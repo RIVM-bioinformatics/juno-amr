@@ -14,7 +14,6 @@ from ruamel.yaml import YAML
 class JunoAmrWrapper:
     def __init__(self, arguments=None):
         """constructor, containing all variables"""
-        self.arguments = []
 
     def get_user_arguments(self):
         """Function to parse the command line arguments from the user"""
@@ -80,12 +79,17 @@ class JunoAmrWrapper:
             dest="threshold",
             help="Threshold for identity of resfinder"
         )
-        # TODO simplify this
-        # parse arguments
-        self.arguments = self.parser.parse_args()
-        self.dict_arguments = vars(self.arguments)
 
-    #Check if the given path is an directory
+        # parse arguments
+        self.dict_arguments = vars(self.parser.parse_args())
+
+    def change_species_name_format(self):
+        for key in self.dict_arguments:
+            if key == "species":
+                # change _ to " " in species name & update species name in the arguments
+                self.dict_arguments[key] = self.dict_arguments[key].replace("_", " ")
+
+    # TODO write code also for fastq file
     def is_directory_with_correct_files(self, input_dir):
         # TODO Did not check inside the file, only if the file has the correct extension.. what if the content of the file is incorrect?
         """Function to check if the given directory is a directory. Also checks if the files in the directory have the correct file format"""
@@ -126,10 +130,10 @@ class JunoAmrWrapper:
         # yaml lay-out
         # TODO make this into a file and load the file instead of inp
         inp = """
-#single fasta
+        #single fasta
         samples_fasta:
-\n       
-# parameters for pipeline given by user
+        \n       
+        # parameters for pipeline given by user
         Parameters:
         """
         
@@ -144,15 +148,18 @@ class JunoAmrWrapper:
             yaml.dump(config, file)
 
     def run_snakemake_command(self):
-        #TODO get correct command to run snakemake
-        pass
+        # Run snakemake
+        print("Starting to run snakemake")
+        os.system("snakemake --snakefile Snakefile --cores 1 --use-conda")
+        print("Everything done!")
         
-
 def main():
     j = JunoAmrWrapper()
     j.get_user_arguments()
+    j.change_species_name_format()
     j.get_input_files_from_input_directory()
     j.create_yaml_file()
+    j.run_snakemake_command()
 
 if __name__ == '__main__':
     main()
