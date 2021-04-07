@@ -1,0 +1,10 @@
+#fastqr1
+samples_fastq_r1:
+
+
+#fastqr2
+samples_fastq_r2:
+
+# parameters for pipeline given by user
+Parameters:
+

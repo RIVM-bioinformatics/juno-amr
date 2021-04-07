@@ -1,22 +1,25 @@
 """
-Snakemake script to automate resfinder runs for multiple samples
+Juno-amr
+Authors: Roxanne Wolthuis ....
+Organization: Rijksinstituut voor Volksgezondheid en Milieu (RIVM)
+Department: Infektieziekteonderzoek, Diagnostiek en Laboratorium Surveillance (IDS), Bacteriologie (BPD)
+Date: 30 - 03 - 2021
 """
 
-# Get configuration file
+#################################################################################
+#####   Import config file                                                  #####
+#################################################################################
+configfile: "config/user_parameters.yml"
 
-# config exported from conda
-# configfile: "config/juno_amr_master.yml"
-
-#current testing config
-configfile: "config/config.yml"
-
-# config created with python wrapper based on user input
-# configfile: "config/user_parameters"
-
-# Get includes
+#################################################################################
+#####   Load processes                                                      #####
+#################################################################################
 include: "bin/rules/runResfinderFastq.smk"
-include: "bin/rules/runResfinderFasta.smk"
+#include: "bin/rules/runResfinderFasta.smk"
 
+#################################################################################
+#####   Specify final output                                                #####
+#################################################################################
 rule all:
     """ Main rule that starts the complete workflow """
     input: 
