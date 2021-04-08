@@ -14,3 +14,4 @@ dependencies:
   - pandas==1.1.0
   - pip:
     - PyYAML==5.3.1
+    - ruamel.yaml
