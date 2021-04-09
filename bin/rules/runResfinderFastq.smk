@@ -29,6 +29,7 @@ rule runResfinderFastq:
 
     shell:
     #TODO put this in a python script and run the script, this is ugly
+    #TODO change this also for fasta if needed
         """
 if [ {params.run_pointfinder} == "true" ]; then
     python3 resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired --point -ifq {input} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
