@@ -6,7 +6,7 @@ rule runResfinderFasta:
 
     output:
         #One of the output files that is requested by rule all
-        output_file = "output/{sample}/PointFinder_results.txt",
+        output_file = "output/{sample}/ResFinder_results.txt",
         #Make an output directory per sample
         output_dir = directory("output/{sample}")
     

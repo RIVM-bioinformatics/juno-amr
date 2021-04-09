@@ -7,7 +7,7 @@ rule runResfinderFastq:
 
     output:
         #Output file requested by rule all
-        output_file = "output/{sample}/PointFinder_results.txt",
+        output_file = "output/{sample}/ResFinder_results.txt",
         #Directory per sample
         output_dir = directory("output/{sample}")
     
@@ -22,8 +22,17 @@ rule runResfinderFastq:
     #get parameters from configfile
         l = config["Parameters"]["coverage"],
         t = config["Parameters"]["threshold"],
-        species = config["Parameters"]["species"]
+        species = config["Parameters"]["species"],
+        resfinder_db = config["Parameters"]["resfinder_db"],
+        pointfinder_db = config["Parameters"]["pointfinder_db"],
+        run_pointfinder = config["Parameters"]["run_pointfinder"]
 
     shell:
-        # Command to call resfinder
-        "python3 resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired --point -ifq {input}"
+    #TODO put this in a python script and run the script, this is ugly
+        """
+if [ {params.run_pointfinder} == "true" ]; then
+    python3 resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired --point -ifq {input} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
+else
+    python3 resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired -ifq {input} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
+fi
+        """

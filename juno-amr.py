@@ -54,38 +54,101 @@ class JunoAmrWrapper:
             metavar="",
             dest="species",
             #space does not work on commandline, reason why the names are with underscore
-            help = "Full scientific name of the species sample, use underscores not spaces. Example: Campylobacter_spp. Options to choose from: Campylobacter_spp, Campylobacter_jejuni, Campylobacter_coli, Escherichia_coli, Salmonella_spp, Plasmodium_falciparum, Neisseria_gonorrhoeae, Mycobacterium_tuberculosis, Enterococcus_faecalis, Enterococcus_faecium, Klebsiella, Helicobacter_pylori & Staphylococcus_aureus",
-            # TODO Currently with capital letter, remove or not?
-            # TODO use nargs to take multiple arguments, so we can use a space in the text?, i think i prefer _ and replace it later..
-            choices = ["Campylobacter_spp", "Campylobacter_jejuni", "Campylobacter_coli", "Escherichia_coli", "Salmonella_spp", "Plasmodium_falciparum", "Neisseria_gonorrhoeae", "Mycobacterium_tuberculosis", "Enterococcus_faecalis", "Enterococcus_faecium", "Klebsiella", "Helicobacter_pylori", "Staphylococcus_aureus"]
+            help = "Full scientific name of the species sample, use underscores not spaces. Example: Campylobacter_spp. Options to choose from: other, Campylobacter_spp, Campylobacter_jejuni, Campylobacter_coli, Escherichia_coli, Salmonella_spp, Plasmodium_falciparum, Neisseria_gonorrhoeae, Mycobacterium_tuberculosis, Enterococcus_faecalis, Enterococcus_faecium, Klebsiella, Helicobacter_pylori & Staphylococcus_aureus",
+            # TODO Currently with capital letter --> transform input to lowercase always
+            choices = ["other", "Campylobacter_spp", "Campylobacter_jejuni", "Campylobacter_coli", "Escherichia_coli", "Salmonella_spp", "Plasmodium_falciparum", "Neisseria_gonorrhoeae", "Mycobacterium_tuberculosis", "Enterococcus_faecalis", "Enterococcus_faecium", "Klebsiella", "Helicobacter_pylori", "Staphylococcus_aureus"]
         )
 
         # Add coverage argument
         self.parser.add_argument(
-            #TODO Default value?
             "-l",
             "--min_cov",
             type=float,
-            required=True,
             metavar="",
+            default=0.6,
             dest="coverage",
             help="Minimum coverage of ResFinder"
         )
 
         # Add identity threshold argument
         self.parser.add_argument(
-            #TODO Default value?
             "-t",
             "--threshold",
             type=float,
-            required=True,
             metavar="",
+            default=0.8,
             dest="threshold",
             help="Threshold for identity of resfinder"
         )
 
+        #Add pointfinder database argument
+        self.parser.add_argument(
+            "-db_point",
+            type=str,
+            metavar="",
+            #TODO change hardcoded path
+            #TODO check if valid path
+            default="../../../db/resfinder/db_pointfinder",
+            dest="pointfinder_db",
+            help="Alternative database for pointfinder"
+        )
+
+        #Add resfinder database argument
+        self.parser.add_argument(
+            "-db_res",
+            type=str,
+            metavar="",
+            #TODO change hardcoded path
+            #TODO check if valid path
+            default="../../../db/resfinder/db_resfinder",
+            dest="resfinder_db",
+            help="Alternative database for resfinder"
+        )
+
+        #Option to run pointfinder
+        self.parser.add_argument(
+            "--point",
+            action = 'store_true',
+            default=True,
+            dest="run_pointfinder",
+            help="To run pointfinder or not"
+        )
+
         # parse arguments
         self.dict_arguments = vars(self.parser.parse_args())
+        #print(self.dict_arguments)
+
+    def check_species(self):
+        # check if species matches other
+        for key in self.dict_arguments:
+            if key == "species":
+                species = self.dict_arguments[key]
+                print(species)
+                if species == "other":
+                    print("species is other")
+                    print("Changing --point argument to false")
+                    for key in self.dict_arguments:
+                        if key == "run_pointfinder":
+                            print("before: ", self.dict_arguments[key])
+                            print(self.dict_arguments)
+                            self.dict_arguments[key] = self.dict_arguments[key] = False
+                            print("After: ", self.dict_arguments)
+                            return self.dict_arguments
+
+        #     print("Species unknown, resfinder will be executed, but pointfinder can not be run without a species.")
+        #     print("continue pipeline")
+        #     return species
+                else:
+                    print("species recognized and approved, continue pipeline")
+                    # for key in self.dict_arguments:
+                    #     if key == "run_pointfinder":
+                    #         print("before: ", self.dict_arguments[key])
+                    #         self.dict_arguments[key] = str(self.dict_arguments[key]).replace("True", "--point")
+                    #         print("After: ", self.dict_arguments[key])
+                    return self.dict_arguments
+        #     return species
+        # if so argument point should be changed to an empty string
+        # else argument for point should be --point
 
     def change_species_name_format(self):
         for key in self.dict_arguments:
@@ -212,6 +275,7 @@ class JunoAmrWrapper:
 def main():
     j = JunoAmrWrapper()
     j.get_user_arguments()
+    j.check_species()
     j.change_species_name_format()
     #choose fasta or fastq
     #j.get_input_files_from_input_directory_fasta()
