@@ -27,6 +27,11 @@ rule runResfinderFastq:
         pointfinder_db = config["Parameters"]["pointfinder_db"],
         run_pointfinder = config["Parameters"]["run_pointfinder"]
 
+    resources: 
+        mem_mb=config["mem_mb"]
+
+    threads: config["threads"]
+
     shell:
     #TODO put this in a python script and run the script, this is ugly
     #TODO change this also for fasta if needed

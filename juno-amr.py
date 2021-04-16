@@ -216,6 +216,7 @@ class JunoAmrWrapper:
                     # TODO if the input dir ends with a "/" then the config will get double "//" in the name
                     # TODO do we end with a slash or not?
                     samplename = os.path.splitext(filename)[0].split("_")
+                    #print("samplename: ", samplename)
                     if "R1" in samplename[1]:
                         self.input_files_r1.update({samplename[0]: directory_name + "/" + filename})
                     elif "R2" in samplename[1]:
@@ -268,9 +269,15 @@ class JunoAmrWrapper:
 
     def run_snakemake_command(self):
         # Run snakemake with resfinder
-        print("Starting to run snakemake")
-        os.system("snakemake --snakefile Snakefile --cores 1 --use-conda")
-        print("Everything done!")
+        open_config_parameters = open("config/database_config.yml")
+        parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
+        #print("Config cores: ", parsed_config['local-cores'])
+        memory = parsed_config['mem_mb']
+        print("test", memory)
+        #print("Starting to run snakemake")
+        #os.system("snakemake --snakefile Snakefile --cores 1 --use-conda --drmaa"")
+        print("testing to run on cluster")
+        os.system("snakemake --snakefile Snakefile --use-conda --cores 8 --drmaa \" -q bio -n {threads} -o test/log/drmaa/test.out -e test/log/drmaa/test.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir test/log/drmaa")
         
 def main():
     j = JunoAmrWrapper()
