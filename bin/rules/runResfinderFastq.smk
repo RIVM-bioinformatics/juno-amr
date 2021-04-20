@@ -28,8 +28,10 @@ rule runResfinderFastq:
         run_pointfinder = config["Parameters"]["run_pointfinder"]
 
     resources: 
+    #TODO add to fasta
         mem_mb=config["mem_mb"]
 
+#TODO add to fasta
     threads: config["threads"]
 
     shell:

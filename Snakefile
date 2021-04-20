@@ -20,8 +20,9 @@ include: "bin/rules/runResfinderFastq.smk"
 #################################################################################
 #####   Specify final output                                                #####
 #################################################################################
-localrules:
-    all
+#localrules:
+#    all
+
 rule all:
     """ Main rule that starts the complete workflow """
     resources: 

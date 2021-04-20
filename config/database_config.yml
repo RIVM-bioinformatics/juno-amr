@@ -1,0 +1,12 @@
+
+local-cores: 4
+db-cores: 300
+mem_mb: 4000
+threads: 1
+latency-wait: 60
+use-conda: true
+jobname: Juno-amr
+keep-going: true
+printshellcmds: true
+conda-frontend: mamba
+restart-times: 2

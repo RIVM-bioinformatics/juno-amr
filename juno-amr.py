@@ -222,6 +222,23 @@ class JunoAmrWrapper:
                     elif "R2" in samplename[1]:
                         self.input_files_r2.update({samplename[0]: directory_name + "/" + filename})
 
+    def check_if_db_exists(self, db_path):
+        #TODO only working for pointfinder, make working for resfinder later
+        if os.path.isdir(db_path):
+            print("found db directory, checking for files")
+            if len(os.listdir("../../../db/resfinder/db_pointfinder")) == 0:
+                print("No files found in directory, downloading latest pointfinder database")
+                # TODO make a variable in a different file for this link
+                os.system("git clone https://git@bitbucket.org/genomicepidemiology/pointfinder_db.git /mnt/db/resfinder/db_pointfinder")
+
+            else:
+                print("Database pointfinder found, proceed pipeline")
+        else:
+            print("did not find a database, clowning new db now")
+            # todo make a variable in a different file for this link
+            os.system("git clone https://git@bitbucket.org/genomicepidemiology/pointfinder_db.git /mnt/db/resfinder/db_pointfinder")
+
+
     def create_yaml_file_fasta(self):
         # Make config dir if this does not exist:
         Path("config").mkdir(parents=True, exist_ok=True)
@@ -272,16 +289,18 @@ class JunoAmrWrapper:
         open_config_parameters = open("config/database_config.yml")
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
         #print("Config cores: ", parsed_config['local-cores'])
-        memory = parsed_config['mem_mb']
-        print("test", memory)
-        #print("Starting to run snakemake")
-        #os.system("snakemake --snakefile Snakefile --cores 1 --use-conda --drmaa"")
+        cores = parsed_config['db-cores']
+        #os.system("snakemake --snakefile Snakefile --cores 1 --use-conda")
         print("testing to run on cluster")
-        os.system("snakemake --snakefile Snakefile --use-conda --cores 8 --drmaa \" -q bio -n {threads} -o test/log/drmaa/test.out -e test/log/drmaa/test.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir test/log/drmaa")
+        #cant get cores from the config or snakemake, snakemake api?
+        os.system("snakemake --snakefile Snakefile --use-conda --cores %d --drmaa \" -q bio -n {threads} -o output/log/drmaa/{name}_{wildcards}_{jobid}.out -e output/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir output/log/drmaa" % cores)
         
 def main():
     j = JunoAmrWrapper()
     j.get_user_arguments()
+    #pointfinderpath = "../../../db/resfinder/db_pointfinder"
+    #j.check_if_db_exists(pointfinderpath)
+    #j.check_if_db_exists(resfinderpath)
     j.check_species()
     j.change_species_name_format()
     #choose fasta or fastq
