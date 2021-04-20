@@ -7,9 +7,9 @@ rule runResfinderFastq:
 
     output:
         #Output file requested by rule all
-        output_file = "output/{sample}/ResFinder_results.txt",
+        output_file = OUT + "/{sample}/ResFinder_results.txt",
         #Directory per sample
-        output_dir = directory("output/{sample}")
+        output_dir = directory(OUT + "/{sample}")
     
     conda:
     #TODO put this command in a config for easy access

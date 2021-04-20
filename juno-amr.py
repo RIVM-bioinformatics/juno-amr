@@ -33,6 +33,20 @@ class JunoAmrWrapper:
             add_help = True
         )
 
+        #TODO check if the given path is a path/directory
+        # Add output directory argument
+        # TODO check if we want to end the directories with a slash or not
+        self.parser.add_argument(
+            "-o",
+            "--output",
+            type=str,
+            required=False,
+            metavar="",
+            default="output",
+            dest="output_dir",
+            help="Path to the directory you want to use as an output directory, if non is given the default will be an output directory in the Juno-amr folder"
+        )
+
         #Add input directory argument
         self.parser.add_argument(
             "-i",
@@ -116,7 +130,7 @@ class JunoAmrWrapper:
 
         # parse arguments
         self.dict_arguments = vars(self.parser.parse_args())
-        #print(self.dict_arguments)
+        print(self.dict_arguments)
 
     def check_species(self):
         # check if species matches other
@@ -216,10 +230,10 @@ class JunoAmrWrapper:
                     # TODO if the input dir ends with a "/" then the config will get double "//" in the name
                     # TODO do we end with a slash or not?
                     samplename = os.path.splitext(filename)[0].split("_")
-                    #print("samplename: ", samplename)
-                    if "R1" in samplename[1]:
+                    print("samplename: ", samplename)
+                    if "pR1" in samplename[1]:
                         self.input_files_r1.update({samplename[0]: directory_name + "/" + filename})
-                    elif "R2" in samplename[1]:
+                    elif "pR2" in samplename[1]:
                         self.input_files_r2.update({samplename[0]: directory_name + "/" + filename})
 
     def check_if_db_exists(self, db_path):
@@ -308,7 +322,7 @@ def main():
     j.get_input_files_from_input_directory_fastq()
     #j.create_yaml_file_fasta()
     j.create_yaml_file_fastq()
-    j.run_snakemake_command()
+    #j.run_snakemake_command()
 
 if __name__ == '__main__':
     main()
