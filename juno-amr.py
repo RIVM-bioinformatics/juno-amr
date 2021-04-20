@@ -26,8 +26,7 @@ class JunoAmrWrapper:
         # Create argparser
         #TODO do we want custom error messages?
         self.parser = argparse.ArgumentParser(
-            # TODO: place example of run here, how to make arguments positional/optional?
-            usage= "amr_wrapper.py ....",
+            usage= "python3 juno-amr.py -s [species]  -i [directory with fastq files]",
             # TODO: Add proper description of the tool
             description = "Juno-amr pipeline. Automated pipeline to use resfinder and pointfinder on given input data.",
             add_help = True
@@ -48,6 +47,7 @@ class JunoAmrWrapper:
         )
 
         #Add input directory argument
+        #TODO decide on fasta or fastq
         self.parser.add_argument(
             "-i",
             "--input",
@@ -55,22 +55,20 @@ class JunoAmrWrapper:
             required=True,
             metavar="",
             dest="input_dir",
-            #TODO For now the only input accepted is a fasta file, need to decide on fasta or fastq
-            help="Path to the directory of your input. Example: path/to/input/fasta or path/to/input/fastq"
+            help="Path to the directory of your input. Example: path/to/input/fastq"
         )
 
         # Add species argument
         self.parser.add_argument(
             "-s",
             "--species",
-            type = str,
+            type = str.lower,
             required = True,
             metavar="",
             dest="species",
             #space does not work on commandline, reason why the names are with underscore
-            help = "Full scientific name of the species sample, use underscores not spaces. Example: Campylobacter_spp. Options to choose from: other, Campylobacter_spp, Campylobacter_jejuni, Campylobacter_coli, Escherichia_coli, Salmonella_spp, Plasmodium_falciparum, Neisseria_gonorrhoeae, Mycobacterium_tuberculosis, Enterococcus_faecalis, Enterococcus_faecium, Klebsiella, Helicobacter_pylori & Staphylococcus_aureus",
-            # TODO Currently with capital letter --> transform input to lowercase always
-            choices = ["other", "Campylobacter_spp", "Campylobacter_jejuni", "Campylobacter_coli", "Escherichia_coli", "Salmonella_spp", "Plasmodium_falciparum", "Neisseria_gonorrhoeae", "Mycobacterium_tuberculosis", "Enterococcus_faecalis", "Enterococcus_faecium", "Klebsiella", "Helicobacter_pylori", "Staphylococcus_aureus"]
+            help = "Full scientific name of the species sample, use underscores not spaces. Example: campylobacter_spp. Options to choose from: other, campylobacter_spp, campylobacter_jejuni, campylobacter_coli, escherichia_coli, salmonella_spp, plasmodium_falciparum, neisseria_gonorrhoeae, mycobacterium_tuberculosis, enterococcus_faecalis, enterococcus_faecium, klebsiella, helicobacter_pylori & staphylococcus_aureus",
+            choices = ["other", "campylobacter_spp", "campylobacter_jejuni", "campylobacter_coli", "escherichia_coli", "salmonella_spp", "plasmodium_falciparum", "neisseria_gonorrhoeae", "mycobacterium_tuberculosis", "enterococcus_faecalis", "enterococcus_faecium", "klebsiella", "helicobacter_pylori", "staphylococcus_aureus"]
         )
 
         # Add coverage argument
@@ -149,20 +147,9 @@ class JunoAmrWrapper:
                             print("After: ", self.dict_arguments)
                             return self.dict_arguments
 
-        #     print("Species unknown, resfinder will be executed, but pointfinder can not be run without a species.")
-        #     print("continue pipeline")
-        #     return species
                 else:
                     print("species recognized and approved, continue pipeline")
-                    # for key in self.dict_arguments:
-                    #     if key == "run_pointfinder":
-                    #         print("before: ", self.dict_arguments[key])
-                    #         self.dict_arguments[key] = str(self.dict_arguments[key]).replace("True", "--point")
-                    #         print("After: ", self.dict_arguments[key])
                     return self.dict_arguments
-        #     return species
-        # if so argument point should be changed to an empty string
-        # else argument for point should be --point
 
     def change_species_name_format(self):
         for key in self.dict_arguments:
@@ -220,17 +207,16 @@ class JunoAmrWrapper:
     def get_input_files_from_input_directory_fastq(self):
         self.input_files_r1 = {}
         self.input_files_r2 = {}
+        # Get the filenames that are used as input for resfinder, only filenames with pR1 and pR2 will be used.
+        #TODO change this if we want others to use the pipeline as well or tell them to change the input names of their files
         for key in self.dict_arguments:
             if key == "input_dir":
                 directory_name = self.dict_arguments[key]
                 input_directory = os.listdir(self.dict_arguments[key])
                 for filename in input_directory:
-                    #get the sample name minus _r1/r2
-                    # TODO only works with underscore, will this be the standard format?
                     # TODO if the input dir ends with a "/" then the config will get double "//" in the name
                     # TODO do we end with a slash or not?
                     samplename = os.path.splitext(filename)[0].split("_")
-                    print("samplename: ", samplename)
                     if "pR1" in samplename[1]:
                         self.input_files_r1.update({samplename[0]: directory_name + "/" + filename})
                     elif "pR2" in samplename[1]:
@@ -251,7 +237,6 @@ class JunoAmrWrapper:
             print("did not find a database, clowning new db now")
             # todo make a variable in a different file for this link
             os.system("git clone https://git@bitbucket.org/genomicepidemiology/pointfinder_db.git /mnt/db/resfinder/db_pointfinder")
-
 
     def create_yaml_file_fasta(self):
         # Make config dir if this does not exist:
@@ -299,14 +284,12 @@ class JunoAmrWrapper:
             yaml.dump(config, file)
 
     def run_snakemake_command(self):
-        # Run snakemake with resfinder
+        #TODO convert os system command to snakemake api
         open_config_parameters = open("config/database_config.yml")
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
-        #print("Config cores: ", parsed_config['local-cores'])
         cores = parsed_config['db-cores']
         #os.system("snakemake --snakefile Snakefile --cores 1 --use-conda")
         print("testing to run on cluster")
-        #cant get cores from the config or snakemake, snakemake api?
         os.system("snakemake --snakefile Snakefile --use-conda --cores %d --drmaa \" -q bio -n {threads} -o output/log/drmaa/{name}_{wildcards}_{jobid}.out -e output/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir output/log/drmaa" % cores)
         
 def main():
@@ -322,7 +305,7 @@ def main():
     j.get_input_files_from_input_directory_fastq()
     #j.create_yaml_file_fasta()
     j.create_yaml_file_fastq()
-    #j.run_snakemake_command()
+    j.run_snakemake_command()
 
 if __name__ == '__main__':
     main()

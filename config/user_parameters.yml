@@ -1,18 +1,22 @@
 #fastqr1
 samples_fastq_r1:
-  '1171900012': testdata/fastq_zipped/1171900012_R1.fastq.gz
-  '1071900063': testdata/fastq_zipped/1071900063_R1.fastq.gz
+  '1071900063': testdata/fastq_zipped/1071900063_pR1.fastq.gz
+  '1171900012': testdata/fastq_zipped/1171900012_pR1.fastq.gz
 
 
 #fastqr2
 samples_fastq_r2:
-  '1071900063': testdata/fastq_zipped/1071900063_R2.fastq.gz
-  '1171900012': testdata/fastq_zipped/1171900012_R2.fastq.gz
+  '1171900012': testdata/fastq_zipped/1171900012_pR2.fastq.gz
+  '1071900063': testdata/fastq_zipped/1071900063_pR2.fastq.gz
 
 # parameters for pipeline given by user
 Parameters:
+  output_dir: testing/test/
   input_dir: testdata/fastq_zipped
-  species: Escherichia coli
+  species: escherichia coli
   coverage: 0.6
   threshold: 0.8
+  pointfinder_db: ../../../db/resfinder/db_pointfinder
+  resfinder_db: ../../../db/resfinder/db_resfinder
+  run_pointfinder: true
 
