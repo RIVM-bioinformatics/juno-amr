@@ -11,12 +11,12 @@ samples_fastq_r2:
 
 # parameters for pipeline given by user
 Parameters:
-  output_dir: testing/test/
+  output_dir: testing_with_shell_final
   input_dir: testdata/fastq_zipped
   species: escherichia coli
   coverage: 0.6
   threshold: 0.8
   pointfinder_db: ../../../db/resfinder/db_pointfinder
   resfinder_db: ../../../db/resfinder/db_resfinder
-  run_pointfinder: true
+  run_pointfinder: '1'
 

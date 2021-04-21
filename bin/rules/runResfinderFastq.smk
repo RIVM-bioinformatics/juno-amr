@@ -37,8 +37,10 @@ rule runResfinderFastq:
     shell:
     #TODO put this in a python script and run the script, this is ugly
     #TODO change this also for fasta if needed
+    #TODO add KMA path/db
+        # "python3 resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired --point -ifq {input} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}"
         """
-if [ {params.run_pointfinder} == "true" ]; then
+if [ {params.run_pointfinder} == "1" ]; then
     python3 resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired --point -ifq {input} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
 else
     python3 resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired -ifq {input} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}

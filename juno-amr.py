@@ -11,6 +11,7 @@ Documentation: -
 import sys
 import argparse
 import os
+import re
 import yaml
 import pathlib
 from pathlib import Path
@@ -120,15 +121,16 @@ class JunoAmrWrapper:
         #Option to run pointfinder
         self.parser.add_argument(
             "--point",
-            action = 'store_true',
-            default=True,
+            type=str,
+            #action = 'store_true',
+            default="1",
             dest="run_pointfinder",
             help="To run pointfinder or not"
         )
 
         # parse arguments
         self.dict_arguments = vars(self.parser.parse_args())
-        print(self.dict_arguments)
+        #print(self.dict_arguments)
 
     def check_species(self):
         # check if species matches other
@@ -141,14 +143,14 @@ class JunoAmrWrapper:
                     print("Changing --point argument to false")
                     for key in self.dict_arguments:
                         if key == "run_pointfinder":
-                            print("before: ", self.dict_arguments[key])
-                            print(self.dict_arguments)
-                            self.dict_arguments[key] = self.dict_arguments[key] = False
-                            print("After: ", self.dict_arguments)
+                            print(self.dict_arguments[key])
+                            self.dict_arguments[key] = self.dict_arguments[key] = "0"
+                            print(self.dict_arguments[key])
                             return self.dict_arguments
 
                 else:
                     print("species recognized and approved, continue pipeline")
+                    print(self.dict_arguments[key])
                     return self.dict_arguments
 
     def change_species_name_format(self):
@@ -156,13 +158,37 @@ class JunoAmrWrapper:
             if key == "species":
                 # change _ to " " in species name & update species name in the arguments
                 self.dict_arguments[key] = self.dict_arguments[key].replace("_", " ")
-    
+
+    def check_directory_format(self, given_path):
+        if given_path.endswith("/"):
+            print("path is correct:", given_path)
+            return given_path
+        else:
+            print("path is incorrect format, changing format")
+            correct_format = given_path + "/"
+            print("format changed")
+            return correct_format
+        print(self.dict_arguments)
+            
+        # for key in self.dict_arguments:
+        #     if key == "input_dir":
+        #         inputdir = self.dict_arguments[key]
+        #         if inputdir.endswith("/"):
+        #             print(self.dict_arguments)
+        #             continue
+        #         else:
+        #             correct_format = inputdir + "/"
+        #             self.dict_arguments[key] = correct_format
+        #             print(self.dict_arguments)
+
     def is_directory_with_correct_files_fastq(self, input_dir):
         #allowed extensions
         allowed_file_extensions = ['.fastq', '.fq', '.fastq.gz', '.fq.gz']
         #check if dir exists
         if os.path.isdir(input_dir):
             folder = os.listdir(input_dir)
+
+            # for each file check if the file has the correct extension
             for filename in folder:
                 #get filename extension
                 extension = "".join(pathlib.Path(filename).suffixes)
@@ -207,6 +233,7 @@ class JunoAmrWrapper:
     def get_input_files_from_input_directory_fastq(self):
         self.input_files_r1 = {}
         self.input_files_r2 = {}
+        fq_pattern = re.compile("(.*?)(?:_S\d+_|_S\d+.|_|\.)(?:p)?R?(1|2)(?:_.*\.|\..*\.|\.)f(ast)?q(\.gz)?")
         # Get the filenames that are used as input for resfinder, only filenames with pR1 and pR2 will be used.
         #TODO change this if we want others to use the pipeline as well or tell them to change the input names of their files
         for key in self.dict_arguments:
@@ -216,11 +243,13 @@ class JunoAmrWrapper:
                 for filename in input_directory:
                     # TODO if the input dir ends with a "/" then the config will get double "//" in the name
                     # TODO do we end with a slash or not?
-                    samplename = os.path.splitext(filename)[0].split("_")
-                    if "pR1" in samplename[1]:
-                        self.input_files_r1.update({samplename[0]: directory_name + "/" + filename})
-                    elif "pR2" in samplename[1]:
-                        self.input_files_r2.update({samplename[0]: directory_name + "/" + filename})
+                    match = fq_pattern.fullmatch(filename)
+                    if match:
+                        samplename = re.split("_pR(1|2)", filename)
+                        if "1" in samplename[1]:
+                            self.input_files_r1.update({samplename[0]: directory_name + "/" + filename})
+                        elif "2" in samplename[1]:
+                            self.input_files_r2.update({samplename[0]: directory_name + "/" + filename})
 
     def check_if_db_exists(self, db_path):
         #TODO only working for pointfinder, make working for resfinder later
@@ -236,6 +265,7 @@ class JunoAmrWrapper:
         else:
             print("did not find a database, clowning new db now")
             # todo make a variable in a different file for this link
+            #TODO to make the database working need to run install.py to index the databases with KMA how to fix this?
             os.system("git clone https://git@bitbucket.org/genomicepidemiology/pointfinder_db.git /mnt/db/resfinder/db_pointfinder")
 
     def create_yaml_file_fasta(self):
@@ -285,6 +315,7 @@ class JunoAmrWrapper:
 
     def run_snakemake_command(self):
         #TODO convert os system command to snakemake api
+        #TODO if a run crashes or is stopped the directory will be locked, do we need to build in a --unlock command?
         open_config_parameters = open("config/database_config.yml")
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
         cores = parsed_config['db-cores']
@@ -295,6 +326,7 @@ class JunoAmrWrapper:
 def main():
     j = JunoAmrWrapper()
     j.get_user_arguments()
+    #j.check_directory_format()
     #pointfinderpath = "../../../db/resfinder/db_pointfinder"
     #j.check_if_db_exists(pointfinderpath)
     #j.check_if_db_exists(resfinderpath)
