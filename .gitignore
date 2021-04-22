@@ -3,3 +3,7 @@ resfinder
 output
 testdata
 .snakemake
+testing
+
+#files to ignore
+config/user_parameters.yml

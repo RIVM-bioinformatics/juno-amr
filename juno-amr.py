@@ -16,6 +16,8 @@ import yaml
 import pathlib
 from pathlib import Path
 from ruamel.yaml import YAML
+import csv
+
 
 class JunoAmrWrapper:
     def __init__(self, arguments=None):
@@ -125,7 +127,15 @@ class JunoAmrWrapper:
             #action = 'store_true',
             default="1",
             dest="run_pointfinder",
-            help="To run pointfinder or not"
+            help="Type one to run pointfinder, type 0 to not run pointfinder, default is 1."
+        )
+
+        #Option to run a dry run in snakemake
+        self.parser.add_argument(
+            "--dryrun",
+            action='store_true',
+            dest="dryrun",
+            help="If you want to run a dry run type --dryrun in your command"
         )
 
         # parse arguments
@@ -137,20 +147,16 @@ class JunoAmrWrapper:
         for key in self.dict_arguments:
             if key == "species":
                 species = self.dict_arguments[key]
-                print(species)
                 if species == "other":
                     print("species is other")
                     print("Changing --point argument to false")
                     for key in self.dict_arguments:
                         if key == "run_pointfinder":
-                            print(self.dict_arguments[key])
                             self.dict_arguments[key] = self.dict_arguments[key] = "0"
-                            print(self.dict_arguments[key])
                             return self.dict_arguments
 
                 else:
                     print("species recognized and approved, continue pipeline")
-                    print(self.dict_arguments[key])
                     return self.dict_arguments
 
     def change_species_name_format(self):
@@ -320,24 +326,78 @@ class JunoAmrWrapper:
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
         cores = parsed_config['db-cores']
         #os.system("snakemake --snakefile Snakefile --cores 1 --use-conda")
-        print("testing to run on cluster")
-        os.system("snakemake --snakefile Snakefile --use-conda --cores %d --drmaa \" -q bio -n {threads} -o output/log/drmaa/{name}_{wildcards}_{jobid}.out -e output/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir output/log/drmaa" % cores)
+        if self.dict_arguments["dryrun"] is False:
+            os.system("snakemake --snakefile Snakefile --use-conda --cores %d --drmaa \" -q bio -n {threads} -o output/log/drmaa/{name}_{wildcards}_{jobid}.out -e output/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir output/log/drmaa" % cores)
+        else:
+            os.system("snakemake --dryrun --snakefile Snakefile --use-conda --cores %d --drmaa \" -q bio -n {threads} -o output/log/drmaa/{name}_{wildcards}_{jobid}.out -e output/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir output/log/drmaa" % cores)
+
+    #def create_amr_phenotype_summary(self):
+        # uit file --> pheno_Table.txt
+
+        #collect:
+        # sample id [each amr type]
+        # 122           0[all numbers under]
+
+    def create_amr_genes_summary(self):
+        # open hier lege file
+        sample_directories = os.listdir("testing/")
+        for results_dir in sample_directories:
+            for result_file in results_dir:
+                print(result_file)
+        # get all directories from the output directory
+        # save the directory name as the sample name
+        # from each directory open the file that matches a regex pattern
+        # set this file as the resfinder_gene_file
+
+        #read the file
+        resfinder_gene_file = open("testing/1071900063/ResFinder_results_tab.txt", "r")
+        header = resfinder_gene_file.readline().split("\t")
+        del header[4:]
+        header.insert(0, "Sample")
+        print(header)
+        data_lines = resfinder_gene_file.readlines()[1:]
+        with open('test.csv', 'w', newline='') as csvfile:
+            spamwriter = csv.writer(csvfile)
+            spamwriter.writerow(header)
+
+            for line in data_lines:
+                elements_in_line = line.split("\t")
+                del elements_in_line[4:]
+                #add the number of the sample here
+                elements_in_line.insert(0, "samplenummervar")
+                print(elements_in_line)
+                spamwriter.writerow(elements_in_line)
         
+        # make a var that holds a path to the output file of resfinder --> resfinder results tab
+        # open the file
+        # skip de header, of copy paste deze?
+        # split de inhoud van de file op (spatie in header, tab in output)
+
+        #Things to collect from the file
+        #Sample name
+        #resistance gene id
+        # Coverage
+        # Identity
+        # Alignment length & coverage
+    
+    #def create_amr_pointfinder_summary(self):
+        #TODO structure to be discussed
+
 def main():
     j = JunoAmrWrapper()
-    j.get_user_arguments()
+    #j.get_user_arguments()
     #j.check_directory_format()
     #pointfinderpath = "../../../db/resfinder/db_pointfinder"
     #j.check_if_db_exists(pointfinderpath)
     #j.check_if_db_exists(resfinderpath)
-    j.check_species()
-    j.change_species_name_format()
+    #j.check_species()
+    #j.change_species_name_format()
     #choose fasta or fastq
     #j.get_input_files_from_input_directory_fasta()
-    j.get_input_files_from_input_directory_fastq()
+    #j.get_input_files_from_input_directory_fastq()
     #j.create_yaml_file_fasta()
-    j.create_yaml_file_fastq()
-    j.run_snakemake_command()
-
+    #j.create_yaml_file_fastq()
+    #j.run_snakemake_command()
+    j.create_amr_genes_summary()
 if __name__ == '__main__':
     main()
