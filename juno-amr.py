@@ -339,65 +339,67 @@ class JunoAmrWrapper:
         # 122           0[all numbers under]
 
     def create_amr_genes_summary(self):
-        # open hier lege file
-        sample_directories = os.listdir("testing/")
-        for results_dir in sample_directories:
-            for result_file in results_dir:
-                print(result_file)
-        # get all directories from the output directory
-        # save the directory name as the sample name
-        # from each directory open the file that matches a regex pattern
-        # set this file as the resfinder_gene_file
-
-        #read the file
-        resfinder_gene_file = open("testing/1071900063/ResFinder_results_tab.txt", "r")
-        header = resfinder_gene_file.readline().split("\t")
-        del header[4:]
-        header.insert(0, "Sample")
-        print(header)
-        data_lines = resfinder_gene_file.readlines()[1:]
-        with open('test.csv', 'w', newline='') as csvfile:
-            spamwriter = csv.writer(csvfile)
-            spamwriter.writerow(header)
-
-            for line in data_lines:
-                elements_in_line = line.split("\t")
-                del elements_in_line[4:]
-                #add the number of the sample here
-                elements_in_line.insert(0, "samplenummervar")
-                print(elements_in_line)
-                spamwriter.writerow(elements_in_line)
+        #Get output dir from user parameters config
+        open_config_parameters = open("config/user_parameters.yml")
+        parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
+        output_dir_name = parsed_config['Parameters']['output_dir']
         
-        # make a var that holds a path to the output file of resfinder --> resfinder results tab
-        # open the file
-        # skip de header, of copy paste deze?
-        # split de inhoud van de file op (spatie in header, tab in output)
+        #get current path
+        current_path = os.path.abspath(os.getcwd())
+        summary_file_path = f"{current_path}/{output_dir_name}"
+        
+        #If there is a summary file, remove it
+        if os.path.exists(f"{summary_file_path}/summary_amr_genes.csv"):
+            os.remove(f"{summary_file_path}/summary_amr_genes.csv")
 
-        #Things to collect from the file
-        #Sample name
-        #resistance gene id
-        # Coverage
-        # Identity
-        # Alignment length & coverage
+        #Get the samplenames, to add as ID and to open each path
+        samplenames = os.listdir(summary_file_path)
+
+        # open new summary file
+        with open(f'{summary_file_path}/summary_amr_genes.csv', 'w', newline='') as csvfile:
+            summary_file = csv.writer(csvfile)
+
+            #Set the header for the file
+            #Just taking the first sample to get the header for the csv file
+            pathname = f"{summary_file_path}/{samplenames[0]}/ResFinder_results_tab.txt"
+            opened_file = open(pathname, "r")
+            header = opened_file.readline().split("\t")
+            del header[4:]
+            header.insert(0, "Sample")
+            summary_file.writerow(header)
+
+            # for each name in samplenames, open the file that matches "ResFinder_results_tab.txt" in the folder named as the samplename
+            for samplename  in samplenames:
+                # Open file and collect all data except the header
+                pathname = f"{summary_file_path}/{samplename}/ResFinder_results_tab.txt"
+                opened_file = open(pathname, "r")
+                data_lines = opened_file.readlines()[1:]
+
+                #Write elements of interest to the generated summary file
+                for line in data_lines:
+                    elements_in_line = line.split("\t")
+                    del elements_in_line[4:]
+                    elements_in_line.insert(0, samplename)
+                    summary_file.writerow(elements_in_line)
     
     #def create_amr_pointfinder_summary(self):
         #TODO structure to be discussed
 
 def main():
     j = JunoAmrWrapper()
-    #j.get_user_arguments()
+    j.get_user_arguments()
     #j.check_directory_format()
     #pointfinderpath = "../../../db/resfinder/db_pointfinder"
     #j.check_if_db_exists(pointfinderpath)
     #j.check_if_db_exists(resfinderpath)
-    #j.check_species()
-    #j.change_species_name_format()
+    j.check_species()
+    j.change_species_name_format()
     #choose fasta or fastq
     #j.get_input_files_from_input_directory_fasta()
-    #j.get_input_files_from_input_directory_fastq()
+    j.get_input_files_from_input_directory_fastq()
     #j.create_yaml_file_fasta()
-    #j.create_yaml_file_fastq()
-    #j.run_snakemake_command()
+    j.create_yaml_file_fastq()
+    j.run_snakemake_command()
     j.create_amr_genes_summary()
 if __name__ == '__main__':
     main()

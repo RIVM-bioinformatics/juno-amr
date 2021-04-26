@@ -4,6 +4,7 @@ output
 testdata
 .snakemake
 testing
+outputtt
 
 #files to ignore
 config/user_parameters.yml
