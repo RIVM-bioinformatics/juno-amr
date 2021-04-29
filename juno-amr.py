@@ -350,19 +350,31 @@ class JunoAmrWrapper:
 
         #Get the samplenames, to add as ID and to open each path
         samplenames = os.listdir(summary_file_path)
-        
+
         # empty list for antimicrobial classes
         antimicrobials = []
         antimicrobials.insert(0, "Samplename")
 
         with open(f'{summary_file_path}/summary_amr_phenotype.csv', 'w', newline='') as csvfile:
-            summary_file = csv.writer(csvfile)
-                #Line 18 is where the actual data starts
-                #TODO dit specifieke stuk zoeken, voor ieder sample is het bestand andere lengte
-            add_header = True
+            summary_file = csv.writer(csvfile, delimiter=",")
+            
+            #Set the informational header for the file
+            #Just taking the first sample to get the header for the csv file
+            pathname = f"{summary_file_path}/{samplenames[0]}/pheno_table.txt"
+            opened_file = open(pathname, "r")
+            header = opened_file.readlines()
+            header_selection = header[7:16]
+            for string in header_selection:
+                summary_file.writerow([string])
+
+            #set boolean for colnames true here
+            add_colnames = True
+
             for samplename in samplenames:
                 pathname=f"{summary_file_path}/{samplename}/pheno_table.txt"
                 opened_file = open(pathname, "r")
+                #Line 18 is where the actual data starts
+                #TODO dit specifieke stuk zoeken, voor ieder sample is het bestand andere lengte
                 file_content = opened_file.readlines()[17:118]
 
                 #Make empty list for each sample
@@ -374,14 +386,14 @@ class JunoAmrWrapper:
                     elements = line.split("\t")
                     antimicrobial_match.append(elements[3])
 
-                # Check if header is added, if not, add header
-                if add_header:
+                # Check if colnames are added, if not, add colnames
+                if add_colnames:
                     for line in file_content:
                         elements = line.split("\t")
                         antimicrobials.append(elements[0])
 
                     summary_file.writerow(antimicrobials)
-                    add_header = False
+                    add_colnames = False
                 #write matches to file
                 summary_file.writerow(antimicrobial_match)
          
@@ -429,8 +441,33 @@ class JunoAmrWrapper:
                     elements_in_line.insert(0, samplename)
                     summary_file.writerow(elements_in_line)
     
-    def create_amr_pointfinder_summary(self):
+    #def merge_header_in_amr_phenotype_summary(self):
 
+    # def create_amr_pointfinder_summary(self):
+    #     #TODO add this t/m with open to a new function
+    #     open_config_parameters = open("config/user_parameters.yml")
+    #     parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
+    #     output_dir_name = parsed_config['Parameters']['output_dir']
+
+    #     #get current path
+    #     current_path = os.path.abspath(os.getcwd())
+    #     summary_file_path = f"{current_path}/{output_dir_name}"
+         
+    #     #If there is a summary file, remove it
+    #     if os.path.exists(f"{summary_file_path}/summary_amr_pointfinder.csv"):
+    #         os.remove(f"{summary_file_path}/summary_amr_pointfinder.csv")
+
+    #     #Get the samplenames, to add as ID and to open each path
+    #     samplenames = os.listdir(summary_file_path)
+
+    #     with open(f'{summary_file_path}/summary_amr_pointfinder.csv', 'w', newline='') as csvfile:
+    #         summary_file = csv.writer(csvfile)
+
+    #         pathname = f"{summary_file_path}/{samplenames[0]}/ResFinder_results_tab.txt"
+    #         opened_file = open(pathname, "r")
+    #         header = opened_file.readline().split("\t")
+        
+    #     #TODO structure to be discussed
 
 def main():
     j = JunoAmrWrapper()
@@ -448,7 +485,8 @@ def main():
     #j.create_yaml_file_fastq()
     #j.run_snakemake_command()
     #j.create_amr_genes_summary()
-    #j.create_amr_phenotype_summary()
-    j.create_amr_pointfinder_summary()
+    j.create_amr_phenotype_summary()
+    #j.merge_header_in_amr_phenotype_summary
+    #j.create_amr_pointfinder_summary()
 if __name__ == '__main__':
     main()
