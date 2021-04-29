@@ -331,13 +331,60 @@ class JunoAmrWrapper:
         else:
             os.system("snakemake --dryrun --snakefile Snakefile --use-conda --cores %d --drmaa \" -q bio -n {threads} -o output/log/drmaa/{name}_{wildcards}_{jobid}.out -e output/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir output/log/drmaa" % cores)
 
-    #def create_amr_phenotype_summary(self):
-        # uit file --> pheno_Table.txt
+    def create_amr_phenotype_summary(self):
+        #TODO make function for repetitive code(call it prepare for summaries oid)
+        #TODO put lines from opening config till samplenames in a function
+        #TODO make dir called summaries and place al summaries in here
+        #Get output dir from user parameters config
+        open_config_parameters = open("config/user_parameters.yml")
+        parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
+        output_dir_name = parsed_config['Parameters']['output_dir']
 
-        #collect:
-        # sample id [each amr type]
-        # 122           0[all numbers under]
+        #get current path
+        current_path = os.path.abspath(os.getcwd())
+        summary_file_path = f"{current_path}/{output_dir_name}"
+         
+        #If there is a summary file, remove it
+        if os.path.exists(f"{summary_file_path}/summary_amr_phenotype.csv"):
+            os.remove(f"{summary_file_path}/summary_amr_phenotype.csv")
 
+        #Get the samplenames, to add as ID and to open each path
+        samplenames = os.listdir(summary_file_path)
+        
+        # empty list for antimicrobial classes
+        antimicrobials = []
+        antimicrobials.insert(0, "Samplename")
+
+        with open(f'{summary_file_path}/summary_amr_phenotype.csv', 'w', newline='') as csvfile:
+            summary_file = csv.writer(csvfile)
+                #Line 18 is where the actual data starts
+                #TODO dit specifieke stuk zoeken, voor ieder sample is het bestand andere lengte
+            add_header = True
+            for samplename in samplenames:
+                pathname=f"{summary_file_path}/{samplename}/pheno_table.txt"
+                opened_file = open(pathname, "r")
+                file_content = opened_file.readlines()[17:118]
+
+                #Make empty list for each sample
+                antimicrobial_match = []
+                antimicrobial_match.insert(0, samplename)
+                
+                #get the match number
+                for line in file_content:
+                    elements = line.split("\t")
+                    antimicrobial_match.append(elements[3])
+
+                # Check if header is added, if not, add header
+                if add_header:
+                    for line in file_content:
+                        elements = line.split("\t")
+                        antimicrobials.append(elements[0])
+
+                    summary_file.writerow(antimicrobials)
+                    add_header = False
+                #write matches to file
+                summary_file.writerow(antimicrobial_match)
+         
     def create_amr_genes_summary(self):
         #Get output dir from user parameters config
         open_config_parameters = open("config/user_parameters.yml")
@@ -382,8 +429,8 @@ class JunoAmrWrapper:
                     elements_in_line.insert(0, samplename)
                     summary_file.writerow(elements_in_line)
     
-    #def create_amr_pointfinder_summary(self):
-        #TODO structure to be discussed
+    def create_amr_pointfinder_summary(self):
+
 
 def main():
     j = JunoAmrWrapper()
@@ -392,14 +439,16 @@ def main():
     #pointfinderpath = "../../../db/resfinder/db_pointfinder"
     #j.check_if_db_exists(pointfinderpath)
     #j.check_if_db_exists(resfinderpath)
-    j.check_species()
-    j.change_species_name_format()
+    #j.check_species()
+    #j.change_species_name_format()
     #choose fasta or fastq
     #j.get_input_files_from_input_directory_fasta()
-    j.get_input_files_from_input_directory_fastq()
+    #j.get_input_files_from_input_directory_fastq()
     #j.create_yaml_file_fasta()
-    j.create_yaml_file_fastq()
-    j.run_snakemake_command()
-    j.create_amr_genes_summary()
+    #j.create_yaml_file_fastq()
+    #j.run_snakemake_command()
+    #j.create_amr_genes_summary()
+    #j.create_amr_phenotype_summary()
+    j.create_amr_pointfinder_summary()
 if __name__ == '__main__':
     main()
