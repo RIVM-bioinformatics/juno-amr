@@ -15,6 +15,7 @@ import re
 import yaml
 import pathlib
 from pathlib import Path
+import shutil
 from ruamel.yaml import YAML
 import csv
 
@@ -25,19 +26,17 @@ class JunoAmrWrapper:
 
     def get_user_arguments(self):
         """Function to parse the command line arguments from the user"""
-
         # Create argparser
         #TODO do we want custom error messages?
         self.parser = argparse.ArgumentParser(
             usage= "python3 juno-amr.py -s [species]  -i [directory with fastq files]",
-            # TODO: Add proper description of the tool
             description = "Juno-amr pipeline. Automated pipeline to use resfinder and pointfinder on given input data.",
             add_help = True
         )
 
         #TODO check if the given path is a path/directory
-        # Add output directory argument
-        # TODO check if we want to end the directories with a slash or not
+        # Add arguments
+        # TODO check if we want to end the directories with a slash or not --> built func
         self.parser.add_argument(
             "-o",
             "--output",
@@ -49,7 +48,6 @@ class JunoAmrWrapper:
             help="Path to the directory you want to use as an output directory, if non is given the default will be an output directory in the Juno-amr folder"
         )
 
-        #Add input directory argument
         #TODO decide on fasta or fastq
         self.parser.add_argument(
             "-i",
@@ -61,7 +59,6 @@ class JunoAmrWrapper:
             help="Path to the directory of your input. Example: path/to/input/fastq"
         )
 
-        # Add species argument
         self.parser.add_argument(
             "-s",
             "--species",
@@ -74,7 +71,6 @@ class JunoAmrWrapper:
             choices = ["other", "campylobacter_spp", "campylobacter_jejuni", "campylobacter_coli", "escherichia_coli", "salmonella_spp", "plasmodium_falciparum", "neisseria_gonorrhoeae", "mycobacterium_tuberculosis", "enterococcus_faecalis", "enterococcus_faecium", "klebsiella", "helicobacter_pylori", "staphylococcus_aureus"]
         )
 
-        # Add coverage argument
         self.parser.add_argument(
             "-l",
             "--min_cov",
@@ -85,7 +81,6 @@ class JunoAmrWrapper:
             help="Minimum coverage of ResFinder"
         )
 
-        # Add identity threshold argument
         self.parser.add_argument(
             "-t",
             "--threshold",
@@ -96,7 +91,6 @@ class JunoAmrWrapper:
             help="Threshold for identity of resfinder"
         )
 
-        #Add pointfinder database argument
         self.parser.add_argument(
             "-db_point",
             type=str,
@@ -108,7 +102,6 @@ class JunoAmrWrapper:
             help="Alternative database for pointfinder"
         )
 
-        #Add resfinder database argument
         self.parser.add_argument(
             "-db_res",
             type=str,
@@ -120,17 +113,14 @@ class JunoAmrWrapper:
             help="Alternative database for resfinder"
         )
 
-        #Option to run pointfinder
         self.parser.add_argument(
             "--point",
             type=str,
-            #action = 'store_true',
             default="1",
             dest="run_pointfinder",
             help="Type one to run pointfinder, type 0 to not run pointfinder, default is 1."
         )
 
-        #Option to run a dry run in snakemake
         self.parser.add_argument(
             "--dryrun",
             action='store_true',
@@ -140,7 +130,6 @@ class JunoAmrWrapper:
 
         # parse arguments
         self.dict_arguments = vars(self.parser.parse_args())
-        #print(self.dict_arguments)
 
     def check_species(self):
         # check if species matches other
@@ -148,15 +137,13 @@ class JunoAmrWrapper:
             if key == "species":
                 species = self.dict_arguments[key]
                 if species == "other":
-                    print("species is other")
-                    print("Changing --point argument to false")
+                    # if species is other turn off pointfinder
                     for key in self.dict_arguments:
                         if key == "run_pointfinder":
                             self.dict_arguments[key] = self.dict_arguments[key] = "0"
                             return self.dict_arguments
 
                 else:
-                    print("species recognized and approved, continue pipeline")
                     return self.dict_arguments
 
     def change_species_name_format(self):
@@ -165,6 +152,7 @@ class JunoAmrWrapper:
                 # change _ to " " in species name & update species name in the arguments
                 self.dict_arguments[key] = self.dict_arguments[key].replace("_", " ")
 
+    #TODO this function is not being used yet
     def check_directory_format(self, given_path):
         if given_path.endswith("/"):
             print("path is correct:", given_path)
@@ -175,17 +163,6 @@ class JunoAmrWrapper:
             print("format changed")
             return correct_format
         print(self.dict_arguments)
-            
-        # for key in self.dict_arguments:
-        #     if key == "input_dir":
-        #         inputdir = self.dict_arguments[key]
-        #         if inputdir.endswith("/"):
-        #             print(self.dict_arguments)
-        #             continue
-        #         else:
-        #             correct_format = inputdir + "/"
-        #             self.dict_arguments[key] = correct_format
-        #             print(self.dict_arguments)
 
     def is_directory_with_correct_files_fastq(self, input_dir):
         #allowed extensions
@@ -196,7 +173,6 @@ class JunoAmrWrapper:
 
             # for each file check if the file has the correct extension
             for filename in folder:
-                #get filename extension
                 extension = "".join(pathlib.Path(filename).suffixes)
                 if extension not in allowed_file_extensions:
                     self.parser.error("Files in the input directory do not have a correct file format. Please give a directory with files in the format: {}".format(allowed_file_extensions))   
@@ -205,6 +181,7 @@ class JunoAmrWrapper:
                 print(f'\"{input_dir}\" is not a directory. Give an existing directory.')
                 sys.exit(1)
 
+    #TODO this function is not being used yet
     def is_directory_with_correct_files_fasta(self, input_dir):
         """Function to check if the given directory is a directory. Also checks if the files in the directory have the correct file format"""
         #allowed extensions
@@ -223,6 +200,7 @@ class JunoAmrWrapper:
             print(f'\"{input_dir}\" is not a directory. Give an existing directory.')
             sys.exit(1)
 
+    #TODO this function is not being used yet
     def get_input_files_from_input_directory_fasta(self):
         self.input_files = {}
         # get directory location
@@ -248,7 +226,6 @@ class JunoAmrWrapper:
                 input_directory = os.listdir(self.dict_arguments[key])
                 for filename in input_directory:
                     # TODO if the input dir ends with a "/" then the config will get double "//" in the name
-                    # TODO do we end with a slash or not?
                     match = fq_pattern.fullmatch(filename)
                     if match:
                         samplename = re.split("_pR(1|2)", filename)
@@ -257,6 +234,7 @@ class JunoAmrWrapper:
                         elif "2" in samplename[1]:
                             self.input_files_r2.update({samplename[0]: directory_name + "/" + filename})
 
+    #TODO this function is not being used yet
     def check_if_db_exists(self, db_path):
         #TODO only working for pointfinder, make working for resfinder later
         if os.path.isdir(db_path):
@@ -274,6 +252,7 @@ class JunoAmrWrapper:
             #TODO to make the database working need to run install.py to index the databases with KMA how to fix this?
             os.system("git clone https://git@bitbucket.org/genomicepidemiology/pointfinder_db.git /mnt/db/resfinder/db_pointfinder")
 
+    #TODO this function is not being used yet
     def create_yaml_file_fasta(self):
         # Make config dir if this does not exist:
         Path("config").mkdir(parents=True, exist_ok=True)
@@ -302,8 +281,6 @@ class JunoAmrWrapper:
 
     def create_yaml_file_fastq(self):
         print("Producing yaml file for snakemake")
-        #open the yaml setup file
-        #TODO change this layout for fasta or fastq
         yaml_setup = open("config/setup_config.yml")
         
         #change yaml layout with received arguments & input
@@ -313,10 +290,8 @@ class JunoAmrWrapper:
             # add parameters
             config['Parameters'] = self.dict_arguments
             # add filenames
-            # TODO or change to fasta
             config['samples_fastq_r1'] = self.input_files_r1
             config['samples_fastq_r2'] = self.input_files_r2
-
             yaml.dump(config, file)
 
     def run_snakemake_command(self):
@@ -326,41 +301,57 @@ class JunoAmrWrapper:
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
         cores = parsed_config['db-cores']
         #os.system("snakemake --snakefile Snakefile --cores 1 --use-conda")
-        if self.dict_arguments["dryrun"] is False:
-            os.system("snakemake --snakefile Snakefile --use-conda --cores %d --drmaa \" -q bio -n {threads} -o output/log/drmaa/{name}_{wildcards}_{jobid}.out -e output/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir output/log/drmaa" % cores)
-        else:
-            os.system("snakemake --dryrun --snakefile Snakefile --use-conda --cores %d --drmaa \" -q bio -n {threads} -o output/log/drmaa/{name}_{wildcards}_{jobid}.out -e output/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir output/log/drmaa" % cores)
 
-    def create_amr_phenotype_summary(self):
-        #TODO make function for repetitive code(call it prepare for summaries oid)
-        #TODO put lines from opening config till samplenames in a function
-        #TODO make dir called summaries and place al summaries in here
-        #Get output dir from user parameters config
+        #get output dir name from other yaml file
+        open_config_parameters = open("config/user_parameters.yml")
+        parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
+        output_dir_name = parsed_config['Parameters']['output_dir']
+        current_path = os.path.abspath(os.getcwd())
+        self.output_file_path = f"{current_path}/{output_dir_name}"
+        
+        if self.dict_arguments["dryrun"] is False:
+            os.system("snakemake --snakefile Snakefile --use-conda --cores %d --drmaa \" -q bio -n {threads} -o %s/log/drmaa/{name}_{wildcards}_{jobid}.out -e %s/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir %s/log/drmaa" % (cores, self.output_file_path, self.output_file_path, self.output_file_path))
+        else:
+            os.system("snakemake --dryrun --snakefile Snakefile --use-conda --cores %d --drmaa \" -q bio -n {threads} -o %s/log/drmaa/{name}_{wildcards}_{jobid}.out -e %s/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir %s/log/drmaa" % (cores, self.output_file_path, self.output_file_path, self.output_file_path))
+
+    def preproccesing_for_summary_files(self):
+        #Get the output directory from the yaml file
         open_config_parameters = open("config/user_parameters.yml")
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
         output_dir_name = parsed_config['Parameters']['output_dir']
 
-        #get current path
         current_path = os.path.abspath(os.getcwd())
-        summary_file_path = f"{current_path}/{output_dir_name}"
-         
-        #If there is a summary file, remove it
-        if os.path.exists(f"{summary_file_path}/summary_amr_phenotype.csv"):
-            os.remove(f"{summary_file_path}/summary_amr_phenotype.csv")
+        #create the file path variab;e
+        self.output_file_path = f"{current_path}/{output_dir_name}"
+        
+        # if there is a summary directory, delete this
+        dirpath = Path(f"{self.output_file_path}/summary")
+        if dirpath.exists() and dirpath.is_dir():
+            print("found summary directory, removing it")
+            shutil.rmtree(dirpath)
+        
+        # Make new summary directory
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath)
+    
+        #get samples from the sample directory
+        self.samplenames = os.listdir(f"{self.output_file_path}/results_per_sample")
 
-        #Get the samplenames, to add as ID and to open each path
-        samplenames = os.listdir(summary_file_path)
+        return self.output_file_path, self.samplenames, dirpath
 
+    def create_amr_phenotype_summary(self):
         # empty list for antimicrobial classes
         antimicrobials = []
+        # add sample name column
         antimicrobials.insert(0, "Samplename")
-
-        with open(f'{summary_file_path}/summary_amr_phenotype.csv', 'w', newline='') as csvfile:
+        
+        #create and open the summary file
+        with open(f'{self.output_file_path}/summary/summary_amr_phenotype.csv', 'w', newline='') as csvfile:
             summary_file = csv.writer(csvfile, delimiter=",")
             
             #Set the informational header for the file
             #Just taking the first sample to get the header for the csv file
-            pathname = f"{summary_file_path}/{samplenames[0]}/pheno_table.txt"
+            pathname = f"{self.output_file_path}/results_per_sample/{self.samplenames[0]}/pheno_table.txt"
             opened_file = open(pathname, "r")
             header = opened_file.readlines()
             header_selection = header[7:16]
@@ -370,14 +361,14 @@ class JunoAmrWrapper:
             #set boolean for colnames true here
             add_colnames = True
 
-            for samplename in samplenames:
-                pathname=f"{summary_file_path}/{samplename}/pheno_table.txt"
+            #set actual data in the file for each sample
+            for samplename in self.samplenames:
+                pathname=f"{self.output_file_path}/results_per_sample/{samplename}/pheno_table.txt"
                 opened_file = open(pathname, "r")
-                #Line 18 is where the actual data starts
-                #TODO dit specifieke stuk zoeken, voor ieder sample is het bestand andere lengte
+                #Each file is the same, starting line 17 and ending line 118
                 file_content = opened_file.readlines()[17:118]
 
-                #Make empty list for each sample
+                #Make empty list for each sample and add the samplename to the sample column
                 antimicrobial_match = []
                 antimicrobial_match.insert(0, samplename)
                 
@@ -398,39 +389,25 @@ class JunoAmrWrapper:
                 summary_file.writerow(antimicrobial_match)
          
     def create_amr_genes_summary(self):
-        #Get output dir from user parameters config
-        open_config_parameters = open("config/user_parameters.yml")
-        parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
-        output_dir_name = parsed_config['Parameters']['output_dir']
-        
-        #get current path
-        current_path = os.path.abspath(os.getcwd())
-        summary_file_path = f"{current_path}/{output_dir_name}"
-        
-        #If there is a summary file, remove it
-        if os.path.exists(f"{summary_file_path}/summary_amr_genes.csv"):
-            os.remove(f"{summary_file_path}/summary_amr_genes.csv")
-
-        #Get the samplenames, to add as ID and to open each path
-        samplenames = os.listdir(summary_file_path)
-
-        # open new summary file
-        with open(f'{summary_file_path}/summary_amr_genes.csv', 'w', newline='') as csvfile:
+        # make and open new summary file
+        with open(f'{self.output_file_path}/summary/summary_amr_genes.csv', 'w', newline='') as csvfile:
             summary_file = csv.writer(csvfile)
 
             #Set the header for the file
             #Just taking the first sample to get the header for the csv file
-            pathname = f"{summary_file_path}/{samplenames[0]}/ResFinder_results_tab.txt"
+            pathname = f"{self.output_file_path}/results_per_sample/{self.samplenames[0]}/ResFinder_results_tab.txt"
             opened_file = open(pathname, "r")
+
+            #get the column names
             header = opened_file.readline().split("\t")
             del header[4:]
             header.insert(0, "Sample")
             summary_file.writerow(header)
 
-            # for each name in samplenames, open the file that matches "ResFinder_results_tab.txt" in the folder named as the samplename
-            for samplename  in samplenames:
+            # for each sample get the data
+            for samplename  in self.samplenames:
                 # Open file and collect all data except the header
-                pathname = f"{summary_file_path}/{samplename}/ResFinder_results_tab.txt"
+                pathname = f"{self.output_file_path}/results_per_sample/{samplename}/ResFinder_results_tab.txt"
                 opened_file = open(pathname, "r")
                 data_lines = opened_file.readlines()[1:]
 
@@ -440,53 +417,18 @@ class JunoAmrWrapper:
                     del elements_in_line[4:]
                     elements_in_line.insert(0, samplename)
                     summary_file.writerow(elements_in_line)
-    
-    #def merge_header_in_amr_phenotype_summary(self):
-
-    # def create_amr_pointfinder_summary(self):
-    #     #TODO add this t/m with open to a new function
-    #     open_config_parameters = open("config/user_parameters.yml")
-    #     parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
-    #     output_dir_name = parsed_config['Parameters']['output_dir']
-
-    #     #get current path
-    #     current_path = os.path.abspath(os.getcwd())
-    #     summary_file_path = f"{current_path}/{output_dir_name}"
-         
-    #     #If there is a summary file, remove it
-    #     if os.path.exists(f"{summary_file_path}/summary_amr_pointfinder.csv"):
-    #         os.remove(f"{summary_file_path}/summary_amr_pointfinder.csv")
-
-    #     #Get the samplenames, to add as ID and to open each path
-    #     samplenames = os.listdir(summary_file_path)
-
-    #     with open(f'{summary_file_path}/summary_amr_pointfinder.csv', 'w', newline='') as csvfile:
-    #         summary_file = csv.writer(csvfile)
-
-    #         pathname = f"{summary_file_path}/{samplenames[0]}/ResFinder_results_tab.txt"
-    #         opened_file = open(pathname, "r")
-    #         header = opened_file.readline().split("\t")
-        
-    #     #TODO structure to be discussed
 
 def main():
     j = JunoAmrWrapper()
     j.get_user_arguments()
-    #j.check_directory_format()
-    #pointfinderpath = "../../../db/resfinder/db_pointfinder"
-    #j.check_if_db_exists(pointfinderpath)
-    #j.check_if_db_exists(resfinderpath)
-    #j.check_species()
-    #j.change_species_name_format()
-    #choose fasta or fastq
-    #j.get_input_files_from_input_directory_fasta()
-    #j.get_input_files_from_input_directory_fastq()
-    #j.create_yaml_file_fasta()
-    #j.create_yaml_file_fastq()
-    #j.run_snakemake_command()
-    #j.create_amr_genes_summary()
+    j.check_species()
+    j.change_species_name_format()
+    j.get_input_files_from_input_directory_fastq()
+    j.create_yaml_file_fastq()
+    j.run_snakemake_command()
+    j.preproccesing_for_summary_files()
+    j.create_amr_genes_summary()
     j.create_amr_phenotype_summary()
-    #j.merge_header_in_amr_phenotype_summary
-    #j.create_amr_pointfinder_summary()
+
 if __name__ == '__main__':
     main()
