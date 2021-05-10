@@ -368,6 +368,7 @@ class JunoAmrWrapper:
 
             #set actual data in the file for each sample
             for samplename in self.samplenames:
+                print("Current sample: ", samplename)
                 pathname=f"{self.output_file_path}/results_per_sample/{samplename}/pheno_table.txt"
                 opened_file = open(pathname, "r")
                 #Each file is the same, starting line 17 and ending line 118

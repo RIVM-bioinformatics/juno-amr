@@ -8,6 +8,7 @@ rule runResfinderFastq:
     output:
         #Output file requested by rule all
         output_file = OUT + "/results_per_sample/{sample}/ResFinder_results.txt",
+        output_file_2 = OUT + "/results_per_sample/{sample}/pheno_table.txt",
         #Directory per sample
         output_dir = directory(OUT + "/results_per_sample/{sample}")
     
