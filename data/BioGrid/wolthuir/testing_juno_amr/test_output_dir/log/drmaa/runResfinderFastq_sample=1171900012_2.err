@@ -1,0 +1,16 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	runResfinderFastq
+	1
+
+[Mon May 10 12:30:05 2021]
+Job 0: Processing received samples in resfinder
+
+Activating conda environment: /mnt/scratch_dir/wolthuir/Juno-amr/.snakemake/conda/87d43c02
+[Mon May 10 12:38:38 2021]
+Finished job 0.
+1 of 1 steps (100%) done

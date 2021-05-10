@@ -118,10 +118,12 @@ class JunoAmrWrapper:
             type=str,
             default="1",
             dest="run_pointfinder",
+            metavar="",
             help="Type one to run pointfinder, type 0 to not run pointfinder, default is 1."
         )
 
         self.parser.add_argument(
+            "-n",
             "--dryrun",
             action='store_true',
             dest="dryrun",
@@ -307,11 +309,12 @@ class JunoAmrWrapper:
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
         output_dir_name = parsed_config['Parameters']['output_dir']
         current_path = os.path.abspath(os.getcwd())
-        self.output_file_path = f"{current_path}/{output_dir_name}"
+        self.output_file_path = f"{output_dir_name}"
         
         if self.dict_arguments["dryrun"] is False:
             os.system("snakemake --snakefile Snakefile --use-conda --cores %d --drmaa \" -q bio -n {threads} -o %s/log/drmaa/{name}_{wildcards}_{jobid}.out -e %s/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir %s/log/drmaa" % (cores, self.output_file_path, self.output_file_path, self.output_file_path))
         else:
+            print("running dry run")
             os.system("snakemake --dryrun --snakefile Snakefile --use-conda --cores %d --drmaa \" -q bio -n {threads} -o %s/log/drmaa/{name}_{wildcards}_{jobid}.out -e %s/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir %s/log/drmaa" % (cores, self.output_file_path, self.output_file_path, self.output_file_path))
 
     def preproccesing_for_summary_files(self):
@@ -320,9 +323,9 @@ class JunoAmrWrapper:
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
         output_dir_name = parsed_config['Parameters']['output_dir']
 
-        current_path = os.path.abspath(os.getcwd())
+        #current_path = os.path.abspath(os.getcwd())
         #create the file path variab;e
-        self.output_file_path = f"{current_path}/{output_dir_name}"
+        self.output_file_path = f"{output_dir_name}"
         
         # if there is a summary directory, delete this
         dirpath = Path(f"{self.output_file_path}/summary")
@@ -336,6 +339,8 @@ class JunoAmrWrapper:
     
         #get samples from the sample directory
         self.samplenames = os.listdir(f"{self.output_file_path}/results_per_sample")
+        print("output file path:", self.output_file_path)
+        print("samplenames: ", self.samplenames)
 
         return self.output_file_path, self.samplenames, dirpath
 
@@ -428,6 +433,7 @@ def main():
     j.run_snakemake_command()
     j.preproccesing_for_summary_files()
     j.create_amr_genes_summary()
+    
     j.create_amr_phenotype_summary()
 
 if __name__ == '__main__':

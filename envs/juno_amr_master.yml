@@ -1,4 +1,4 @@
-name: juno_amr_master
+name: juno-amr_master
 channels:
   - bioconda
   - conda-forge

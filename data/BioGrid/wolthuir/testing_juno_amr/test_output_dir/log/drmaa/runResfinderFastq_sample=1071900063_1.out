@@ -1,0 +1,91 @@
+Sender: LSF System <lsfadmin@rivm-lsfsv-l13p.rivm.ssc-campus.nl>
+Subject: Job 688488: <snakejob.runResfinderFastq.1.sh> in cluster <RIVM-LSF-PRD> Done
+
+Job <snakejob.runResfinderFastq.1.sh> was submitted from host <rivm-biohn-l05p.int.ssc-campus.nl> by user <wolthuir> in cluster <RIVM-LSF-PRD> at Mon May 10 12:29:59 2021
+Job was executed on host(s) <rivm-lsfsv-l13p.rivm.ssc-campus.nl>, in queue <bio>, as user <wolthuir> in cluster <RIVM-LSF-PRD> at Mon May 10 12:30:00 2021
+</home/wolthuir> was used as the home directory.
+</mnt/scratch_dir/wolthuir/Juno-amr> was used as the working directory.
+Started at Mon May 10 12:30:00 2021
+Terminated at Mon May 10 12:32:44 2021
+Results reported at Mon May 10 12:32:44 2021
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+/mnt/scratch_dir/wolthuir/Juno-amr/.snakemake/tmp.hyzyvlr8/snakejob.runResfinderFastq.1.sh
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   142.78 sec.
+    Max Memory :                                 64 MB
+    Average Memory :                             51.68 MB
+    Total Requested Memory :                     4000.00 MB
+    Delta Memory :                               3936.00 MB
+    Max Swap :                                   -
+    Max Processes :                              11
+    Max Threads :                                15
+    Run time :                                   164 sec.
+    Turnaround time :                            165 sec.
+
+The output (if any) follows:
+
+MISMATCHES: [['sub', 80, 80, 'C', 'r.80A>C', 'A', 'C'], ['sub', 89, 89, 'G', 'r.89T>G', 'T', 'G'], ['sub', 90, 90, 'a', 'r.90C>a', 'C', 'a'], ['sub', 93, 93, 'C', 'r.93T>C', 'T', 'C'], ['sub', 183, 183, 'T', 'r.183C>T', 'C', 'T'], ['sub', 250, 250, 'T', 'r.250A>T', 'A', 'T'], ['sub', 253, 253, 'T', 'r.253A>T', 'A', 'T'], ['sub', 273, 273, 'A', 'r.273T>A', 'T', 'A'], ['sub', 488, 488, 'T', 'r.488C>T', 'C', 'T']]
+['sub', 80, 80, 'C', 'r.80A>C', 'A', 'C']
+['sub', 89, 89, 'G', 'r.89T>G', 'T', 'G']
+['sub', 90, 90, 'a', 'r.90C>a', 'C', 'a']
+['sub', 93, 93, 'C', 'r.93T>C', 'T', 'C']
+['sub', 183, 183, 'T', 'r.183C>T', 'C', 'T']
+['sub', 250, 250, 'T', 'r.250A>T', 'A', 'T']
+['sub', 253, 253, 'T', 'r.253A>T', 'A', 'T']
+['sub', 273, 273, 'A', 'r.273T>A', 'T', 'A']
+['sub', 488, 488, 'T', 'r.488C>T', 'C', 'T']
+MISMATCHES: [['sub', 137, 137, 'A', 'r.137T>A', 'T', 'A'], ['sub', 142, 142, 'T', 'r.142A>T', 'A', 'T'], ['sub', 143, 143, 'T', 'r.143C>T', 'C', 'T'], ['sub', 316, 316, 'T', 'r.316C>T', 'C', 'T'], ['sub', 356, 356, 'A', 'r.356G>A', 'G', 'A'], ['sub', 357, 357, 'T', 'r.357C>T', 'C', 'T'], ['sub', 1171, 1171, 'A', 'r.1171G>A', 'G', 'A'], ['del', 1174, 1174, 'T', 'r.1174delT', 'del', 'T'], ['sub', 1178, 1178, 'T', 'r.1178C>T', 'C', 'T'], ['sub', 1211, 1211, 'T', 'r.1211C>T', 'C', 'T'], ['sub', 1220, 1220, 'A', 'r.1220G>A', 'G', 'A'], ['sub', 1229, 1229, 'T', 'r.1229C>T', 'C', 'T'], ['sub', 1506, 1506, 'C', 'r.1506T>C', 'T', 'C'], ['sub', 1507, 1507, 'T', 'r.1507C>T', 'C', 'T'], ['sub', 1723, 1723, 'A', 'r.1723G>A', 'G', 'A'], ['sub', 1865, 1865, 'C', 'r.1865T>C', 'T', 'C'], ['sub', 2794, 2794, 'T', 'r.2794C>T', 'C', 'T'], ['sub', 2796, 2796, 'C', 'r.2796T>C', 'T', 'C'], ['sub', 2799, 2799, 'G', 'r.2799A>G', 'A', 'G'], ['sub', 2802, 2802, 'A', 'r.2802G>A', 'G', 'A']]
+['sub', 137, 137, 'A', 'r.137T>A', 'T', 'A']
+['sub', 142, 142, 'T', 'r.142A>T', 'A', 'T']
+['sub', 143, 143, 'T', 'r.143C>T', 'C', 'T']
+['sub', 316, 316, 'T', 'r.316C>T', 'C', 'T']
+['sub', 356, 356, 'A', 'r.356G>A', 'G', 'A']
+['sub', 357, 357, 'T', 'r.357C>T', 'C', 'T']
+['sub', 1171, 1171, 'A', 'r.1171G>A', 'G', 'A']
+['del', 1174, 1174, 'T', 'r.1174delT', 'del', 'T']
+['sub', 1178, 1178, 'T', 'r.1178C>T', 'C', 'T']
+['sub', 1211, 1211, 'T', 'r.1211C>T', 'C', 'T']
+['sub', 1220, 1220, 'A', 'r.1220G>A', 'G', 'A']
+['sub', 1229, 1229, 'T', 'r.1229C>T', 'C', 'T']
+['sub', 1506, 1506, 'C', 'r.1506T>C', 'T', 'C']
+['sub', 1507, 1507, 'T', 'r.1507C>T', 'C', 'T']
+['sub', 1723, 1723, 'A', 'r.1723G>A', 'G', 'A']
+['sub', 1865, 1865, 'C', 'r.1865T>C', 'T', 'C']
+['sub', 2794, 2794, 'T', 'r.2794C>T', 'C', 'T']
+['sub', 2796, 2796, 'C', 'r.2796T>C', 'T', 'C']
+['sub', 2799, 2799, 'G', 'r.2799A>G', 'A', 'G']
+['sub', 2802, 2802, 'A', 'r.2802G>A', 'G', 'A']
+MISMATCHES: [['sub', -1, -1, 'T', 'n.-1C>T', 'C', 'T'], ['sub', -18, -18, 'A', 'n.-18G>A', 'G', 'A']]
+['sub', -1, -1, 'T', 'n.-1C>T', 'C', 'T']
+['sub', -18, -18, 'A', 'n.-18G>A', 'G', 'A']
+MISMATCHES: [['sub', 93, 93, 'L', 'p.I93L', 'ATC', 'CTC', 'I', 'L'], ['sub', 267, 267, 'Q', 'p.R267Q', 'CGG', 'CAG', 'R', 'Q']]
+['sub', 93, 93, 'L', 'p.I93L', 'ATC', 'CTC', 'I', 'L']
+['sub', 267, 267, 'Q', 'p.R267Q', 'CGG', 'CAG', 'R', 'Q']
+MISMATCHES: [['sub', 83, 83, 'L', 'p.S83L', 'TCG', 'TTG', 'S', 'L'], ['sub', 281, 281, 'I', 'p.V281I', 'GTA', 'ATA', 'V', 'I']]
+['sub', 83, 83, 'L', 'p.S83L', 'TCG', 'TTG', 'S', 'L']
+['sub', 281, 281, 'I', 'p.V281I', 'GTA', 'ATA', 'V', 'I']
+MISMATCHES: [['sub', 775, 775, 'L', 'p.Q775L', 'CAG', 'CTG', 'Q', 'L']]
+['sub', 775, 775, 'L', 'p.Q775L', 'CAG', 'CTG', 'Q', 'L']
+MISMATCHES: [['sub', 62, 62, 'K', 'p.E62K', 'GAA', 'AAA', 'E', 'K'], ['sub', 452, 452, 'V', 'p.A452V', 'GCT', 'GTT', 'A', 'V'], ['sub', 691, 691, 'I', 'p.V691I', 'GTT', 'ATT', 'V', 'I']]
+['sub', 62, 62, 'K', 'p.E62K', 'GAA', 'AAA', 'E', 'K']
+['sub', 452, 452, 'V', 'p.A452V', 'GCT', 'GTT', 'A', 'V']
+['sub', 691, 691, 'I', 'p.V691I', 'GTT', 'ATT', 'V', 'I']
+MISMATCHES: [['sub', 136, 136, 'I', 'p.V136I', 'GTT', 'ATT', 'V', 'I'], ['sub', 210, 210, 'V', 'p.E210V', 'GAA', 'GTA', 'E', 'V']]
+['sub', 136, 136, 'I', 'p.V136I', 'GTT', 'ATT', 'V', 'I']
+['sub', 210, 210, 'V', 'p.E210V', 'GAA', 'GTA', 'E', 'V']
+MISMATCHES: []
+
+
+PS:
+
+Read file </mnt/scratch_dir/wolthuir/Juno-amr//data/BioGrid/wolthuir/testing_juno_amr/test_output_dir/log/drmaa/runResfinderFastq_sample=1071900063_1.err> for stderr output of this job.
+
