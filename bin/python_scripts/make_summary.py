@@ -15,7 +15,32 @@ class JunoSummary:
         """constructor"""
 
     def test(self):
-        print("Hello world")
+        print("Hreceiving and printing snakemake input")
+        #receive input from snakemake
+        genes_output_file = snakemake.input[0]
+        #phenotype_output_file = snakemake.input[1]
+
+        #open the file
+        opened_file = open(genes_output_file)
+        #read the file
+        header = opened_file.readlines()
+        subselection = header[7:16]
+        print("subselection of the file")
+        print(subselection)
+            
+        #receive output from snakemake
+        genes_summary_location = snakemake.output[0]
+        #pheno_summary location = snakemake.output[0]
+
+        #write subselection to a outputfile
+        print("open output file")
+        with open(genes_summary_location, 'w', newline='') as csvfile:
+            summary_file = csv.writer(csvfile)
+            print("wirte output file")
+            for string in header_selection:
+                summary_file.writerow([string])
+
+
 
     def preproccesing_for_summary_files(self):
         #Get the output directory from the yaml file
@@ -49,7 +74,7 @@ class JunoSummary:
 def main():
     m = JunoSummary()
     m.test()
-    m.preproccesing_for_summary_files()
+    #m.preproccesing_for_summary_files()
     
 if __name__ == '__main__':
     main()
