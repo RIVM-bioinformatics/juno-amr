@@ -18,6 +18,7 @@ from pathlib import Path
 import shutil
 from ruamel.yaml import YAML
 import csv
+import pandas as pd
 
 
 class JunoAmrWrapper:
@@ -325,6 +326,7 @@ class JunoAmrWrapper:
 
         #current_path = os.path.abspath(os.getcwd())
         #create the file path variab;e
+        #TODO deze regel kan weg
         self.output_file_path = f"{output_dir_name}"
         
         # if there is a summary directory, delete this
@@ -339,23 +341,60 @@ class JunoAmrWrapper:
     
         #get samples from the sample directory
         self.samplenames = os.listdir(f"{self.output_file_path}/results_per_sample")
-        print("output file path:", self.output_file_path)
-        print("samplenames: ", self.samplenames)
+        #print("output file path:", self.output_file_path)
+        
+        #print("samplenames: ", self.samplenames)
 
         return self.output_file_path, self.samplenames, dirpath
 
-    def create_amr_phenotype_summary(self):
-        # empty list for antimicrobial classes
-        antimicrobials = []
-        # add sample name column
-        antimicrobials.insert(0, "Samplename")
-        
-        #create and open the summary file
-        with open(f'{self.output_file_path}/summary/summary_amr_phenotype.csv', 'w', newline='') as csvfile:
-            summary_file = csv.writer(csvfile, delimiter=",")
+    def create_amr_phenotype_summary(self):           
+        #set boolean for colnames true here
+        add_colnames = True
+        self.df_list = []
+
+        for samplename in self.samplenames:
+            # empty list for antimicrobial classes
+            antimicrobials = []
+            # add sample name column
+            antimicrobials.insert(0, "Samplename")
+
+            pathname=f"{self.output_file_path}/results_per_sample/{samplename}/pheno_table.txt"
+            opened_file = open(pathname, "r")
+
+            #Make subselection of the file starting line 17 where the antimicrobial classes are listed
+            #TODO make it based on the header
+            sub_selection = opened_file.readlines()[17:]
             
-            #Set the informational header for the file
-            #Just taking the first sample to get the header for the csv file
+            #Make an empty list for the file content
+            file_content = []
+            # #Make empty list for each sample and add the samplename to the sample column
+            antimicrobial_match = []
+            antimicrobial_match.insert(0, samplename)
+
+            for line in sub_selection:
+                #Search for the end of the antimicrobial classes that are listed in the file
+                if line.startswith("\n"):
+                    break
+                #Append all lines containing information to the file content list
+                file_content.append(line)
+            
+            for line in file_content:
+                elements = line.split("\t")
+                antimicrobial_match.append(elements[3])
+                antimicrobials.append(elements[0])
+            temp_df = pd.DataFrame([antimicrobial_match], columns=antimicrobials)   
+            self.df_list.append(temp_df)
+
+        final_df = pd.concat(self.df_list, axis=0, ignore_index=True)
+        final_df.to_csv(f'{self.output_file_path}/summary/summary_amr_phenotype.csv', mode='a', index=False)
+
+    def add_header_to_summary(self):
+        with open(f'{self.output_file_path}/summary/summary_amr_phenotype.csv', 'w', newline='') as csvfile:
+            summary_file = csv.writer(csvfile)
+        # Collect the header from 1 sample
+        # Add header to existing summary
+        #Set the informational header for the file
+        #Just taking the first sample to get the header for the csv file
             pathname = f"{self.output_file_path}/results_per_sample/{self.samplenames[0]}/pheno_table.txt"
             opened_file = open(pathname, "r")
             header = opened_file.readlines()
@@ -363,37 +402,6 @@ class JunoAmrWrapper:
             for string in header_selection:
                 summary_file.writerow([string])
 
-            #set boolean for colnames true here
-            add_colnames = True
-
-            #set actual data in the file for each sample
-            for samplename in self.samplenames:
-                print("Current sample: ", samplename)
-                pathname=f"{self.output_file_path}/results_per_sample/{samplename}/pheno_table.txt"
-                opened_file = open(pathname, "r")
-                #Each file is the same, starting line 17 and ending line 118
-                file_content = opened_file.readlines()[17:118]
-
-                #Make empty list for each sample and add the samplename to the sample column
-                antimicrobial_match = []
-                antimicrobial_match.insert(0, samplename)
-                
-                #get the match number
-                for line in file_content:
-                    elements = line.split("\t")
-                    antimicrobial_match.append(elements[3])
-
-                # Check if colnames are added, if not, add colnames
-                if add_colnames:
-                    for line in file_content:
-                        elements = line.split("\t")
-                        antimicrobials.append(elements[0])
-
-                    summary_file.writerow(antimicrobials)
-                    add_colnames = False
-                #write matches to file
-                summary_file.writerow(antimicrobial_match)
-         
     def create_amr_genes_summary(self):
         # make and open new summary file
         with open(f'{self.output_file_path}/summary/summary_amr_genes.csv', 'w', newline='') as csvfile:
@@ -434,8 +442,8 @@ def main():
     j.run_snakemake_command()
     j.preproccesing_for_summary_files()
     j.create_amr_genes_summary()
-    
-    j.create_amr_phenotype_summary()
+    j.add_header_to_summary()
+    j.create_amr_phenotype_summary() 
 
 if __name__ == '__main__':
     main()
