@@ -316,7 +316,8 @@ class JunoAmrWrapper:
         else:
             print("running dry run")
             os.system("snakemake --dryrun --snakefile Snakefile --use-conda --latency-wait 5 --cores %d --drmaa \" -q bio -n {threads} -o %s/log/drmaa/{name}_{wildcards}_{jobid}.out -e %s/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir %s/log/drmaa" % (cores, self.output_file_path, self.output_file_path, self.output_file_path))
-
+    
+    #TODO if confirmed that the pipeline works, this function can be deleted
     def preproccesing_for_summary_files(self):
         #Get the output directory from the yaml file
         open_config_parameters = open("config/user_parameters.yml")
@@ -336,6 +337,78 @@ class JunoAmrWrapper:
         #get samples from the sample directory
         self.samplenames = os.listdir(f"{self.output_dir_name}/results_per_sample")
         return self.output_dir_name, self.samplenames, dirpath
+    
+    #TODO once the functions work, replace them into make_summary.py to call as a rule
+    def pointfinder_result_summary(self):
+        #Get path & open 1 file for the colnames
+        self.pointfinder_results_file = f"{self.output_dir_name}/results_per_sample"
+        pathname = f"{self.pointfinder_results_file}/{self.samplenames[0]}/PointFinder_results.txt" 
+        opened_file = open(pathname, "r")
+
+        #Get columns from one of the files
+        lines = opened_file.readlines()
+        column_names = lines[0].split("\t")
+        column_names.insert(0, "Samplename")
+
+        # Make an empty list to add list with data for each sample
+        data_per_sample = []
+
+        #Collect data for each sample and add this to a list with the samplename
+        for samplename in self.samplenames:
+            sample = []
+            pathname = f"{self.pointfinder_results_file}/{samplename}/PointFinder_results.txt" 
+            opened_file = open(pathname, "r")
+            lines = opened_file.readlines()
+            subselection = lines[1:]
+
+            sample.append(samplename)
+            for line in subselection:
+                elements = line.split("\t")
+                for element in elements:
+                    sample.append(element)
+
+            #Add samples to the list
+            data_per_sample.append(sample)    
+
+        #Create DF with pandas and write to csv file
+        data_frame = pd.DataFrame(data_per_sample, columns = column_names)
+        data_frame.to_csv(f'{self.output_dir_name}/summary/summary_amr_pointfinder_results.csv', mode='a', index=False)
+    
+    def pointfinder_prediction_summary(self):
+        #Get path & open 1 file for the colnames
+        self.pointfinder_prediction_file = f"{self.output_dir_name}/results_per_sample"
+        pathname = f"{self.pointfinder_prediction_file}/{self.samplenames[0]}/PointFinder_results.txt" 
+        opened_file = open(pathname, "r")
+
+        # Maak een lege DF met een maar van de columns of alleen de sample column?
+        #TODO kan dit korter?
+        cols = ["Samplename"]
+        sample_df = pd.DataFrame(self.samplenames, columns=cols)
+        #print(sample_df)
+
+        dataframe_per_sample = []
+        # Voor ieder sample
+        for samplename in self.samplenames:
+            pathname = f"{self.pointfinder_prediction_file}/{samplename}/PointFinder_prediction.txt" 
+            opened_file = open(pathname, "r")
+            lines = opened_file.readlines()
+            #list van de colnames
+            column_names = lines[0].split("\t")
+            
+            #list van de values
+            for line in lines[1:]:
+                print(line)
+
+            # add lists together
+
+        #voeg  deze dfs toe aan een list buiten de loop
+        #Voeg de dfs in de gemaakte list samen met de lege/sample column df via pandas concat
+
+        #Get columns from one of the files
+        #TODO! columns zijn verschillend per file
+        #lines = opened_file.readlines()
+        #column_names = lines[0].split("\t")
+        #column_names.insert(0, "Samplename") 
 
 def main():
     j = JunoAmrWrapper()
@@ -344,7 +417,10 @@ def main():
     j.change_species_name_format()
     j.get_input_files_from_input_directory_fastq()
     j.create_yaml_file_fastq()
-    j.run_snakemake_command()
+    #j.run_snakemake_command()
+    j.preproccesing_for_summary_files()
+    #j.pointfinder_result_summary()
+    j.pointfinder_prediction_summary()
 
 if __name__ == '__main__':
     main()

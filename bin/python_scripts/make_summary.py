@@ -37,8 +37,6 @@ class JunoSummary:
 
         #get samples from the sample directory
         self.samplenames = os.listdir(f"{self.output_dir_name}/results_per_sample")
-        
-        
         return self.output_dir_name, self.samplenames, dirpath
 
     def create_amr_genes_summary(self):
@@ -80,7 +78,7 @@ class JunoSummary:
     def add_header_to_phenotype_summary(self):
         #Create the summary file for the phenotype
         pheno_summary_location = snakemake.output[1]
-        #self.phenotype_output_file = snakemake.input[0]
+        #TODO make this snakemake input(ook in andere functie) --> self.phenotype_output_file = snakemake.input[0]
         self.phenotype_output_file = f"{self.output_dir_name}/results_per_sample"
         
         with open(pheno_summary_location, 'w', newline='') as csvfile:
