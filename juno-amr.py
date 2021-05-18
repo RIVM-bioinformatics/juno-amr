@@ -377,38 +377,29 @@ class JunoAmrWrapper:
     def pointfinder_prediction_summary(self):
         #Get path & open 1 file for the colnames
         self.pointfinder_prediction_file = f"{self.output_dir_name}/results_per_sample"
-        pathname = f"{self.pointfinder_prediction_file}/{self.samplenames[0]}/PointFinder_results.txt" 
-        opened_file = open(pathname, "r")
-
-        # Maak een lege DF met een maar van de columns of alleen de sample column?
-        #TODO kan dit korter?
-        cols = ["Samplename"]
-        sample_df = pd.DataFrame(self.samplenames, columns=cols)
-        #print(sample_df)
 
         dataframe_per_sample = []
-        # Voor ieder sample
+
         for samplename in self.samplenames:
             pathname = f"{self.pointfinder_prediction_file}/{samplename}/PointFinder_prediction.txt" 
             opened_file = open(pathname, "r")
             lines = opened_file.readlines()
-            #list van de colnames
-            column_names = lines[0].split("\t")
-            
-            #list van de values
-            for line in lines[1:]:
-                print(line)
 
-            # add lists together
+            #get the colnames
+            column_names = lines[0].strip("\n").split("\t")
+            # get the values
+            elements = lines[1].strip("\n").split("\t")
+            #add the samplename
+            elements.insert(0, samplename)
+            #create df for each sample
+            temp_df = pd.DataFrame([elements], columns=column_names)
+            dataframe_per_sample.append(temp_df)
+           
+        #concat all dfs and write to file
+        final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
+        #print(final_df)
+        final_df.to_csv(f'{self.output_dir_name}/summary/summary_pointfinder_prediction.csv', mode='a', index=False)
 
-        #voeg  deze dfs toe aan een list buiten de loop
-        #Voeg de dfs in de gemaakte list samen met de lege/sample column df via pandas concat
-
-        #Get columns from one of the files
-        #TODO! columns zijn verschillend per file
-        #lines = opened_file.readlines()
-        #column_names = lines[0].split("\t")
-        #column_names.insert(0, "Samplename") 
 
 def main():
     j = JunoAmrWrapper()
@@ -417,10 +408,10 @@ def main():
     j.change_species_name_format()
     j.get_input_files_from_input_directory_fastq()
     j.create_yaml_file_fastq()
-    #j.run_snakemake_command()
-    j.preproccesing_for_summary_files()
+    j.run_snakemake_command()
+    #j.preproccesing_for_summary_files()
     #j.pointfinder_result_summary()
-    j.pointfinder_prediction_summary()
+    #j.pointfinder_prediction_summary()
 
 if __name__ == '__main__':
     main()

@@ -140,12 +140,76 @@ class JunoSummary:
         #Write the dataframe to existing file with header
         final_df.to_csv(f'{self.output_dir_name}/summary/summary_amr_phenotype.csv', mode='a', index=False)
 
+    def pointfinder_result_summary(self):
+        #Get path & open 1 file for the colnames
+        self.pointfinder_results_file = f"{self.output_dir_name}/results_per_sample"
+        pathname = f"{self.pointfinder_results_file}/{self.samplenames[0]}/PointFinder_results.txt" 
+        opened_file = open(pathname, "r")
+
+        #Get columns from one of the files
+        lines = opened_file.readlines()
+        column_names = lines[0].split("\t")
+        column_names.insert(0, "Samplename")
+
+        # Make an empty list to add list with data for each sample
+        data_per_sample = []
+
+        #Collect data for each sample and add this to a list with the samplename
+        for samplename in self.samplenames:
+            sample = []
+            pathname = f"{self.pointfinder_results_file}/{samplename}/PointFinder_results.txt" 
+            opened_file = open(pathname, "r")
+            lines = opened_file.readlines()
+            subselection = lines[1:]
+
+            sample.append(samplename)
+            for line in subselection:
+                elements = line.split("\t")
+                for element in elements:
+                    sample.append(element)
+
+            #Add samples to the list
+            data_per_sample.append(sample)    
+
+        #Create DF with pandas and write to csv file
+        data_frame = pd.DataFrame(data_per_sample, columns = column_names)
+        data_frame.to_csv(f'{self.output_dir_name}/summary/summary_amr_pointfinder_results.csv', mode='a', index=False)
+    
+    def pointfinder_prediction_summary(self):
+        #Get path & open 1 file for the colnames
+        self.pointfinder_prediction_file = f"{self.output_dir_name}/results_per_sample"
+
+        dataframe_per_sample = []
+
+        for samplename in self.samplenames:
+            pathname = f"{self.pointfinder_prediction_file}/{samplename}/PointFinder_prediction.txt" 
+            opened_file = open(pathname, "r")
+            lines = opened_file.readlines()
+
+            #get the colnames
+            column_names = lines[0].strip("\n").split("\t")
+            # get the values
+            elements = lines[1].strip("\n").split("\t")
+            #add the samplename
+            elements.insert(0, samplename)
+            #create df for each sample
+            temp_df = pd.DataFrame([elements], columns=column_names)
+            dataframe_per_sample.append(temp_df)
+           
+        #concat all dfs and write to file
+        final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
+        #print(final_df)
+        final_df.to_csv(f'{self.output_dir_name}/summary/summary_pointfinder_prediction.csv', mode='a', index=False)
+
+
 def main():
     m = JunoSummary()
     m.preproccesing_for_summary_files()
     m.create_amr_genes_summary()
     m.add_header_to_phenotype_summary()
     m.create_amr_phenotype_summary()
+    m.pointfinder_result_summary()
+    m.pointfinder_prediction_summary()
 
 if __name__ == '__main__':
     main()
