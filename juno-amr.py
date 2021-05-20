@@ -33,16 +33,26 @@ class JunoAmrWrapper:
             description = "Juno-amr pipeline. Automated pipeline to use resfinder and pointfinder on given input data.",
             add_help = True
         )
+        #TODO option 1: subparsers
+        #TODO option 2: search for another argparse
+        #TODO sys.argv if else eromheen bouwen
+        # self.subparsers = self.parser.add_subparsers(help='sub-command help')
+        # species_parser = self.subparsers.add_parser('species', help='blep')
+        
+        # species_parser.add_argument(
+        #     '-s',
+        #     '--species',
+        #     help = "blaaaa",
+        #     type=str)
 
         #TODO check if the given path is a path/directory
         # Add arguments
-        # TODO check if we want to end the directories with a slash or not --> built func
         self.parser.add_argument(
             "-o",
             "--output",
             type=str,
             required=False,
-            metavar="",
+            metavar="dir",
             default="output",
             dest="output_dir",
             help="Path to the directory you want to use as an output directory, if non is given the default will be an output directory in the Juno-amr folder"
@@ -54,7 +64,7 @@ class JunoAmrWrapper:
             "--input",
             type=self.is_directory_with_correct_files_fastq,
             required=True,
-            metavar="",
+            metavar="dir",
             dest="input_dir",
             help="Path to the directory of your input. Example: path/to/input/fastq"
         )
@@ -64,7 +74,7 @@ class JunoAmrWrapper:
             "--species",
             type = str.lower,
             required = True,
-            metavar="",
+            metavar="str",
             dest="species",
             #space does not work on commandline, reason why the names are with underscore
             help = "Full scientific name of the species sample, use underscores not spaces. Example: campylobacter_spp. Options to choose from: other, campylobacter_spp, campylobacter_jejuni, campylobacter_coli, escherichia_coli, salmonella_spp, plasmodium_falciparum, neisseria_gonorrhoeae, mycobacterium_tuberculosis, enterococcus_faecalis, enterococcus_faecium, klebsiella, helicobacter_pylori & staphylococcus_aureus",
@@ -75,7 +85,7 @@ class JunoAmrWrapper:
             "-l",
             "--min_cov",
             type=float,
-            metavar="",
+            metavar="float",
             default=0.6,
             dest="coverage",
             help="Minimum coverage of ResFinder"
@@ -85,7 +95,7 @@ class JunoAmrWrapper:
             "-t",
             "--threshold",
             type=float,
-            metavar="",
+            metavar="float",
             default=0.8,
             dest="threshold",
             help="Threshold for identity of resfinder"
@@ -94,10 +104,8 @@ class JunoAmrWrapper:
         self.parser.add_argument(
             "-db_point",
             type=str,
-            metavar="",
-            #TODO change hardcoded path
-            #TODO check if valid path
-            default="../../../db/resfinder/db_pointfinder",
+            metavar="dir",
+            default="/mnt/db/resfinder/db_pointfinder",
             dest="pointfinder_db",
             help="Alternative database for pointfinder"
         )
@@ -105,10 +113,8 @@ class JunoAmrWrapper:
         self.parser.add_argument(
             "-db_res",
             type=str,
-            metavar="",
-            #TODO change hardcoded path
-            #TODO check if valid path
-            default="../../../db/resfinder/db_resfinder",
+            metavar="dir",
+            default="/mnt/db/resfinder/db_resfinder",
             dest="resfinder_db",
             help="Alternative database for resfinder"
         )
@@ -132,6 +138,7 @@ class JunoAmrWrapper:
 
         # parse arguments
         self.dict_arguments = vars(self.parser.parse_args())
+        print(self.dict_arguments)
 
     def check_species(self):
         # check if species matches other
@@ -411,7 +418,7 @@ def main():
     j.run_snakemake_command()
     #j.preproccesing_for_summary_files()
     #j.pointfinder_result_summary()
-    #j.pointfinder_prediction_summary()
+   # j.pointfinder_prediction_summary()
 
 if __name__ == '__main__':
     main()

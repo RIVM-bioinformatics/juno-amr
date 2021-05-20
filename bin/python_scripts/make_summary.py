@@ -96,7 +96,7 @@ class JunoSummary:
     def create_amr_phenotype_summary(self):           
         #set boolean for colnames true here
         add_colnames = True
-        pheno_summary_location = snakemake.output[0]
+        #pheno_summary_location = snakemake.output[0]
         #Create empty list to store the dataframes for each sample
         self.df_list = []
 
@@ -141,6 +141,7 @@ class JunoSummary:
         final_df.to_csv(f'{self.output_dir_name}/summary/summary_amr_phenotype.csv', mode='a', index=False)
 
     def pointfinder_result_summary(self):
+        pointfinder_results_output = snakemake.output[2]
         #Get path & open 1 file for the colnames
         self.pointfinder_results_file = f"{self.output_dir_name}/results_per_sample"
         pathname = f"{self.pointfinder_results_file}/{self.samplenames[0]}/PointFinder_results.txt" 
@@ -177,6 +178,7 @@ class JunoSummary:
     
     def pointfinder_prediction_summary(self):
         #Get path & open 1 file for the colnames
+        pointfinder_prediction_output = snakemake.output[3]
         self.pointfinder_prediction_file = f"{self.output_dir_name}/results_per_sample"
 
         dataframe_per_sample = []
@@ -199,7 +201,7 @@ class JunoSummary:
         #concat all dfs and write to file
         final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
         #print(final_df)
-        final_df.to_csv(f'{self.output_dir_name}/summary/summary_pointfinder_prediction.csv', mode='a', index=False)
+        final_df.to_csv(f'{self.output_dir_name}/summary/summary_amr_pointfinder_prediction.csv', mode='a', index=False)
 
 
 def main():

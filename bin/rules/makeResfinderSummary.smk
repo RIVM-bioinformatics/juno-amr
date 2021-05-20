@@ -4,10 +4,15 @@ rule makeResfinderSummary:
         # / results_per_sample/{sample}/ --> as params for summary functions
         # -dir [params]
         #not one arg but multiple, for each sample, extract the sample name
-        resfinder_pheno_output = expand(OUT + "/results_per_sample/{sample}/pheno_table.txt", sample=config["samples_fastq_r1"])
+        resfinder_pheno_output = expand(OUT + "/results_per_sample/{sample}/pheno_table.txt", sample=config["samples_fastq_r1"]),
+        pointfinder_results_output = expand(OUT + "/results_per_sample/{sample}/PointFinder_results.txt", sample=config["samples_fastq_r1"]),
+        pointfinder_prediction_output = expand(OUT + "/results_per_sample/{sample}/PointFinder_prediction.txt", sample=config["samples_fastq_r1"])
+    
     output:
         genes_summary = OUT + "/summary/summary_amr_genes.csv",
         pheno_summary = OUT + "/summary/summary_amr_phenotype.csv",
+        pointfinder_results = OUT + "/summary/summary_amr_pointfinder_results.csv",
+        pointfinder_prediction = OUT + "/summary/summary_amr_pointfinder_prediction.csv"
 
     conda: 
         "../../envs/resfinder.yml"

@@ -36,5 +36,10 @@ rule all:
         # expand("output/{sample}/ResFinder_results.txt", sample=config["samples_fasta"]),
         expand(OUT + "/results_per_sample/{sample}/ResFinder_results_tab.txt", sample=config["samples_fastq_r1"]),
         expand(OUT + "/results_per_sample/{sample}/pheno_table.txt", sample=config["samples_fastq_r1"]),
+        expand(OUT + "/results_per_sample/{sample}/PointFinder_results.txt", sample=config["samples_fastq_r1"]),
+        expand(OUT + "/results_per_sample/{sample}/PointFinder_prediction.txt", sample=config["samples_fastq_r1"]),
         expand(OUT + "/summary/summary_amr_genes.csv"),
-        expand(OUT + "/summary/summary_amr_phenotype.csv")
+        expand(OUT + "/summary/summary_amr_phenotype.csv"),
+        expand(OUT + "/summary/summary_amr_pointfinder_results.csv"),
+        expand(OUT + "/summary/summary_amr_pointfinder_prediction.csv")
+        
