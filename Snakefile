@@ -41,5 +41,6 @@ rule all:
         expand(OUT + "/summary/summary_amr_genes.csv"),
         expand(OUT + "/summary/summary_amr_phenotype.csv"),
         expand(OUT + "/summary/summary_amr_pointfinder_results.csv"),
-        expand(OUT + "/summary/summary_amr_pointfinder_prediction.csv")
+        expand(OUT + "/summary/summary_amr_pointfinder_prediction.csv"),
+        expand(OUT + "/results_per_sample/{sample}", sample=config["samples_fastq_r1"])
         

@@ -138,7 +138,7 @@ class JunoAmrWrapper:
 
         # parse arguments
         self.dict_arguments = vars(self.parser.parse_args())
-        print(self.dict_arguments)
+        #print(self.dict_arguments)
 
     def check_species(self):
         # check if species matches other

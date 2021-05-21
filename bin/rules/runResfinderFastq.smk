@@ -12,7 +12,7 @@ rule runResfinderFastq:
         output_file_3 = OUT + "/results_per_sample/{sample}/PointFinder_results.txt",
         output_file_4 = OUT + "/results_per_sample/{sample}/PointFinder_prediction.txt",
         #Directory per sample
-        output_dir = directory(OUT + "/results_per_sample/{sample}")
+        output_dir = directory(OUT + "/results_per_sample/{sample}"),
     
     conda:
     #TODO put this command in a config for easy access
