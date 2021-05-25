@@ -18,7 +18,8 @@ import shutil
 
 class JunoSummary:
     def __init__(self, arguments=None):
-        """constructor"""
+        """constructor here are all necessary paths collected. If you change a path, change it in this variable so the pipeline stays automated."""
+        #self.resfinder_species_file = resfinder/run_resfinder.py"
 
     def get_user_arguments(self):
         """Function to parse the command line arguments from the user"""
@@ -248,7 +249,7 @@ class JunoSummary:
         final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
         #print(final_df)
         final_df.to_csv(f'{self.output_dir_name}/summary/summary_amr_pointfinder_prediction.csv', mode='a', index=False)
-
+    
 def main():
     m = JunoSummary()
     m.get_user_arguments()

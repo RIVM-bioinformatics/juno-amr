@@ -12,6 +12,7 @@ import sys
 import argparse
 import os
 import re
+import snakemake
 import yaml
 import pathlib
 from pathlib import Path
@@ -19,10 +20,30 @@ import shutil
 from ruamel.yaml import YAML
 import csv
 import pandas as pd
+#from cge.pointfinder import PointFinder
 
 class JunoAmrWrapper:
     def __init__(self, arguments=None):
         """constructor, containing all variables"""
+
+    #def get_species_from_resfinder(self):
+        #point_dbs = PointFinder.get_db_names(db_path_point)
+        #print(point_dbs)
+        #species_file = open(self.resfinder_species_file)
+        # species_data = species_file.readlines()
+
+        # species_dict_lines = []
+        # for line in species_data:
+        #     if "species_transl" in line: 
+        #         species_dict_lines.append(line)
+        
+        #species_transl
+        #Deze dictionary uit de file halen en de values gebruiken als de choices. Values in een list stoppen
+        # File openen
+        # lezen tot file begint met de naam van de variabele?
+        # dan lines selecteren tot de line een } heeft?
+        # voor iedere line splitten op :?
+        # het stukje achter de dubbele punt gebruiken maar de spatie replacen met _ voor de command line
 
     def get_user_arguments(self):
         """Function to parse the command line arguments from the user"""
@@ -303,6 +324,39 @@ class JunoAmrWrapper:
             config['samples_fastq_r2'] = self.input_files_r2
             yaml.dump(config, file)
 
+    def run_snakemake_api(self):
+        open_config_parameters = open("config/database_config.yml")
+        parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
+        cores = parsed_config['db-cores']
+
+        open_config_parameters = open("config/user_parameters.yml")
+        parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
+        output_dir_name = parsed_config['Parameters']['output_dir']
+        current_path = os.path.abspath(os.getcwd())
+        self.output_file_path = f"{output_dir_name}"
+
+        if self.dict_arguments["dryrun"] is False:
+            snakemake.snakemake(
+                "Snakefile",
+                use_conda = True,
+                latency_wait = 5,
+                cores = cores,
+                drmaa =f"-q bio -n {{threads}} -o {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.err -R \"span[hosts=1]\" -R \"rusage[mem={{resources.mem_mb}}]\"",
+                drmaa_log_dir = f"{self.output_file_path}/log/drmaa"
+            )
+
+        elif self.dict_arguments["dryrun"] is True:
+            print("running with dryrun option")
+            snakemake.snakemake(
+                "Snakefile",
+                use_conda = True,
+                dryrun = True,
+                latency_wait = 5,
+                cores = cores,
+                drmaa =f"-q bio -n {{threads}} -o {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.err -R \"span[hosts=1]\" -R \"rusage[mem={{resources.mem_mb}}]\"",
+                drmaa_log_dir = f"{self.output_file_path}/log/drmaa"
+            )
+
     def run_snakemake_command(self):
         #TODO convert os system command to snakemake api
         #TODO if a run crashes or is stopped the directory will be locked, do we need to build in a --unlock command?
@@ -323,99 +377,17 @@ class JunoAmrWrapper:
         else:
             print("running dry run")
             os.system("snakemake --dryrun --snakefile Snakefile --use-conda --latency-wait 5 --cores %d --drmaa \" -q bio -n {threads} -o %s/log/drmaa/{name}_{wildcards}_{jobid}.out -e %s/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir %s/log/drmaa" % (cores, self.output_file_path, self.output_file_path, self.output_file_path))
-    
-    #TODO if confirmed that the pipeline works, this function can be deleted
-    def preproccesing_for_summary_files(self):
-        #Get the output directory from the yaml file
-        open_config_parameters = open("config/user_parameters.yml")
-        parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
-        self.output_dir_name = parsed_config['Parameters']['output_dir']
- 
-        # if there is a summary directory, delete this
-        dirpath = Path(f"{self.output_dir_name}/summary")
-        if dirpath.exists() and dirpath.is_dir():
-            print("found summary directory, removing it")
-            shutil.rmtree(dirpath)
-        
-        # Make new summary directory
-        if not os.path.exists(dirpath):
-            os.makedirs(dirpath)
-    
-        #get samples from the sample directory
-        self.samplenames = os.listdir(f"{self.output_dir_name}/results_per_sample")
-        return self.output_dir_name, self.samplenames, dirpath
-    
-    #TODO once the functions work, replace them into make_summary.py to call as a rule
-    def pointfinder_result_summary(self):
-        #Get path & open 1 file for the colnames
-        self.pointfinder_results_file = f"{self.output_dir_name}/results_per_sample"
-        pathname = f"{self.pointfinder_results_file}/{self.samplenames[0]}/PointFinder_results.txt" 
-        opened_file = open(pathname, "r")
-
-        #Get columns from one of the files
-        lines = opened_file.readlines()
-        column_names = lines[0].split("\t")
-        column_names.insert(0, "Samplename")
-
-        # Make an empty list to add list with data for each sample
-        data_per_sample = []
-
-        #Collect data for each sample and add this to a list with the samplename
-        for samplename in self.samplenames:
-            sample = []
-            pathname = f"{self.pointfinder_results_file}/{samplename}/PointFinder_results.txt" 
-            opened_file = open(pathname, "r")
-            lines = opened_file.readlines()
-            subselection = lines[1:]
-
-            sample.append(samplename)
-            for line in subselection:
-                elements = line.split("\t")
-                for element in elements:
-                    sample.append(element)
-
-            #Add samples to the list
-            data_per_sample.append(sample)    
-
-        #Create DF with pandas and write to csv file
-        data_frame = pd.DataFrame(data_per_sample, columns = column_names)
-        data_frame.to_csv(f'{self.output_dir_name}/summary/summary_amr_pointfinder_results.csv', mode='a', index=False)
-    
-    def pointfinder_prediction_summary(self):
-        #Get path & open 1 file for the colnames
-        self.pointfinder_prediction_file = f"{self.output_dir_name}/results_per_sample"
-
-        dataframe_per_sample = []
-
-        for samplename in self.samplenames:
-            pathname = f"{self.pointfinder_prediction_file}/{samplename}/PointFinder_prediction.txt" 
-            opened_file = open(pathname, "r")
-            lines = opened_file.readlines()
-
-            #get the colnames
-            column_names = lines[0].strip("\n").split("\t")
-            # get the values
-            elements = lines[1].strip("\n").split("\t")
-            #add the samplename
-            elements.insert(0, samplename)
-            #create df for each sample
-            temp_df = pd.DataFrame([elements], columns=column_names)
-            dataframe_per_sample.append(temp_df)
-           
-        #concat all dfs and write to file
-        final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
-        #print(final_df)
-        final_df.to_csv(f'{self.output_dir_name}/summary/summary_pointfinder_prediction.csv', mode='a', index=False)
-
 
 def main():
     j = JunoAmrWrapper()
+    #j.get_species_from_resfinder
     j.get_user_arguments()
     j.check_species()
     j.change_species_name_format()
     j.get_input_files_from_input_directory_fastq()
     j.create_yaml_file_fastq()
-    j.run_snakemake_command()
+    j.run_snakemake_api()
+    #j.run_snakemake_command()
     #j.preproccesing_for_summary_files()
     #j.pointfinder_result_summary()
    # j.pointfinder_prediction_summary()
