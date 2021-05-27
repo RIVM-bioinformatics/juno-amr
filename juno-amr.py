@@ -20,6 +20,7 @@ import shutil
 from ruamel.yaml import YAML
 import csv
 import pandas as pd
+#this import wont work
 #from cge.pointfinder import PointFinder
 
 class JunoAmrWrapper:
@@ -325,16 +326,17 @@ class JunoAmrWrapper:
             yaml.dump(config, file)
 
     def run_snakemake_api(self):
+        #Get cores from config
         open_config_parameters = open("config/database_config.yml")
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
         cores = parsed_config['db-cores']
 
+        #Get output dir from other config
         open_config_parameters = open("config/user_parameters.yml")
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
-        output_dir_name = parsed_config['Parameters']['output_dir']
-        current_path = os.path.abspath(os.getcwd())
-        self.output_file_path = f"{output_dir_name}"
-
+        self.output_file_path = parsed_config['Parameters']['output_dir']
+        
+        #run snakemake API with or without dryrun
         if self.dict_arguments["dryrun"] is False:
             snakemake.snakemake(
                 "Snakefile",
@@ -357,27 +359,6 @@ class JunoAmrWrapper:
                 drmaa_log_dir = f"{self.output_file_path}/log/drmaa"
             )
 
-    def run_snakemake_command(self):
-        #TODO convert os system command to snakemake api
-        #TODO if a run crashes or is stopped the directory will be locked, do we need to build in a --unlock command?
-        open_config_parameters = open("config/database_config.yml")
-        parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
-        cores = parsed_config['db-cores']
-        #os.system("snakemake --snakefile Snakefile --cores 1 --use-conda")
-
-        #get output dir name from other yaml file
-        open_config_parameters = open("config/user_parameters.yml")
-        parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
-        output_dir_name = parsed_config['Parameters']['output_dir']
-        current_path = os.path.abspath(os.getcwd())
-        self.output_file_path = f"{output_dir_name}"
-        
-        if self.dict_arguments["dryrun"] is False:
-            os.system("snakemake --snakefile Snakefile --use-conda  --latency-wait 5 --cores %d --drmaa \" -q bio -n {threads} -o %s/log/drmaa/{name}_{wildcards}_{jobid}.out -e %s/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir %s/log/drmaa" % (cores, self.output_file_path, self.output_file_path, self.output_file_path))
-        else:
-            print("running dry run")
-            os.system("snakemake --dryrun --snakefile Snakefile --use-conda --latency-wait 5 --cores %d --drmaa \" -q bio -n {threads} -o %s/log/drmaa/{name}_{wildcards}_{jobid}.out -e %s/log/drmaa/{name}_{wildcards}_{jobid}.err -R \"span[hosts=1]\" -R \"rusage[mem={resources.mem_mb}]\" \" --drmaa-log-dir %s/log/drmaa" % (cores, self.output_file_path, self.output_file_path, self.output_file_path))
-
 def main():
     j = JunoAmrWrapper()
     #j.get_species_from_resfinder
@@ -387,10 +368,7 @@ def main():
     j.get_input_files_from_input_directory_fastq()
     j.create_yaml_file_fastq()
     j.run_snakemake_api()
-    #j.run_snakemake_command()
-    #j.preproccesing_for_summary_files()
-    #j.pointfinder_result_summary()
-   # j.pointfinder_prediction_summary()
+
 
 if __name__ == '__main__':
     main()

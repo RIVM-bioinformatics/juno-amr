@@ -18,8 +18,9 @@ import shutil
 
 class JunoSummary:
     def __init__(self, arguments=None):
-        """constructor here are all necessary paths collected. If you change a path, change it in this variable so the pipeline stays automated."""
-        #self.resfinder_species_file = resfinder/run_resfinder.py"
+        self.user_parameters_path = "config/user_parameters.yml"
+        self.summary_folder_path = "summary"
+        self.results_folder = "results_per_sample"
 
     def get_user_arguments(self):
         """Function to parse the command line arguments from the user"""
@@ -33,11 +34,13 @@ class JunoSummary:
         self.parser.add_argument(
             "-s",
             "--summary",
-            #TYPE is een path of file
+            #TODO TYPE is een path of file
             type=str,
             required=True,
             metavar="file",
             dest="summary_file_names",
+            # 4 different filenames are requested. The first one is for the gene summary, second phenotype summary, thirth pointfinder result summary and last poinfinder prediction summary
+            # TODO Do we want a default for this?
             nargs = 4,
             help="The name for each of the summary files, in this order: gene_summary, phenotype_summary, Pointfinder_result_summary, pointfinder_prediction_summary"
         )
@@ -60,12 +63,12 @@ class JunoSummary:
     
     def preproccesing_for_summary_files(self):
         #Get the output directory from the yaml file
-        open_config_parameters = open("config/user_parameters.yml")
+        open_config_parameters = open(self.user_parameters_path)
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
         self.output_dir_name = parsed_config['Parameters']['output_dir']
         
         # if there is a summary directory, delete this
-        dirpath = Path(f"{self.output_dir_name}/summary")
+        dirpath = Path(f"{self.output_dir_name}/{self.summary_folder_path}")
         if dirpath.exists() and dirpath.is_dir():
             print("found summary directory, removing it")
             shutil.rmtree(dirpath)
@@ -75,8 +78,13 @@ class JunoSummary:
             os.makedirs(dirpath)
 
         #get samples from the sample directory
-        #TODO hier moet de input komen 
-        self.samplenames = os.listdir(f"{self.output_dir_name}/results_per_sample")
+        self.input_paths = self.dict_arguments.get("input")
+        self.samplenames = []
+        for path in self.input_paths:
+            path.strip("'")
+            elements = path.split("/")
+            samplename = elements[2]
+            self.samplenames.append(samplename)
 
         #Collect summary file names from the parser
         self.summary_file_names = self.dict_arguments.get("summary_file_names")
@@ -84,10 +92,6 @@ class JunoSummary:
         return self.output_dir_name, self.samplenames, dirpath
 
     def create_amr_genes_summary(self):
-        #receive input from snakemake
-        genes_output_file = f"{self.output_dir_name}/results_per_sample"
-        #receive output from snakemake
-
         genes_summary_location = self.summary_file_names[0]
 
         #write genedata to outputfile
@@ -96,9 +100,7 @@ class JunoSummary:
 
             #Set the header for the file
             #Just taking the first sample to get the header for the csv file
-
-            #TODO Hier moet het path van input wegkomen, de eerste uit de lijst
-            pathname = f"{genes_output_file}/{self.samplenames[0]}/ResFinder_results_tab.txt"
+            pathname = f"{self.input_paths[0]}/ResFinder_results_tab.txt"
             opened_file = open(pathname, "r")
 
             #get the column names
@@ -108,11 +110,10 @@ class JunoSummary:
             summary_file.writerow(header)
 
             # for each sample get the data
-            #TODO dit word dan voor ieder sample in de input
-            #TODO de samplename moet dan wel eruit worden gehaald
-            for samplename  in self.samplenames:
-                # Open file and collect all data except the header
-                pathname = f"{genes_output_file}/{samplename}/ResFinder_results_tab.txt"
+            # Set a counter to add the correct sample name for each sample
+            sample_counter = 0
+            for path in self.input_paths:
+                pathname = f"{path}/ResFinder_results_tab.txt"
                 opened_file = open(pathname, "r")
                 data_lines = opened_file.readlines()[1:]
 
@@ -120,21 +121,18 @@ class JunoSummary:
                 for line in data_lines:
                     elements_in_line = line.split("\t")
                     del elements_in_line[4:]
-                    elements_in_line.insert(0, samplename)
+                    elements_in_line.insert(0, self.samplenames[sample_counter])
                     summary_file.writerow(elements_in_line)
+                sample_counter = sample_counter + 1
 
     def add_header_to_phenotype_summary(self):
-        #Create the summary file for the phenotype
-        pheno_summary_location = self.summary_file_names[1]
-        #TODO make this snakemake input(ook in andere functie) --> self.phenotype_output_file = snakemake.input[0]
-        self.phenotype_output_file = f"{self.output_dir_name}/results_per_sample"
-        
-        with open(pheno_summary_location, 'w', newline='') as csvfile:
+        self.pheno_summary_location = self.summary_file_names[1]
+        with open(f"{self.pheno_summary_location}", 'w', newline='') as csvfile:
             summary_file = csv.writer(csvfile)
 
         #Set the informational header for the file
         #Just taking the first sample to get the header for the csv file
-            pathname = f"{self.phenotype_output_file}/{self.samplenames[0]}/pheno_table.txt" 
+            pathname = f"{self.input_paths[0]}/pheno_table.txt" 
             opened_file = open(pathname, "r")
             header = opened_file.readlines()
             header_selection = header[7:16]
@@ -144,27 +142,30 @@ class JunoSummary:
     def create_amr_phenotype_summary(self):           
         #set boolean for colnames true here
         add_colnames = True
-        #pheno_summary_location = snakemake.output[0]
         #Create empty list to store the dataframes for each sample
         self.df_list = []
 
-        for samplename in self.samplenames:
+        sample_counter = 0
+        for path in self.input_paths:
             # empty list for antimicrobial classes
             antimicrobials = []
             # add sample name column
             antimicrobials.insert(0, "Samplename")
+            
             #Make an empty list for the file content
             file_content = []
             #Make empty list for each sample and add the samplename to the sample column
             antimicrobial_match = []
-            antimicrobial_match.insert(0, samplename)
+
+            antimicrobial_match.insert(0, self.samplenames[sample_counter])
             #Open the resfinder results
-            pathname = f"{self.phenotype_output_file}/{samplename}/pheno_table.txt"
+            pathname = f"{path}/pheno_table.txt"
             opened_file = open(pathname, "r")
             #Make subselection of the file starting line 17 where the antimicrobial classes are listed
             #TODO make it based on the header
             sub_selection = opened_file.readlines()[17:]
-            
+            sample_counter = sample_counter + 1
+
             for line in sub_selection:
                 #Search for the end of the antimicrobial classes that are listed in the file
                 if line.startswith("\n"):
@@ -186,15 +187,14 @@ class JunoSummary:
         # Merge all dataframes in one
         final_df = pd.concat(self.df_list, axis=0, ignore_index=True)
         #Write the dataframe to existing file with header
-        final_df.to_csv(f'{self.output_dir_name}/summary/summary_amr_phenotype.csv', mode='a', index=False)
+        final_df.to_csv(f'{self.pheno_summary_location}', mode='a', index=False)
 
     def pointfinder_result_summary(self):
         pointfinder_results_output = self.summary_file_names[2]
+        
         #Get path & open 1 file for the colnames
-        self.pointfinder_results_file = f"{self.output_dir_name}/results_per_sample"
-        pathname = f"{self.pointfinder_results_file}/{self.samplenames[0]}/PointFinder_results.txt" 
+        pathname = f"{self.input_paths[0]}/PointFinder_results.txt" 
         opened_file = open(pathname, "r")
-
         #Get columns from one of the files
         lines = opened_file.readlines()
         column_names = lines[0].split("\t")
@@ -204,34 +204,36 @@ class JunoSummary:
         data_per_sample = []
 
         #Collect data for each sample and add this to a list with the samplename
-        for samplename in self.samplenames:
+        sample_counter = 0
+        for path in self.input_paths:
             sample = []
-            pathname = f"{self.pointfinder_results_file}/{samplename}/PointFinder_results.txt" 
+            pathname = f"{path}/PointFinder_results.txt" 
             opened_file = open(pathname, "r")
             lines = opened_file.readlines()
             subselection = lines[1:]
 
-            sample.append(samplename)
+            sample.append(self.samplenames[sample_counter])
             for line in subselection:
                 elements = line.split("\t")
                 for element in elements:
                     sample.append(element)
-
+            sample_counter = sample_counter + 1
             #Add samples to the list
             data_per_sample.append(sample)    
 
         #Create DF with pandas and write to csv file
         data_frame = pd.DataFrame(data_per_sample, columns = column_names)
-        data_frame.to_csv(f'{self.output_dir_name}/summary/summary_amr_pointfinder_results.csv', mode='a', index=False)
+        data_frame.to_csv(f'{pointfinder_results_output}', mode='a', index=False)
     
     def pointfinder_prediction_summary(self):
         #Get path & open 1 file for the colnames
         pointfinder_prediction_output = self.summary_file_names[3]
-        self.pointfinder_prediction_file = f"{self.output_dir_name}/results_per_sample"
-
+        
         dataframe_per_sample = []
-        for samplename in self.samplenames:
-            pathname = f"{self.pointfinder_prediction_file}/{samplename}/PointFinder_prediction.txt" 
+        sample_counter = 0
+        for path in self.input_paths: 
+            print("sample counters", sample_counter, path)
+            pathname = f"{path}/PointFinder_prediction.txt" 
             opened_file = open(pathname, "r")
             lines = opened_file.readlines()
 
@@ -240,15 +242,15 @@ class JunoSummary:
             # get the values
             elements = lines[1].strip("\n").split("\t")
             #add the samplename
-            elements.insert(0, samplename)
+            elements.insert(0, self.samplenames[sample_counter])
             #create df for each sample
             temp_df = pd.DataFrame([elements], columns=column_names)
             dataframe_per_sample.append(temp_df)
+            sample_counter = sample_counter + 1
            
         #concat all dfs and write to file
         final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
-        #print(final_df)
-        final_df.to_csv(f'{self.output_dir_name}/summary/summary_amr_pointfinder_prediction.csv', mode='a', index=False)
+        final_df.to_csv(f'{pointfinder_prediction_output}', mode='a', index=False)
     
 def main():
     m = JunoSummary()
