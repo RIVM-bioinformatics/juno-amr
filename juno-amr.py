@@ -20,31 +20,20 @@ import shutil
 from ruamel.yaml import YAML
 import csv
 import pandas as pd
-#this import wont work
-#from cge.pointfinder import PointFinder
 
 class JunoAmrWrapper:
     def __init__(self, arguments=None):
         """constructor, containing all variables"""
+        self.path_to_pointfinder_db = "/mnt/db/resfinder/db_pointfinder"
 
-    #def get_species_from_resfinder(self):
-        #point_dbs = PointFinder.get_db_names(db_path_point)
-        #print(point_dbs)
-        #species_file = open(self.resfinder_species_file)
-        # species_data = species_file.readlines()
-
-        # species_dict_lines = []
-        # for line in species_data:
-        #     if "species_transl" in line: 
-        #         species_dict_lines.append(line)
-        
-        #species_transl
-        #Deze dictionary uit de file halen en de values gebruiken als de choices. Values in een list stoppen
-        # File openen
-        # lezen tot file begint met de naam van de variabele?
-        # dan lines selecteren tot de line een } heeft?
-        # voor iedere line splitten op :?
-        # het stukje achter de dubbele punt gebruiken maar de spatie replacen met _ voor de command line
+    def get_species_names_from_pointfinder_db(self):
+        self.species_options = []
+        for entry in os.scandir(self.path_to_pointfinder_db):
+            if not entry.name.startswith('.') and entry.is_dir():
+                self.species_options.append(entry.name)
+        print("here")
+        print(self.species_options)
+        return self.species_options
 
     def get_user_arguments(self):
         """Function to parse the command line arguments from the user"""
@@ -99,8 +88,8 @@ class JunoAmrWrapper:
             metavar="str",
             dest="species",
             #space does not work on commandline, reason why the names are with underscore
-            help = "Full scientific name of the species sample, use underscores not spaces. Example: campylobacter_spp. Options to choose from: other, campylobacter_spp, campylobacter_jejuni, campylobacter_coli, escherichia_coli, salmonella_spp, plasmodium_falciparum, neisseria_gonorrhoeae, mycobacterium_tuberculosis, enterococcus_faecalis, enterococcus_faecium, klebsiella, helicobacter_pylori & staphylococcus_aureus",
-            choices = ["other", "campylobacter_spp", "campylobacter_jejuni", "campylobacter_coli", "escherichia_coli", "salmonella_spp", "plasmodium_falciparum", "neisseria_gonorrhoeae", "mycobacterium_tuberculosis", "enterococcus_faecalis", "enterococcus_faecium", "klebsiella", "helicobacter_pylori", "staphylococcus_aureus"]
+            help = f"Full scientific name of the species sample, use underscores not spaces. Options: {self.species_options}",
+            choices = self.species_options
         )
 
         self.parser.add_argument(
@@ -361,7 +350,7 @@ class JunoAmrWrapper:
 
 def main():
     j = JunoAmrWrapper()
-    #j.get_species_from_resfinder
+    j.get_species_names_from_pointfinder_db()
     j.get_user_arguments()
     j.check_species()
     j.change_species_name_format()

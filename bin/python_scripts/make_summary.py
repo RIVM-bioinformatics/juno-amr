@@ -232,7 +232,6 @@ class JunoSummary:
         dataframe_per_sample = []
         sample_counter = 0
         for path in self.input_paths: 
-            print("sample counters", sample_counter, path)
             pathname = f"{path}/PointFinder_prediction.txt" 
             opened_file = open(pathname, "r")
             lines = opened_file.readlines()
@@ -254,6 +253,7 @@ class JunoSummary:
     
 def main():
     m = JunoSummary()
+    #m.get_species_names_from_pointfinder_db()
     m.get_user_arguments()
     m.preproccesing_for_summary_files()
     m.create_amr_genes_summary()
