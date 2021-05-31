@@ -211,16 +211,25 @@ class JunoSummary:
             opened_file = open(pathname, "r")
             lines = opened_file.readlines()
             subselection = lines[1:]
+            
 
-            sample.append(self.samplenames[sample_counter])
-            for line in subselection:
-                elements = line.split("\t")
-                for element in elements:
-                    sample.append(element)
+            # If pointfinder has no results, write an empty list to the summary
+            print("lengte", len(subselection))
+            if len(subselection) < 1:
+                # append hier lege values voor alle columns 
+                sample.extend((self.samplenames[sample_counter], None, None, None, None, None))
+                print(sample)
+            # if there is result, place it in a list and convert this to a pd dataframe
+            
+            else:
+                sample.append(self.samplenames[sample_counter])
+                for line in subselection:
+                    elements = line.split("\t")
+                    for element in elements:
+                        sample.append(element)
             sample_counter = sample_counter + 1
-            #Add samples to the list
             data_per_sample.append(sample)    
-
+           
         #Create DF with pandas and write to csv file
         data_frame = pd.DataFrame(data_per_sample, columns = column_names)
         data_frame.to_csv(f'{pointfinder_results_output}', mode='a', index=False)
@@ -253,7 +262,6 @@ class JunoSummary:
     
 def main():
     m = JunoSummary()
-    #m.get_species_names_from_pointfinder_db()
     m.get_user_arguments()
     m.preproccesing_for_summary_files()
     m.create_amr_genes_summary()
