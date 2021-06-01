@@ -31,8 +31,6 @@ class JunoAmrWrapper:
         for entry in os.scandir(self.path_to_pointfinder_db):
             if not entry.name.startswith('.') and entry.is_dir():
                 self.species_options.append(entry.name)
-        print("here")
-        print(self.species_options)
         return self.species_options
 
     def get_user_arguments(self):
@@ -73,7 +71,7 @@ class JunoAmrWrapper:
         self.parser.add_argument(
             "-i",
             "--input",
-            type=self.is_directory_with_correct_files_fastq,
+            type=self.is_directory_with_correct_file_format,
             required=True,
             metavar="dir",
             dest="input_dir",
@@ -184,135 +182,89 @@ class JunoAmrWrapper:
             return correct_format
         print(self.dict_arguments)
 
-    def is_directory_with_correct_files_fastq(self, input_dir):
+    def is_directory_with_correct_file_format(self, input_dir):
         #allowed extensions
-        allowed_file_extensions = ['.fastq', '.fq', '.fastq.gz', '.fq.gz']
+        #TODO theres more extensions
+        allowed_file_extensions = ['.fastq', '.fq', '.fastq.gz', '.fq.gz', ".faa", ".fasta", "fasta.gz", "faa.gz"]
         #check if dir exists
         if os.path.isdir(input_dir):
             folder = os.listdir(input_dir)
-
+            
+            # split de ext van folder[0]
+            #for filename in folder, check of de extension gelijk is
             # for each file check if the file has the correct extension
+            # TODO als er gemengde files zijn gaat het nog fout, iedere extension is nu goed, maar het kan maar 1 extension per dir zijn
             for filename in folder:
                 extension = "".join(pathlib.Path(filename).suffixes)
                 if extension not in allowed_file_extensions:
                     self.parser.error("Files in the input directory do not have a correct file format. Please give a directory with files in the format: {}".format(allowed_file_extensions))   
-                return input_dir
-            else:
-                print(f'\"{input_dir}\" is not a directory. Give an existing directory.')
-                sys.exit(1)
-
-    #TODO this function is not being used yet
-    def is_directory_with_correct_files_fasta(self, input_dir):
-        """Function to check if the given directory is a directory. Also checks if the files in the directory have the correct file format"""
-        #allowed extensions
-        allowed_file_extensions = [".faa", ".fasta"]
-        #check if directory exists
-        if os.path.isdir(input_dir):
-            #Check the filename extension
-            #simplify folder?
-            folder = os.listdir(input_dir)
-            for filename in folder:
-                extension ="".join(pathlib.Path(filename).suffixes)
-                if extension not in allowed_file_extensions:
-                    self.parser.error("Files in the input directory do not have a correct file format. Please give a directory with files in the format: {}".format(allowed_file_extensions))
-            return input_dir
         else:
             print(f'\"{input_dir}\" is not a directory. Give an existing directory.')
-            sys.exit(1)
+            sys.exit(1)      
+        return input_dir
 
-    #TODO this function is not being used yet
-    def get_input_files_from_input_directory_fasta(self):
-        self.input_files = {}
-        # get directory location
-        for key in self.dict_arguments:
-            if key == "input_dir":
-                directory_name = self.dict_arguments[key]
-                input_directory = os.listdir(self.dict_arguments[key])
-                # put file name in self.input_files
-                for filename in input_directory:
-                    samplename = os.path.splitext(filename)[0]
-                    # get the folder in front of the file name
-                    self.input_files.update({samplename: directory_name + "/" + filename})
-
-    def get_input_files_from_input_directory_fastq(self):
+    def get_input_files_from_input_directory(self):
         self.input_files_r1 = {}
         self.input_files_r2 = {}
+        self.input_files_fasta = {}
+        fasta_ext = [".faa", ".fasta"]
+        fastq_ext = ['.fastq', '.fq', '.fastq.gz', '.fq.gz']
+        self.isFastq = False
         fq_pattern = re.compile("(.*?)(?:_S\d+_|_S\d+.|_|\.)(?:p)?R?(1|2)(?:_.*\.|\..*\.|\.)f(ast)?q(\.gz)?")
+        #TODO i dont know which pattern to use yet
+        fa_pattern = re.compile("(.*?)(?:_S\d+_|_S\d+.|_|\.)?(?:_.*\.|\..*\.|\.)f(ast)?(a|q)(\.gz)?")
         # Get the filenames that are used as input for resfinder, only filenames with pR1 and pR2 will be used.
-        #TODO change this if we want others to use the pipeline as well or tell them to change the input names of their files
         for key in self.dict_arguments:
             if key == "input_dir":
                 directory_name = self.dict_arguments[key]
                 input_directory = os.listdir(self.dict_arguments[key])
+                
                 for filename in input_directory:
-                    # TODO if the input dir ends with a "/" then the config will get double "//" in the name
-                    match = fq_pattern.fullmatch(filename)
-                    if match:
-                        samplename = re.split("_pR(1|2)", filename)
-                        if "1" in samplename[1]:
-                            self.input_files_r1.update({samplename[0]: directory_name + "/" + filename})
-                        elif "2" in samplename[1]:
-                            self.input_files_r2.update({samplename[0]: directory_name + "/" + filename})
+                    ext = "".join(pathlib.Path(filename).suffixes)
+                    match_fq = fq_pattern.fullmatch(filename)
+                    match_fa = fa_pattern.fullmatch(filename)
+                    
+                    #if the extension is fasta
+                    if ext in fasta_ext:
+                        # set the boolean
+                        self.isFastq = False
+                        if match_fa:
+                            for filename in input_directory:
+                                samplename = os.path.splitext(filename)[0]
+                                self.input_files_fasta.update({samplename: directory_name + filename})
+                      
+                    #if the extension is fastq
+                    elif ext in fastq_ext:
+                        self.isFastq = True
+                        # TODO if the input dir ends with a "/" then the config will get double "//" in the name
+                        if match_fq:
+                            samplename = re.split("_pR(1|2)", filename)
+                            if "1" in samplename[1]:
+                                self.input_files_r1.update({samplename[0]: directory_name + "/" + filename})
+                            elif "2" in samplename[1]:
+                                self.input_files_r2.update({samplename[0]: directory_name + "/" + filename})
 
-    #TODO this function is not being used yet
-    def check_if_db_exists(self, db_path):
-        #TODO only working for pointfinder, make working for resfinder later
-        if os.path.isdir(db_path):
-            print("found db directory, checking for files")
-            if len(os.listdir("../../../db/resfinder/db_pointfinder")) == 0:
-                print("No files found in directory, downloading latest pointfinder database")
-                # TODO make a variable in a different file for this link
-                os.system("git clone https://git@bitbucket.org/genomicepidemiology/pointfinder_db.git /mnt/db/resfinder/db_pointfinder")
-
-            else:
-                print("Database pointfinder found, proceed pipeline")
-        else:
-            print("did not find a database, clowning new db now")
-            # todo make a variable in a different file for this link
-            #TODO to make the database working need to run install.py to index the databases with KMA how to fix this?
-            os.system("git clone https://git@bitbucket.org/genomicepidemiology/pointfinder_db.git /mnt/db/resfinder/db_pointfinder")
-
-    #TODO this function is not being used yet
-    def create_yaml_file_fasta(self):
-        # Make config dir if this does not exist:
-        Path("config").mkdir(parents=True, exist_ok=True)
-        # # Make a yaml file, add arguments to the yaml file
-        print("Producing yaml file for snakemake")
-        
-        # yaml lay-out
-        # TODO make this into a file and load the file instead of inp
-        inp = """
-        #single fasta
-        samples_fasta:
-        \n       
-        # parameters for pipeline given by user
-        Parameters:
-        """
-        
-        #change yaml layout with received arguments & input
-        with open("config/config.yml", "w") as file:
-            yaml = YAML()
-            config = yaml.load(inp)
-            # add parameters
-            config['Parameters'] = self.dict_arguments
-            # add filenames
-            config['samples_fasta'] = self.input_files
-            yaml.dump(config, file)
-
-    def create_yaml_file_fastq(self):
-        print("Producing yaml file for snakemake")
-        yaml_setup = open("config/setup_config.yml")
-        
+    def create_yaml_file(self):
+        yaml_setup_fq = open("config/setup_config_fq.yml")
+        yaml_setup_fa = open("config/setup_config_fa.yml")
         #change yaml layout with received arguments & input
         with open("config/user_parameters.yml", "w") as file:
             yaml = YAML()
-            config = yaml.load(yaml_setup)
-            # add parameters
-            config['Parameters'] = self.dict_arguments
-            # add filenames
-            config['samples_fastq_r1'] = self.input_files_r1
-            config['samples_fastq_r2'] = self.input_files_r2
-            yaml.dump(config, file)
+            #if fastq
+            if self.isFastq is True:
+                config = yaml.load(yaml_setup_fq)
+                # add parameters
+                config['Parameters'] = self.dict_arguments
+                # add filenames
+                config['samples_fastq_r1'] = self.input_files_r1
+                config['samples_fastq_r2'] = self.input_files_r2
+                yaml.dump(config, file)
+            #if fasta
+            elif self.isFastq is False:
+                config = yaml.load(yaml_setup_fa)
+                config['Parameters'] = self.dict_arguments
+                config['samples_fasta'] = self.input_files_fasta
+                yaml.dump(config, file)
 
     def run_snakemake_api(self):
         #Get cores from config
@@ -348,14 +300,44 @@ class JunoAmrWrapper:
                 drmaa_log_dir = f"{self.output_file_path}/log/drmaa"
             )
 
+    #TODO this function is not being used yet
+    def check_if_db_exists(self, db_path):
+        #TODO only working for pointfinder, make working for resfinder later
+        if os.path.isdir(db_path):
+            print("found db directory, checking for files")
+            if len(os.listdir("../../../db/resfinder/db_pointfinder")) == 0:
+                print("No files found in directory, downloading latest pointfinder database")
+                # TODO make a variable in a different file for this link
+                os.system("git clone https://git@bitbucket.org/genomicepidemiology/pointfinder_db.git /mnt/db/resfinder/db_pointfinder")
+
+            else:
+                print("Database pointfinder found, proceed pipeline")
+        else:
+            print("did not find a database, clowning new db now")
+            # todo make a variable in a different file for this link
+            #TODO to make the database working need to run install.py to index the databases with KMA how to fix this?
+            os.system("git clone https://git@bitbucket.org/genomicepidemiology/pointfinder_db.git /mnt/db/resfinder/db_pointfinder")
+
+
+        
+        #change yaml layout with received arguments & input
+        with open("config/config.yml", "w") as file:
+            yaml = YAML()
+            config = yaml.load(inp)
+            # add parameters
+            config['Parameters'] = self.dict_arguments
+            # add filenames
+            config['samples_fasta'] = self.input_files
+            yaml.dump(config, file)
+
 def main():
     j = JunoAmrWrapper()
     j.get_species_names_from_pointfinder_db()
     j.get_user_arguments()
     j.check_species()
     j.change_species_name_format()
-    j.get_input_files_from_input_directory_fastq()
-    j.create_yaml_file_fastq()
+    j.get_input_files_from_input_directory()
+    j.create_yaml_file()
     j.run_snakemake_api()
 
 
