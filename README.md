@@ -47,6 +47,9 @@ conda activate juno-amr_master
 ```
 
 6. [need to test again if these steps are still correct]
+```
+test
+```
 
 ## Usage
 The base command to run this program. Its important that there is no slash after the input folder
@@ -63,20 +66,20 @@ For detailed information please visit the [documentation](https://www.google.com
 
 ## Parameters
 ### Command for help
-* ```-h, --help```     Shows the help of the pipeline
+* ```-h, --help``` Shows the help of the pipeline
 
 #### Required parameters
-* **-i, --input**     Path to the directory of your input. Can be fasta files or paired fastq files. It is important to link to the directory and not the files. Don't put a slash behind the last directory.
-* **-s --species**    Full scientific name of the species sample. Use underscores between the parts of a name and not spaces. A list of available species can be shown if you type ```python3 juno-amr.py -s -h```. It is possible to select 'other' as a species, if 'other' is selected the pipeline will only run resfinder
+* ```-i, --input``` Path to the directory of your input. Can be fasta files or paired fastq files. It is important to link to the directory and not the files. Don't put a slash behind the last directory.
+* ```-s --species**``` Full scientific name of the species sample. Use underscores between the parts of a name and not spaces. A list of available species can be shown if you type ```python3 juno-amr.py -s -h```. It is possible to select 'other' as a species, if 'other' is selected the pipeline will only run resfinder
 
 ### Optional parameters
-* **-l --min_cov**    Minimum coverage of resfinder
-* **-t --threshold**  Threshold for identity of resfinder
-* **-o, --output**    Path to the directory that is used for the output. If none is given the default will be an output directory in the Juno-amr folder.
-* **-n --dryrun**     If you want to run a dry run use one of these parameters
-* **-db_point**       Path for alternative database for pointfinder
-* **-db_res**         Path for alternative database for resfinder
-* **--point**         Type one to run pointfinder, type 0 to not run pointfinder. By default pointfinder will always run if there is a species selected.
+* ```-l --min_cov```    Minimum coverage of resfinder
+* ```-t --threshold```  Threshold for identity of resfinder
+* ```-o, --output```    Path to the directory that is used for the output. If none is given the default will be an output directory in the Juno-amr folder.
+* ```-n --dryrun```     If you want to run a dry run use one of these parameters
+* ```-db_point```       Path for alternative database for pointfinder
+* ```-db_res```         Path for alternative database for resfinder
+* ```--point```         Type one to run pointfinder, type 0 to not run pointfinder. By default pointfinder will always run if there is a species selected.
 
 ## Content of this repository
 * **bin:**
