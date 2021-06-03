@@ -1,6 +1,10 @@
-# Juno-amr
-## Pipeline for antimicrobial restistance
+<p align="center">
+    # Juno-amr
+    ## Pipeline for antimicrobial restistance
+    <img src="bin/images/logo.svg" alt="pipeline logo">
+</p>
 
+## Pipeline information
 * **Athor(s):**             Roxanne Wolthuis
 * **Organization:**         Rijksinstituut voor Volksgezondheid en Milieu (RIVM)
 * **Department:**           Infektieziekteonderzoek, Diagnostiek en Laboratorium Surveillance (IDS), Bacteriologie (BPD)
@@ -15,32 +19,32 @@ This pipeline automates the tools Resfinder and Pointfinder.
 https://www.python.org/downloads/
 
 ## Installation
-* 1. Clone the repository.
+1. Clone the repository.
 ```
 git clone https://github.com/RIVM-bioinformatics/Juno-amr.git
 ```
 
-* 2. Go to Juno directory.
+2. Go to Juno directory.
 ```
 cd Juno-amr
 ```
 
-* 3. Activate mamba.
+3. Activate mamba.
 ```
 conda activate mamba
 ```
 
-* 4. Create mamba environment.
+4. Create mamba environment.
 ```
 mamba env create -f envs/juno_amr_master.yml
 ```
 
-* 5. Activate the environment,
+5. Activate the environment,
 ```
 conda activate juno-amr_master
 ```
 
-* 6. [need to test again if these steps are still correct]
+6. [need to test again if these steps are still correct]
 
 ## Usage
 The base command to run this program. Its important that there is no slash after the input folder
