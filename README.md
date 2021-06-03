@@ -1,8 +1,10 @@
-<p align="center">
-    # Juno-amr
-    ## Pipeline for antimicrobial restistance
+<div align="center">
+    <h1> Juno-amr</h1>
+    <br />
+    <h2> Pipeline for antimicrobial restistance</h2>
+    <br />
     <img src="bin/images/logo.svg" alt="pipeline logo">
-</p>
+</div>
 
 ## Pipeline information
 * **Athor(s):**             Roxanne Wolthuis
