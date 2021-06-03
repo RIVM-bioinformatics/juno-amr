@@ -3,11 +3,11 @@
     <br />
     <h2> Pipeline for antimicrobial restistance</h2>
     <br />
-    <img src="bin/images/logo.svg" alt="pipeline logo">
+    <img src="https://via.placeholder.com/150" alt="pipeline logo">
 </div>
 
 ## Pipeline information
-* **Athor(s):**             Roxanne Wolthuis
+* **Author(s):**             Roxanne Wolthuis
 * **Organization:**         Rijksinstituut voor Volksgezondheid en Milieu (RIVM)
 * **Department:**           Infektieziekteonderzoek, Diagnostiek en Laboratorium Surveillance (IDS), Bacteriologie (BPD)
 * **Start date:**           30 - 03 - 2021
@@ -59,10 +59,11 @@ An example on how to run the pipeline.
 python3 juno-amr.py -s salmonella -i dir/to/fastq_files -o output -l 0.8 -t 0.6
 ```
 
+For detailed information please visit the [documentation](https://www.google.com "Pipeline documentation").
 
 ## Parameters
 ### Command for help
--h, --help      Shows the help of the pipeline
+* ```-h, --help```     Shows the help of the pipeline
 
 #### Required parameters
 * **-i, --input**     Path to the directory of your input. Can be fasta files or paired fastq files. It is important to link to the directory and not the files. Don't put a slash behind the last directory.
@@ -109,4 +110,10 @@ python3 juno-amr.py -s salmonella -i dir/to/fastq_files -o output -l 0.8 -t 0.6
 * Parameters need to be filled in as asked, error handling is not optimalized yet.
 
 ## Future ideas for this pipeline
-* Make it avaiable and user friendly for users outside RIVM.
+* Make this pipeline available and user friendly for users outside RIVM.
+
+## License
+
+## Contact
+
+## Achknowledgements
