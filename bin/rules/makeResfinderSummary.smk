@@ -1,12 +1,5 @@
 rule makeResfinderSummary:    
     input:
-        resfinder_gene_output = expand(OUT + "/results_per_sample/{sample}/ResFinder_results_tab.txt", sample=config["samples_fastq_r1"]),
-        # / results_per_sample/{sample}/ --> as params for summary functions
-        # -dir [params]
-        #not one arg but multiple, for each sample, extract the sample name
-        resfinder_pheno_output = expand(OUT + "/results_per_sample/{sample}/pheno_table.txt", sample=config["samples_fastq_r1"]),
-        pointfinder_results_output = expand(OUT + "/results_per_sample/{sample}/PointFinder_results.txt", sample=config["samples_fastq_r1"]),
-        pointfinder_prediction_output = expand(OUT + "/results_per_sample/{sample}/PointFinder_prediction.txt", sample=config["samples_fastq_r1"]),
         resfinder_output_dir = expand(OUT + "/results_per_sample/{sample}", sample=config["samples_fastq_r1"])
     
     output:

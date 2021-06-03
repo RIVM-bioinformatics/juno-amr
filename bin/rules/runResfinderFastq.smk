@@ -6,13 +6,8 @@ rule runResfinderFastq:
         lambda wildcards: config["samples_fastq_r2"][wildcards.sample]
 
     output:
-        #Output file requested by rule all
-        output_file = OUT + "/results_per_sample/{sample}/ResFinder_results_tab.txt",
-        output_file_2 = OUT + "/results_per_sample/{sample}/pheno_table.txt",
-        output_file_3 = OUT + "/results_per_sample/{sample}/PointFinder_results.txt",
-        output_file_4 = OUT + "/results_per_sample/{sample}/PointFinder_prediction.txt",
         #Directory per sample
-        output_dir = directory(OUT + "/results_per_sample/{sample}"),
+        output_dir = directory(OUT + "/results_per_sample/{sample}")
     
     conda:
     #TODO put this command in a config for easy access

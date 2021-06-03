@@ -83,7 +83,9 @@ class JunoSummary:
         for path in self.input_paths:
             path.strip("'")
             elements = path.split("/")
-            samplename = elements[2]
+            samplename = elements[-1]
+            print("hieer")
+            print(samplename)
             self.samplenames.append(samplename)
 
         #Collect summary file names from the parser
@@ -214,11 +216,9 @@ class JunoSummary:
             
 
             # If pointfinder has no results, write an empty list to the summary
-            print("lengte", len(subselection))
             if len(subselection) < 1:
                 # append hier lege values voor alle columns 
                 sample.extend((self.samplenames[sample_counter], None, None, None, None, None))
-                print(sample)
             # if there is result, place it in a list and convert this to a pd dataframe
             
             else:

@@ -238,7 +238,8 @@ class JunoAmrWrapper:
                         self.isFastq = True
                         # TODO if the input dir ends with a "/" then the config will get double "//" in the name
                         if match_fq:
-                            samplename = re.split("_pR(1|2)", filename)
+                            #TODO _p verwijderd uit de matching
+                            samplename = re.split("R(1|2)", filename)
                             if "1" in samplename[1]:
                                 self.input_files_r1.update({samplename[0]: directory_name + "/" + filename})
                             elif "2" in samplename[1]:
