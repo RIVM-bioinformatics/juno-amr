@@ -54,7 +54,7 @@ test
 ## Usage
 The base command to run this program. Its important that there is no slash after the input folder
 ```
-python3 juno-amr.py -s [species] -i [dir/to/fasta_or_fastq_files
+python3 juno-amr.py -s [species] -i [dir/to/fasta_or_fastq_files]
 ```
 
 An example on how to run the pipeline.

@@ -251,18 +251,28 @@ class JunoAmrWrapper:
         #change yaml layout with received arguments & input
         with open("config/user_parameters.yml", "w") as file:
             yaml = YAML()
+            
             #if fastq
             if self.isFastq is True:
                 config = yaml.load(yaml_setup_fq)
-                # add parameters
+                # Add additional information to the dictionary
+                self.dict_arguments['input_description'] = '-ifq'
+                self.dict_arguments['input_isfastq_boolean'] = self.isFastq
+                
+                # add filenames and parameters
                 config['Parameters'] = self.dict_arguments
-                # add filenames
                 config['samples_fastq_r1'] = self.input_files_r1
                 config['samples_fastq_r2'] = self.input_files_r2
+                
+                #add to yaml
                 yaml.dump(config, file)
+
             #if fasta
             elif self.isFastq is False:
                 config = yaml.load(yaml_setup_fa)
+                self.dict_arguments['input_description'] = '-ifa'
+                self.dict_arguments['input_isfastq_boolean'] = self.isFastq
+                
                 config['Parameters'] = self.dict_arguments
                 config['samples_fasta'] = self.input_files_fasta
                 yaml.dump(config, file)
@@ -283,7 +293,7 @@ class JunoAmrWrapper:
             snakemake.snakemake(
                 "Snakefile",
                 use_conda = True,
-                latency_wait = 5,
+                latency_wait = 30,
                 cores = cores,
                 drmaa =f"-q bio -n {{threads}} -o {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.err -R \"span[hosts=1]\" -R \"rusage[mem={{resources.mem_mb}}]\"",
                 drmaa_log_dir = f"{self.output_file_path}/log/drmaa"
@@ -295,7 +305,7 @@ class JunoAmrWrapper:
                 "Snakefile",
                 use_conda = True,
                 dryrun = True,
-                latency_wait = 5,
+                latency_wait = 30,
                 cores = cores,
                 drmaa =f"-q bio -n {{threads}} -o {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.err -R \"span[hosts=1]\" -R \"rusage[mem={{resources.mem_mb}}]\"",
                 drmaa_log_dir = f"{self.output_file_path}/log/drmaa"

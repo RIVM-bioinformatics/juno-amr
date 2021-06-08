@@ -1,7 +1,8 @@
 rule makeResfinderSummary:    
     input:
-        resfinder_output_dir = expand(OUT + "/results_per_sample/{sample}", sample=config["samples_fastq_r1"])
-    
+    #TODO make fasta or fastq
+        resfinder_output_dir = expand(OUT + "/results_per_sample/{sample}", sample=SAMPLE_NAME)
+
     output:
         genes_summary = OUT + "/summary/summary_amr_genes.csv",
         pheno_summary = OUT + "/summary/summary_amr_phenotype.csv",
