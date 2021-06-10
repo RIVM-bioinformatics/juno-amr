@@ -35,119 +35,112 @@ class JunoAmrWrapper:
 
     def get_user_arguments(self):
         """Function to parse the command line arguments from the user"""
-        # Create argparser
-        #TODO do we want custom error messages?
-        self.parser = argparse.ArgumentParser(
-            usage= "python3 juno-amr.py -s [species]  -i [directory with fastq files]",
-            description = "Juno-amr pipeline. Automated pipeline to use resfinder and pointfinder on given input data.",
-            add_help = True
-        )
-        #TODO option 1: subparsers
-        #TODO option 2: search for another argparse
-        #TODO sys.argv if else eromheen bouwen
-        # self.subparsers = self.parser.add_subparsers(help='sub-command help')
-        # species_parser = self.subparsers.add_parser('species', help='blep')
-        
-        # species_parser.add_argument(
-        #     '-s',
-        #     '--species',
-        #     help = "blaaaa",
-        #     type=str)
+        # Select 2 arguments in the case someone asks for help on the species
+        user_help_input = str(sys.argv[1] + sys.argv[2])
+        if user_help_input == "-s-h":
+            #Give the help and exit the program
+            print(f"Choose the full scientific name of the species sample, use underscores not spaces. Options: {self.species_options}. If you don't know the species choose 'other' as species option")
+            sys.exit()
+        else:
+            # Create argparser
+            self.parser = argparse.ArgumentParser(
+                usage= "python3 juno-amr.py -s [species]  -i [directory with fastq files]",
+                description = "Juno-amr pipeline. Automated pipeline to use resfinder and pointfinder on given input data.",
+                add_help = True
+            )
+          
+            # Add arguments
+            self.parser.add_argument(
+                "-o",
+                "--output",
+                type=str,
+                required=False,
+                metavar="dir",
+                default="output",
+                dest="output_dir",
+                help="Path to the directory you want to use as an output directory, if non is given the default will be an output directory in the Juno-amr folder"
+            )
 
-        #TODO check if the given path is a path/directory
-        # Add arguments
-        self.parser.add_argument(
-            "-o",
-            "--output",
-            type=str,
-            required=False,
-            metavar="dir",
-            default="output",
-            dest="output_dir",
-            help="Path to the directory you want to use as an output directory, if non is given the default will be an output directory in the Juno-amr folder"
-        )
+            #TODO decide on fasta or fastq
+            self.parser.add_argument(
+                "-i",
+                "--input",
+                type=self.is_directory_with_correct_file_format,
+                required=True,
+                metavar="dir",
+                dest="input_dir",
+                help="Path to the directory of your input. Example: path/to/input/fastq"
+            )
 
-        #TODO decide on fasta or fastq
-        self.parser.add_argument(
-            "-i",
-            "--input",
-            type=self.is_directory_with_correct_file_format,
-            required=True,
-            metavar="dir",
-            dest="input_dir",
-            help="Path to the directory of your input. Example: path/to/input/fastq"
-        )
+            self.parser.add_argument(
+                "-s",
+                "--species",
+                type = str.lower,
+                required = True,
+                metavar="str",
+                dest="species",
+                #space does not work on commandline, reason why the names are with underscore
+                help = f"Full scientific name of the species sample, use underscores not spaces. Options: {self.species_options}",
+                choices = self.species_options
+            )
 
-        self.parser.add_argument(
-            "-s",
-            "--species",
-            type = str.lower,
-            required = True,
-            metavar="str",
-            dest="species",
-            #space does not work on commandline, reason why the names are with underscore
-            help = f"Full scientific name of the species sample, use underscores not spaces. Options: {self.species_options}",
-            choices = self.species_options
-        )
+            self.parser.add_argument(
+                "-l",
+                "--min_cov",
+                type=float,
+                metavar="float",
+                default=0.6,
+                dest="coverage",
+                help="Minimum coverage of ResFinder"
+            )
 
-        self.parser.add_argument(
-            "-l",
-            "--min_cov",
-            type=float,
-            metavar="float",
-            default=0.6,
-            dest="coverage",
-            help="Minimum coverage of ResFinder"
-        )
+            self.parser.add_argument(
+                "-t",
+                "--threshold",
+                type=float,
+                metavar="float",
+                default=0.8,
+                dest="threshold",
+                help="Threshold for identity of resfinder"
+            )
 
-        self.parser.add_argument(
-            "-t",
-            "--threshold",
-            type=float,
-            metavar="float",
-            default=0.8,
-            dest="threshold",
-            help="Threshold for identity of resfinder"
-        )
+            self.parser.add_argument(
+                "-db_point",
+                type=str,
+                metavar="dir",
+                default="/mnt/db/resfinder/db_pointfinder",
+                dest="pointfinder_db",
+                help="Alternative database for pointfinder"
+            )
 
-        self.parser.add_argument(
-            "-db_point",
-            type=str,
-            metavar="dir",
-            default="/mnt/db/resfinder/db_pointfinder",
-            dest="pointfinder_db",
-            help="Alternative database for pointfinder"
-        )
+            self.parser.add_argument(
+                "-db_res",
+                type=str,
+                metavar="dir",
+                default="/mnt/db/resfinder/db_resfinder",
+                dest="resfinder_db",
+                help="Alternative database for resfinder"
+            )
 
-        self.parser.add_argument(
-            "-db_res",
-            type=str,
-            metavar="dir",
-            default="/mnt/db/resfinder/db_resfinder",
-            dest="resfinder_db",
-            help="Alternative database for resfinder"
-        )
+            self.parser.add_argument(
+                "--point",
+                type=str,
+                default="1",
+                dest="run_pointfinder",
+                metavar="",
+                help="Type one to run pointfinder, type 0 to not run pointfinder, default is 1."
+            )
 
-        self.parser.add_argument(
-            "--point",
-            type=str,
-            default="1",
-            dest="run_pointfinder",
-            metavar="",
-            help="Type one to run pointfinder, type 0 to not run pointfinder, default is 1."
-        )
+            self.parser.add_argument(
+                "-n",
+                "--dryrun",
+                action='store_true',
+                dest="dryrun",
+                help="If you want to run a dry run type --dryrun in your command"
+            )
 
-        self.parser.add_argument(
-            "-n",
-            "--dryrun",
-            action='store_true',
-            dest="dryrun",
-            help="If you want to run a dry run type --dryrun in your command"
-        )
-
-        # parse arguments
-        self.dict_arguments = vars(self.parser.parse_args())
-        #print(self.dict_arguments)
+            # parse arguments
+            self.dict_arguments = vars(self.parser.parse_args())
 
     def check_species(self):
         # check if species matches other
