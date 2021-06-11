@@ -7,14 +7,14 @@
 </div>
 
 ## Pipeline information
-* **Author(s):**             Roxanne Wolthuis
+* **Author(s):**            Roxanne Wolthuis, Alejandra Hernandez Segura, Maaike van den Beld
 * **Organization:**         Rijksinstituut voor Volksgezondheid en Milieu (RIVM)
 * **Department:**           Infektieziekteonderzoek, Diagnostiek en Laboratorium Surveillance (IDS), Bacteriologie (BPD)
 * **Start date:**           30 - 03 - 2021
-* **Commissioned by:**      -
+* **Commissioned by:**      Maaike van den Beld
 
 ## About this project
-This pipeline automates the tools Resfinder and Pointfinder.
+The Juno Antimicrobial Resistance(Juno AMR) pipeline is a pipeline that is used to automate [ResFinder](https://bitbucket.org/genomicepidemiology/resfinder/src/master/) and [PointFinder](https://bitbucket.org/genomicepidemiology/pointfinder/src/master/).The tools that are being used are created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/). These tools identify acquired genes and find chromosal mutations mediating antimicrobial resistance in DNA secuences of bacteria. This can be partial or total sequences. The output of both tools can be used for analysis and is also combined in four summary files for a quick overview of the most important results.  
 
 ## Prerequisities
 * **Python3.5** or newer. Python is the scripting language used to create the program.
@@ -52,7 +52,7 @@ test
 ```
 
 ## Usage
-The base command to run this program. Its important that there is no slash after the input folder
+The base command to run this program. 
 ```
 python3 juno-amr.py -s [species] -i [dir/to/fasta_or_fastq_files]
 ```
@@ -69,48 +69,26 @@ For detailed information please visit the [documentation](https://www.google.com
 * ```-h, --help``` Shows the help of the pipeline
 
 #### Required parameters
-* ```-i, --input``` Path to the directory of your input. Can be fasta files or paired fastq files. It is important to link to the directory and not the files. Don't put a slash behind the last directory.
-* ```-s --species**``` Full scientific name of the species sample. Use underscores between the parts of a name and not spaces. A list of available species can be shown if you type ```python3 juno-amr.py -s -h```. It is possible to select 'other' as a species, if 'other' is selected the pipeline will only run resfinder
+* ```-i, --input``` Path to the directory of your input. Can be fasta files or paired fastq files. It is important to link to the directory and not the files.
+* ```-s --species**``` Full scientific name of the species sample. Use underscores between the parts of a name and not spaces. A list of available species can be shown if you type ```python3 juno-amr.py -s -h```. It is possible to select 'other' as a species, if 'other' is selected the pipeline will only run ResFinder
 
 ### Optional parameters
-* ```-l --min_cov```    Minimum coverage of resfinder
-* ```-t --threshold```  Threshold for identity of resfinder
+* ```-l --min_cov```    Minimum coverage of ResFinder
+* ```-t --threshold```  Threshold for identity of ResFinder
 * ```-o, --output```    Path to the directory that is used for the output. If none is given the default will be an output directory in the Juno-amr folder.
 * ```-n --dryrun```     If you want to run a dry run use one of these parameters
-* ```-db_point```       Path for alternative database for pointfinder
-* ```-db_res```         Path for alternative database for resfinder
-* ```--point```         Type one to run pointfinder, type 0 to not run pointfinder. By default pointfinder will always run if there is a species selected.
-
-## Content of this repository
-* **bin:**
-    This folder contains all the scripts separated in Python scripts and rules for snakemake.
-    * **python_scripts:**
-        * **make_summary.py:** Creates the four produced summary files
-    * **rules:**
-        * **makeResfinderSummary.smk:** Calls on snakemake to produce summary files by running make_summary.py
-        * **runResfinderFasta.smk:** Calls on snakemake to produce resfinder and pointfinder output with juno-amr.py based on fasta input
-        * **runResfinderFastq.smk:** Calls on snakemake to produce resfinder and pointfinder output with juno-amr.py based on fastq input
-* **config:**
-    * **database_config.yml:** Consists of all settings for to run on the cluster?
-    * **setup_config_fa.yml:** Template that is used to generate a config with parameters from the argumentparse for fasta input
-    * **setup_config.fq.yml:** Template that is used to generate a config with parameters from the argumentparse for fastq input
-* **envs:**
-    * **juno_amr_master.yml:** To setup the juno environment
-    * **resfinder.yml:** To setup resfinder and pointfinder
-* **.gitignore:** File with files and directories to be ignored by git
-* **License:** AGPL3/Free software license
-* **README.md:** To create the readme
-* **Snakefile:** The main snakefile with a rule all that calls the other rules based on the input type
-* **juno-amr.py:** The wrapper for this pipeline
+* ```-db_point```       Path for alternative database for PointFinder
+* ```-db_res```         Path for alternative database for ResFinder
+* ```--point```         Type one to run PointFinder, type 0 to not run PointFinder. By default PointFinder will always run if there is a species selected.
 
 ## Explanation of the output
-* **log:** Log with output and error file from the cluster for each snakemake rule/step that is performed
-* **results_per_sample:** Output produced by resfinder and pointfinder for each sample
+* **log:** Log with output and error file from the cluster for each Snakemake rule/step that is performed
+* **results_per_sample:** Output produced by ResFinder and PointFinder for each sample
 * **summary:** Directory with 4 summary files created from each sample within the results_per_sample folder
 
 ## Issues
-* For now this only works on the cluster.
-* Parameters need to be filled in as asked, error handling is not optimalized yet.
+* For now this only works on the RIVM cluster.
+* Parameters need to be filled in as asked, error handling is not optimized yet.
 
 ## Future ideas for this pipeline
 * Make this pipeline available and user friendly for users outside RIVM.
@@ -119,4 +97,4 @@ For detailed information please visit the [documentation](https://www.google.com
 
 ## Contact
 
-## Achknowledgements
+## Acknowledgements

@@ -181,8 +181,8 @@ class JunoAmrWrapper:
         allowed_file_extensions = ['.fastq', '.fq', '.fastq.gz', '.fq.gz', ".faa", ".fasta", "fasta.gz", "faa.gz"]
         #check if dir exists
         if os.path.isdir(input_dir):
+            input_dir_to_path = Path(input_dir)
             folder = os.listdir(input_dir)
-            
             # split de ext van folder[0]
             #for filename in folder, check of de extension gelijk is
             # for each file check if the file has the correct extension
@@ -194,7 +194,7 @@ class JunoAmrWrapper:
         else:
             print(f'\"{input_dir}\" is not a directory. Give an existing directory.')
             sys.exit(1)      
-        return input_dir
+        return input_dir_to_path
 
     def get_input_files_from_input_directory(self):
         self.input_files_r1 = {}
@@ -209,7 +209,7 @@ class JunoAmrWrapper:
         # Get the filenames that are used as input for resfinder, only filenames with pR1 and pR2 will be used.
         for key in self.dict_arguments:
             if key == "input_dir":
-                directory_name = self.dict_arguments[key]
+                directory_name_str = str(self.dict_arguments[key])
                 input_directory = os.listdir(self.dict_arguments[key])
                 
                 for filename in input_directory:
@@ -224,7 +224,7 @@ class JunoAmrWrapper:
                         if match_fa:
                             for filename in input_directory:
                                 samplename = os.path.splitext(filename)[0]
-                                self.input_files_fasta.update({samplename: directory_name + filename})
+                                self.input_files_fasta.update({samplename: directory_name_str + "/" + filename})
                       
                     #if the extension is fastq
                     elif ext in fastq_ext:
@@ -234,13 +234,18 @@ class JunoAmrWrapper:
                             #TODO _p verwijderd uit de matching
                             samplename = re.split("R(1|2)", filename)
                             if "1" in samplename[1]:
-                                self.input_files_r1.update({samplename[0]: directory_name + "/" + filename})
+                                self.input_files_r1.update({samplename[0]: directory_name_str + "/" + filename})
                             elif "2" in samplename[1]:
-                                self.input_files_r2.update({samplename[0]: directory_name + "/" + filename})
+                                self.input_files_r2.update({samplename[0]: directory_name_str + "/" + filename})
 
     def create_yaml_file(self):
         yaml_setup_fq = open("config/setup_config_fq.yml")
         yaml_setup_fa = open("config/setup_config_fa.yml")
+        
+        #change path to str for yaml 
+        for key in self.dict_arguments:
+            if key == "input_dir":
+                self.dict_arguments[key] = str(self.dict_arguments[key])
         #change yaml layout with received arguments & input
         with open("config/user_parameters.yml", "w") as file:
             yaml = YAML()
@@ -249,7 +254,6 @@ class JunoAmrWrapper:
             if self.isFastq is True:
                 config = yaml.load(yaml_setup_fq)
                 # Add additional information to the dictionary
-                self.dict_arguments['input_description'] = '-ifq'
                 self.dict_arguments['input_isfastq_boolean'] = self.isFastq
                 
                 # add filenames and parameters
@@ -263,9 +267,7 @@ class JunoAmrWrapper:
             #if fasta
             elif self.isFastq is False:
                 config = yaml.load(yaml_setup_fa)
-                self.dict_arguments['input_description'] = '-ifa'
                 self.dict_arguments['input_isfastq_boolean'] = self.isFastq
-                
                 config['Parameters'] = self.dict_arguments
                 config['samples_fasta'] = self.input_files_fasta
                 yaml.dump(config, file)
@@ -342,7 +344,7 @@ def main():
     j.change_species_name_format()
     j.get_input_files_from_input_directory()
     j.create_yaml_file()
-    j.run_snakemake_api()
+    #j.run_snakemake_api()
 
 
 if __name__ == '__main__':
