@@ -18,7 +18,7 @@ import shutil
 
 class JunoSummary:
     def __init__(self, arguments=None):
-        self.user_parameters_path = "config/user_parameters.yml"
+        self.user_parameters_path = "config/user_parameters.yaml"
         self.summary_folder_path = "summary"
         self.results_folder = "results_per_sample"
 

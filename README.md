@@ -17,8 +17,11 @@
 The Juno Antimicrobial Resistance(Juno AMR) pipeline is a pipeline that is used to automate [ResFinder](https://bitbucket.org/genomicepidemiology/resfinder/src/master/) and [PointFinder](https://bitbucket.org/genomicepidemiology/pointfinder/src/master/).The tools that are being used are created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/). These tools identify acquired genes and find chromosal mutations mediating antimicrobial resistance in DNA secuences of bacteria. This can be partial or total sequences. The output of both tools can be used for analysis and is also combined in four summary files for a quick overview of the most important results.  
 
 ## Prerequisities
-* **Python3.5** or newer. Python is the scripting language used to create the program.
-https://www.python.org/downloads/
+* **Linux environment**
+* **(mini)conda**
+* **TBD** to be discussed.
+* **Python3.7.6** Python is the scripting language used to create the program.
+
 
 ## Installation
 1. Clone the repository.
@@ -31,44 +34,36 @@ git clone https://github.com/RIVM-bioinformatics/Juno-amr.git
 cd Juno-amr
 ```
 
-3. Activate mamba.
+3. Create mamba directory.
+```
+TBT
+```
+
+4. Activate mamba.
 ```
 conda activate mamba
 ```
 
-4. Create mamba environment.
+5. Create mamba environment.
 ```
-mamba env create -f envs/juno_amr_master.yml
+mamba env create -f envs/juno_amr_master.yaml
 ```
 
-5. Activate the environment,
+6. Activate the environment,
 ```
 conda activate juno-amr_master
 ```
 
-6. [need to test again if these steps are still correct]
+7. [need to test again if these steps are still correct]
 ```
 test
 ```
 
-## Usage
-The base command to run this program. 
-```
-python3 juno-amr.py -s [species] -i [dir/to/fasta_or_fastq_files]
-```
-
-An example on how to run the pipeline.
-```
-python3 juno-amr.py -s salmonella -i dir/to/fastq_files -o output -l 0.8 -t 0.6
-```
-
-For detailed information please visit the [documentation](https://www.google.com "Pipeline documentation").
-
-## Parameters
+## Parameters & Usage
 ### Command for help
 * ```-h, --help``` Shows the help of the pipeline
 
-#### Required parameters
+### Required parameters
 * ```-i, --input``` Path to the directory of your input. Can be fasta files or paired fastq files. It is important to link to the directory and not the files.
 * ```-s --species**``` Full scientific name of the species sample. Use underscores between the parts of a name and not spaces. A list of available species can be shown if you type ```python3 juno-amr.py -s -h```. It is possible to select 'other' as a species, if 'other' is selected the pipeline will only run ResFinder
 
@@ -81,6 +76,19 @@ For detailed information please visit the [documentation](https://www.google.com
 * ```-db_res```         Path for alternative database for ResFinder
 * ```--point```         Type one to run PointFinder, type 0 to not run PointFinder. By default PointFinder will always run if there is a species selected.
 
+
+### The base command to run this program. 
+```
+python3 juno-amr.py -s [species] -i [dir/to/fasta_or_fastq_files]
+```
+
+### An example on how to run the pipeline.
+```
+python3 juno-amr.py -s salmonella -i dir/to/fastq_files -o output -l 0.8 -t 0.6
+```
+
+Detailed information about the pipeline can be found in the [documentation](https://www.google.com "Pipeline documentation"). This documentation is only accessible for users that have access to the RIVM Linux environment.
+
 ## Explanation of the output
 * **log:** Log with output and error file from the cluster for each Snakemake rule/step that is performed
 * **results_per_sample:** Output produced by ResFinder and PointFinder for each sample
@@ -92,9 +100,13 @@ For detailed information please visit the [documentation](https://www.google.com
 
 ## Future ideas for this pipeline
 * Make this pipeline available and user friendly for users outside RIVM.
+* Make documentation available outside RIVM.
 
 ## License
+This pipeline is licensed with a AGPL3 license. Detailed information can be found inside the 'LICENSE' file in this repository.
 
 ## Contact
+* **Contact person:**       Roxanne Wolthuis
+* **Email**                 roxanne.wolthuis@rivm.nl  
 
 ## Acknowledgements

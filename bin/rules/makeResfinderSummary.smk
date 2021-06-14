@@ -10,7 +10,7 @@ rule makeResfinderSummary:
         pointfinder_prediction = OUT + "/summary/summary_amr_pointfinder_prediction.csv"
 
     conda: 
-        "../../envs/resfinder.yml"
+        "../../envs/resfinder.yaml"
 
     message:
         "Creating a summary file"

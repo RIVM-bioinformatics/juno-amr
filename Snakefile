@@ -9,8 +9,8 @@ Date: 30 - 03 - 2021
 #################################################################################
 #####   Import config file                                                  #####
 #################################################################################
-configfile: "config/user_parameters.yml"
-configfile: "config/database_config.yml"
+configfile: "config/user_parameters.yaml"
+configfile: "config/database_config.yaml"
 
 #output dir
 OUT = config["Parameters"]["output_dir"]

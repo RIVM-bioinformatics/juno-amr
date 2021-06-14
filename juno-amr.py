@@ -239,15 +239,15 @@ class JunoAmrWrapper:
                                 self.input_files_r2.update({samplename[0]: directory_name_str + "/" + filename})
 
     def create_yaml_file(self):
-        yaml_setup_fq = open("config/setup_config_fq.yml")
-        yaml_setup_fa = open("config/setup_config_fa.yml")
+        yaml_setup_fq = open("config/setup_config_fq.yaml")
+        yaml_setup_fa = open("config/setup_config_fa.yaml")
         
         #change path to str for yaml 
         for key in self.dict_arguments:
             if key == "input_dir":
                 self.dict_arguments[key] = str(self.dict_arguments[key])
         #change yaml layout with received arguments & input
-        with open("config/user_parameters.yml", "w") as file:
+        with open("config/user_parameters.yaml", "w") as file:
             yaml = YAML()
             
             #if fastq
@@ -274,12 +274,12 @@ class JunoAmrWrapper:
 
     def run_snakemake_api(self):
         #Get cores from config
-        open_config_parameters = open("config/database_config.yml")
+        open_config_parameters = open("config/database_config.yaml")
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
         cores = parsed_config['db-cores']
 
         #Get output dir from other config
-        open_config_parameters = open("config/user_parameters.yml")
+        open_config_parameters = open("config/user_parameters.yaml")
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
         self.output_file_path = parsed_config['Parameters']['output_dir']
         
@@ -327,7 +327,7 @@ class JunoAmrWrapper:
 
         
         #change yaml layout with received arguments & input
-        with open("config/config.yml", "w") as file:
+        with open("config/config.yaml", "w") as file:
             yaml = YAML()
             config = yaml.load(inp)
             # add parameters
@@ -344,7 +344,7 @@ def main():
     j.change_species_name_format()
     j.get_input_files_from_input_directory()
     j.create_yaml_file()
-    #j.run_snakemake_api()
+    j.run_snakemake_api()
 
 
 if __name__ == '__main__':

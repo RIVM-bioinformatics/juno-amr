@@ -1,0 +1,23 @@
+#fastqr1
+samples_fastq_r1:
+  1071900063_p: testdata/fastq_zipped/1071900063_pR1.fastq.gz
+  1171900012_p: testdata/fastq_zipped/1171900012_pR1.fastq.gz
+
+
+#fastqr2
+samples_fastq_r2:
+  1171900012_p: testdata/fastq_zipped/1171900012_pR2.fastq.gz
+  1071900063_p: testdata/fastq_zipped/1071900063_pR2.fastq.gz
+
+# parameters for pipeline given by user
+Parameters:
+  output_dir: output
+  input_dir: testdata/fastq_zipped
+  species: salmonella
+  coverage: 0.6
+  threshold: 0.8
+  pointfinder_db: /mnt/db/resfinder/db_pointfinder
+  resfinder_db: /mnt/db/resfinder/db_resfinder
+  run_pointfinder: '1'
+  dryrun: false
+  input_isfastq_boolean: true
