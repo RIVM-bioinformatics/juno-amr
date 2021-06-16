@@ -84,8 +84,6 @@ class JunoSummary:
             path.strip("'")
             elements = path.split("/")
             samplename = elements[-1]
-            print("hieer")
-            print(samplename)
             self.samplenames.append(samplename)
 
         #Collect summary file names from the parser
@@ -208,7 +206,7 @@ class JunoSummary:
         #Collect data for each sample and add this to a list with the samplename
         sample_counter = 0
         for path in self.input_paths:
-            sample = []
+
             pathname = f"{path}/PointFinder_results.txt" 
             opened_file = open(pathname, "r")
             lines = opened_file.readlines()
@@ -216,21 +214,31 @@ class JunoSummary:
             
 
             # If pointfinder has no results, write an empty list to the summary
-            if len(subselection) < 1:
-                # append hier lege values voor alle columns 
-                sample.extend((self.samplenames[sample_counter], None, None, None, None, None))
-            # if there is result, place it in a list and convert this to a pd dataframe
-            
-            else:
-                sample.append(self.samplenames[sample_counter])
-                for line in subselection:
+            for line in subselection:
+                sample = []
+
+                #print("hier", self.samplenames[sample_counter])
+                #print("lijn", line)
+                if len(line) < 1:
+                    # append hier lege values voor alle columns 
+                    sample.extend((self.samplenames[sample_counter], None, None, None, None, None))
+                # if there is result, place it in a list and convert this to a pd dataframe
+                
+                else:
+                    sample.append(self.samplenames[sample_counter])
                     elements = line.split("\t")
                     for element in elements:
                         sample.append(element)
+                
+                data_per_sample.append(sample)    
             sample_counter = sample_counter + 1
-            data_per_sample.append(sample)    
-           
+            
+                
         #Create DF with pandas and write to csv file
+        for i in data_per_sample:
+            print(len(i))
+            print(i)
+
         data_frame = pd.DataFrame(data_per_sample, columns = column_names)
         data_frame.to_csv(f'{pointfinder_results_output}', mode='a', index=False)
     
