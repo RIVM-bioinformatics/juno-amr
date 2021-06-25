@@ -31,6 +31,8 @@ class JunoAmrWrapper:
         for entry in os.scandir(self.path_to_pointfinder_db):
             if not entry.name.startswith('.') and entry.is_dir():
                 self.species_options.append(entry.name)
+
+        self.species_options.append("other")
         return self.species_options
 
     def get_user_arguments(self):
@@ -229,9 +231,25 @@ class JunoAmrWrapper:
                     #if the extension is fastq
                     elif ext in fastq_ext:
                         self.isFastq = True
-                        # TODO if the input dir ends with a "/" then the config will get double "//" in the name
                         if match_fq:
-                            #TODO _p verwijderd uit de matching
+                            # fq_1 = re.compile("(.*?)(?:_S\d+_|_S\d+.|_|\.)(?:p)?R?(1)(?:_.*\.|\..*\.|\.)f(ast)?q(\.gz)?")
+                            # fq_2 = re.compile("(.*?)(?:_S\d+_|_S\d+.|_|\.)(?:p)?R?(2)(?:_.*\.|\..*\.|\.)f(ast)?q(\.gz)?")
+                            # match_fq1 = fq_1.fullmatch(filename)
+                            # match_fq2 = fq_2.fullmatch(filename)
+
+                            # if match_fq1:
+                            #     #print("match1")
+                            #     #print(match_fq1)
+                            #     #print(filename)
+                            #     samplename_splitted = filename.split("_", 1)
+                            #     print(samplename_splitted)
+                            #     #self.input_files_r1.update({samplename[0]: directory_name_str + "/" + filename})
+                            # elif match_fq2:
+                            #     print("match2")
+                            #     #print(match_fq2)
+                            #     #print(filename)
+                            #     #self.input_files_r2.update({samplename[0]: directory_name_str + "/" + filename})
+
                             samplename = re.split("R(1|2)", filename)
                             if "1" in samplename[1]:
                                 self.input_files_r1.update({samplename[0]: directory_name_str + "/" + filename})

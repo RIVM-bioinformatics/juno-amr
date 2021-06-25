@@ -32,32 +32,53 @@ class JunoSummary:
         )
 
         self.parser.add_argument(
-            "-s",
-            "--summary",
+            "-sr",
+            "--summary_resfinder",
             #TODO TYPE is een path of file
             type=str,
-            required=True,
             metavar="file",
-            dest="summary_file_names",
-            # 4 different filenames are requested. The first one is for the gene summary, second phenotype summary, thirth pointfinder result summary and last poinfinder prediction summary
+            dest="resfinder_summary_file_names",
+            # 2 different filenames are requested. The first one is for the gene summary, second phenotype summary
             # TODO Do we want a default for this?
-            nargs = 4,
-            help="The name for each of the summary files, in this order: gene_summary, phenotype_summary, Pointfinder_result_summary, pointfinder_prediction_summary"
+            nargs=2,
+            help="The name for each of the resfinder summary files(max 2 files), in this order: gene_summary, phenotype_summary."
+        )
+
+        self.parser.add_argument(
+            "-sp",
+            "--summary_pointfinder",
+            type=str,
+            metavar="file",
+            dest="pointfinder_summary_file_names",
+            #  2 different filenames are requested. The first one is for pointfinder result summary and second poinfinder prediction summary
+            nargs=2,
+            help="The name for each of the pointfinder summary files(max 2 files), in this order: Pointfinder_result_summary, pointfinder_prediction_summary."
         )
 
         self.parser.add_argument(
             "-i",
             "--input",
             type=str,
-            required = True,
-            metavar = "dir",
-            dest = "input",
+            required= True,
+            metavar="dir",
+            dest="input",
             # For the amount of samples there has to be at least one
-            nargs = '+',
-            help = "The input directory for each sample?"
+            nargs='+',
+            help="The input directory for each sample?"
             
         )
         
+        self.parser.add_argument(
+            "-st",
+            "--summary_type",
+            type=str,
+            required = True,
+            metavar="name",
+            dest="summary_type",
+            help="The type of summaries to create, choose from: resfinder or pointfinder",
+            choices= ["resfinder", "pointfinder"]
+        )
+
         # parse arguments
         self.dict_arguments = vars(self.parser.parse_args())
     
@@ -67,13 +88,9 @@ class JunoSummary:
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
         self.output_dir_name = parsed_config['Parameters']['output_dir']
         
-        # if there is a summary directory, delete this
-        dirpath = Path(f"{self.output_dir_name}/{self.summary_folder_path}")
-        if dirpath.exists() and dirpath.is_dir():
-            print("found summary directory, removing it")
-            shutil.rmtree(dirpath)
-        
         # Make new summary directory
+        dirpath = Path(f"{self.output_dir_name}/{self.summary_folder_path}")
+
         if not os.path.exists(dirpath):
             os.makedirs(dirpath)
 
@@ -87,12 +104,13 @@ class JunoSummary:
             self.samplenames.append(samplename)
 
         #Collect summary file names from the parser
-        self.summary_file_names = self.dict_arguments.get("summary_file_names")
+        self.resfinder_summary_file_names = self.dict_arguments.get("resfinder_summary_file_names")
+        self.pointfinder_summary_file_names = self.dict_arguments.get("pointfinder_summary_file_names")
 
         return self.output_dir_name, self.samplenames, dirpath
 
     def create_amr_genes_summary(self):
-        genes_summary_location = self.summary_file_names[0]
+        genes_summary_location = self.resfinder_summary_file_names[0]
 
         #write genedata to outputfile
         with open(genes_summary_location, 'w', newline='') as csvfile:
@@ -126,7 +144,7 @@ class JunoSummary:
                 sample_counter = sample_counter + 1
 
     def add_header_to_phenotype_summary(self):
-        self.pheno_summary_location = self.summary_file_names[1]
+        self.pheno_summary_location = self.resfinder_summary_file_names[1]
         with open(f"{self.pheno_summary_location}", 'w', newline='') as csvfile:
             summary_file = csv.writer(csvfile)
 
@@ -190,7 +208,7 @@ class JunoSummary:
         final_df.to_csv(f'{self.pheno_summary_location}', mode='a', index=False)
 
     def pointfinder_result_summary(self):
-        pointfinder_results_output = self.summary_file_names[2]
+        pointfinder_results_output = self.pointfinder_summary_file_names[0]
         
         #Get path & open 1 file for the colnames
         pathname = f"{self.input_paths[0]}/PointFinder_results.txt" 
@@ -217,8 +235,6 @@ class JunoSummary:
             for line in subselection:
                 sample = []
 
-                #print("hier", self.samplenames[sample_counter])
-                #print("lijn", line)
                 if len(line) < 1:
                     # append hier lege values voor alle columns 
                     sample.extend((self.samplenames[sample_counter], None, None, None, None, None))
@@ -232,19 +248,13 @@ class JunoSummary:
                 
                 data_per_sample.append(sample)    
             sample_counter = sample_counter + 1
-            
-                
-        #Create DF with pandas and write to csv file
-        for i in data_per_sample:
-            print(len(i))
-            print(i)
 
         data_frame = pd.DataFrame(data_per_sample, columns = column_names)
         data_frame.to_csv(f'{pointfinder_results_output}', mode='a', index=False)
     
     def pointfinder_prediction_summary(self):
         #Get path & open 1 file for the colnames
-        pointfinder_prediction_output = self.summary_file_names[3]
+        pointfinder_prediction_output = self.pointfinder_summary_file_names[1]
         
         dataframe_per_sample = []
         sample_counter = 0
@@ -252,7 +262,6 @@ class JunoSummary:
             pathname = f"{path}/PointFinder_prediction.txt" 
             opened_file = open(pathname, "r")
             lines = opened_file.readlines()
-
             #get the colnames
             column_names = lines[0].strip("\n").split("\t")
             # get the values
@@ -272,11 +281,17 @@ def main():
     m = JunoSummary()
     m.get_user_arguments()
     m.preproccesing_for_summary_files()
-    m.create_amr_genes_summary()
-    m.add_header_to_phenotype_summary()
-    m.create_amr_phenotype_summary()
-    m.pointfinder_result_summary()
-    m.pointfinder_prediction_summary()
+
+    summary_type = m.dict_arguments.get("summary_type")
+
+    if summary_type == "resfinder":
+        m.create_amr_genes_summary()
+        m.add_header_to_phenotype_summary()
+        m.create_amr_phenotype_summary()
+
+    elif summary_type == "pointfinder":
+        m.pointfinder_result_summary()
+        m.pointfinder_prediction_summary()
 
 if __name__ == '__main__':
     main()
