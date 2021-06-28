@@ -55,7 +55,7 @@ class JunoAmrWrapper:
             self.parser.add_argument(
                 "-o",
                 "--output",
-                type=str,
+                type=pathlib.Path,
                 required=False,
                 metavar="dir",
                 default="output",
@@ -143,6 +143,8 @@ class JunoAmrWrapper:
 
             # parse arguments
             self.dict_arguments = vars(self.parser.parse_args())
+            #set pathlib.path as string for yaml, yaml doesnt want a posixpath
+            self.dict_arguments["output_dir"] = str(self.dict_arguments.get("output_dir"))
 
     def check_species(self):
         # check if species matches other
@@ -218,48 +220,32 @@ class JunoAmrWrapper:
                     ext = "".join(pathlib.Path(filename).suffixes)
                     match_fq = fq_pattern.fullmatch(filename)
                     match_fa = fa_pattern.fullmatch(filename)
-                    
+
                     #if the extension is fasta
                     if ext in fasta_ext:
                         # set the boolean
                         self.isFastq = False
                         if match_fa:
                             for filename in input_directory:
-                                samplename = os.path.splitext(filename)[0]
-                                self.input_files_fasta.update({samplename: directory_name_str + "/" + filename})
+                                sample = match_fa.group(1)
+                                self.input_files_fasta.update({sample: directory_name_str + "/" + filename})
                       
                     #if the extension is fastq
                     elif ext in fastq_ext:
                         self.isFastq = True
                         if match_fq:
-                            # fq_1 = re.compile("(.*?)(?:_S\d+_|_S\d+.|_|\.)(?:p)?R?(1)(?:_.*\.|\..*\.|\.)f(ast)?q(\.gz)?")
-                            # fq_2 = re.compile("(.*?)(?:_S\d+_|_S\d+.|_|\.)(?:p)?R?(2)(?:_.*\.|\..*\.|\.)f(ast)?q(\.gz)?")
-                            # match_fq1 = fq_1.fullmatch(filename)
-                            # match_fq2 = fq_2.fullmatch(filename)
-
-                            # if match_fq1:
-                            #     #print("match1")
-                            #     #print(match_fq1)
-                            #     #print(filename)
-                            #     samplename_splitted = filename.split("_", 1)
-                            #     print(samplename_splitted)
-                            #     #self.input_files_r1.update({samplename[0]: directory_name_str + "/" + filename})
-                            # elif match_fq2:
-                            #     print("match2")
-                            #     #print(match_fq2)
-                            #     #print(filename)
-                            #     #self.input_files_r2.update({samplename[0]: directory_name_str + "/" + filename})
-
-                            samplename = re.split("R(1|2)", filename)
-                            if "1" in samplename[1]:
-                                self.input_files_r1.update({samplename[0]: directory_name_str + "/" + filename})
-                            elif "2" in samplename[1]:
-                                self.input_files_r2.update({samplename[0]: directory_name_str + "/" + filename})
+                            sample = match_fq.group(1)
+                            rtype = match_fq.group(2)
+                            if rtype == "1":
+                                self.input_files_r1.update({sample: directory_name_str + "/" + filename})
+                            elif rtype == "2":
+                                self.input_files_r2.update({sample: directory_name_str + "/" + filename})
 
     def create_yaml_file(self):
         yaml_setup_fq = open("config/setup_config_fq.yaml")
         yaml_setup_fa = open("config/setup_config_fa.yaml")
         
+        print(self.dict_arguments)
         #change path to str for yaml 
         for key in self.dict_arguments:
             if key == "input_dir":
