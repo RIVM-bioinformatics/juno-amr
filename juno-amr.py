@@ -21,6 +21,9 @@ from ruamel.yaml import YAML
 import csv
 import pandas as pd
 
+sys.path.insert(0, 'bin/python_scripts/')
+import download_dbs
+
 class JunoAmrWrapper:
     def __init__(self, arguments=None):
         """constructor, containing all variables"""
@@ -125,6 +128,14 @@ class JunoAmrWrapper:
             )
 
             self.parser.add_argument(
+                "-u",
+                "--update",
+                action='store_true',
+                dest="db_update",
+                help="Force database update even if they are present."
+            )
+
+            self.parser.add_argument(
                 "--point",
                 type=str,
                 default="1",
@@ -145,6 +156,16 @@ class JunoAmrWrapper:
             self.dict_arguments = vars(self.parser.parse_args())
             #set pathlib.path as string for yaml, yaml doesnt want a posixpath
             self.dict_arguments["output_dir"] = str(self.dict_arguments.get("output_dir"))
+
+    def download_databases(self):
+        """Function to download software and databases necessary for running the Juno-amr pipeline"""
+        db_dir = "mnt/db/juno-amr"
+        self.db_dir = pathlib.Path(db_dir)
+        self.db_dir.mkdir(parents = True, exist_ok = True)
+        self.update = self.dict_arguments["db_update"]
+
+        #print(self.db_dir, 'bin', self.update)
+        download_dbs.get_downloads_juno_amr(self.db_dir, 'bin', self.update)
 
     def check_species(self):
         # check if species matches other
@@ -177,7 +198,6 @@ class JunoAmrWrapper:
             correct_format = given_path + "/"
             print("format changed")
             return correct_format
-        print(self.dict_arguments)
 
     def is_directory_with_correct_file_format(self, input_dir):
         #allowed extensions
@@ -207,8 +227,9 @@ class JunoAmrWrapper:
         fasta_ext = [".faa", ".fasta"]
         fastq_ext = ['.fastq', '.fq', '.fastq.gz', '.fq.gz']
         self.isFastq = False
-        fq_pattern = re.compile("(.*?)(?:_S\d+_|_S\d+.|_|\.)(?:p)?R?(1|2)(?:_.*\.|\..*\.|\.)f(ast)?q(\.gz)?")
-        #TODO i dont know which pattern to use yet
+        #Vraagteken bij de R weggehaald?
+        fq_pattern = re.compile("(.*?)(?:_S\d+_|_S\d+.|_|\.)(?:p)?R(1|2)(?:_.*\.|\..*\.|\.)f(ast)?q(\.gz)?")
+        #TODO is this fasta pattern correct?
         fa_pattern = re.compile("(.*?)(?:_S\d+_|_S\d+.|_|\.)?(?:_.*\.|\..*\.|\.)f(ast)?(a|q)(\.gz)?")
         # Get the filenames that are used as input for resfinder, only filenames with pR1 and pR2 will be used.
         for key in self.dict_arguments:
@@ -344,11 +365,12 @@ def main():
     j = JunoAmrWrapper()
     j.get_species_names_from_pointfinder_db()
     j.get_user_arguments()
-    j.check_species()
-    j.change_species_name_format()
-    j.get_input_files_from_input_directory()
-    j.create_yaml_file()
-    j.run_snakemake_api()
+    j.download_databases()
+    #j.check_species()
+    #j.change_species_name_format()
+    #j.get_input_files_from_input_directory()
+    #j.create_yaml_file()
+    #j.run_snakemake_api()
 
 
 if __name__ == '__main__':
