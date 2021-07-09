@@ -27,7 +27,7 @@ import download_dbs
 class JunoAmrWrapper:
     def __init__(self, arguments=None):
         """constructor, containing all variables"""
-        self.path_to_pointfinder_db = "/mnt/db/resfinder/db_pointfinder"
+        self.path_to_pointfinder_db = "/mnt/db/juno-amr/pointfinderdb"
 
     def get_species_names_from_pointfinder_db(self):
         self.species_options = []
@@ -113,7 +113,7 @@ class JunoAmrWrapper:
                 "-db_point",
                 type=str,
                 metavar="dir",
-                default="/mnt/db/resfinder/db_pointfinder",
+                default="/mnt/db/juno-amr/pointfinderdb",
                 dest="pointfinder_db",
                 help="Alternative database for pointfinder"
             )
@@ -122,7 +122,7 @@ class JunoAmrWrapper:
                 "-db_res",
                 type=str,
                 metavar="dir",
-                default="/mnt/db/resfinder/db_resfinder",
+                default="/mnt/db/juno-amr/resfinderdb",
                 dest="resfinder_db",
                 help="Alternative database for resfinder"
             )
@@ -159,12 +159,10 @@ class JunoAmrWrapper:
 
     def download_databases(self):
         """Function to download software and databases necessary for running the Juno-amr pipeline"""
-        db_dir = "mnt/db/juno-amr"
+        db_dir = "/mnt/db/juno-amr"
         self.db_dir = pathlib.Path(db_dir)
         self.db_dir.mkdir(parents = True, exist_ok = True)
         self.update = self.dict_arguments["db_update"]
-
-        #print(self.db_dir, 'bin', self.update)
         download_dbs.get_downloads_juno_amr(self.db_dir, 'bin', self.update)
 
     def check_species(self):
@@ -266,7 +264,7 @@ class JunoAmrWrapper:
         yaml_setup_fq = open("config/setup_config_fq.yaml")
         yaml_setup_fa = open("config/setup_config_fa.yaml")
         
-        print(self.dict_arguments)
+        #print(self.dict_arguments)
         #change path to str for yaml 
         for key in self.dict_arguments:
             if key == "input_dir":
@@ -330,47 +328,19 @@ class JunoAmrWrapper:
                 drmaa =f"-q bio -n {{threads}} -o {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.err -R \"span[hosts=1]\" -R \"rusage[mem={{resources.mem_mb}}]\"",
                 drmaa_log_dir = f"{self.output_file_path}/log/drmaa"
             )
+#yaml = YAML()
 
-    #TODO this function is not being used yet
-    def check_if_db_exists(self, db_path):
-        #TODO only working for pointfinder, make working for resfinder later
-        if os.path.isdir(db_path):
-            print("found db directory, checking for files")
-            if len(os.listdir("../../../db/resfinder/db_pointfinder")) == 0:
-                print("No files found in directory, downloading latest pointfinder database")
-                # TODO make a variable in a different file for this link
-                os.system("git clone https://git@bitbucket.org/genomicepidemiology/pointfinder_db.git /mnt/db/resfinder/db_pointfinder")
-
-            else:
-                print("Database pointfinder found, proceed pipeline")
-        else:
-            print("did not find a database, clowning new db now")
-            # todo make a variable in a different file for this link
-            #TODO to make the database working need to run install.py to index the databases with KMA how to fix this?
-            os.system("git clone https://git@bitbucket.org/genomicepidemiology/pointfinder_db.git /mnt/db/resfinder/db_pointfinder")
-
-
-        
-        #change yaml layout with received arguments & input
-        with open("config/config.yaml", "w") as file:
-            yaml = YAML()
-            config = yaml.load(inp)
-            # add parameters
-            config['Parameters'] = self.dict_arguments
-            # add filenames
-            config['samples_fasta'] = self.input_files
-            yaml.dump(config, file)
 
 def main():
     j = JunoAmrWrapper()
     j.get_species_names_from_pointfinder_db()
     j.get_user_arguments()
     j.download_databases()
-    #j.check_species()
-    #j.change_species_name_format()
-    #j.get_input_files_from_input_directory()
-    #j.create_yaml_file()
-    #j.run_snakemake_api()
+    j.check_species()
+    j.change_species_name_format()
+    j.get_input_files_from_input_directory()
+    j.create_yaml_file()
+    j.run_snakemake_api()
 
 
 if __name__ == '__main__':

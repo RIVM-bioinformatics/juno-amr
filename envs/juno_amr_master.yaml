@@ -17,4 +17,5 @@ dependencies:
   - cgecore==1.5.5
   - pip:
     - PyYAML==5.3.1
+    - tabulate==0.8.0
     - ruamel.yaml

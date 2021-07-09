@@ -50,12 +50,11 @@ def get_commit_git(gitrepo_dir):
     return commit
 
 #Download resfinder
-#TODO versiontype --> goed genoeg of specifieke commit hebben?
 def download_software_resfinder(resfinder_software_dir, version = '4.1.3'):
     """Function to download kmerfinder if it is not present"""
     if not isinstance(resfinder_software_dir, pathlib.PosixPath):
         resfinder_software_dir = pathlib.Path(resfinder_software_dir)
-    if not resfinder_software_dir.joinpath('resfinder.py').is_file():
+    if not resfinder_software_dir.joinpath('run_resfinder.py').is_file():
         print("\x1b[0;33m Downloading resfinder software...\n\033[0;0m")
         download_git_repo(version, 
                         'https://bitbucket.org/genomicepidemiology/resfinder.git',
@@ -74,17 +73,16 @@ def download_db_resfinder(resfinder_db_dir):
         download_git_repo('master', 
                         'https://git@bitbucket.org/genomicepidemiology/resfinder_db.git',
                         resfinder_db_dir)
-        # Get version here
-        # Lower it wont recognize the dir as a git ripo think because of the installation
-        version = get_commit_git(resfinder_db_dir)
-        print("versionnnnnnnnnnnn")
-        print(version)
-        # Installing
-        current_dir = os.getcwd()
-        os.chdir(resfinder_db_dir)
-        os.system(f"python3 INSTALL.py")
-        os.chdir(current_dir)
-    
+        try:
+            current_dir = os.getcwd()
+            os.chdir(resfinder_db_dir)
+            os.system(f"python3 INSTALL.py")
+            os.chdir(current_dir)
+        except (OSError, IOError) as err:
+            print("OS error: ", err)
+            raise
+
+    version = get_commit_git(resfinder_db_dir)
     return version
 
 def download_db_pointfinder(pointfinder_db_dir):
@@ -93,20 +91,20 @@ def download_db_pointfinder(pointfinder_db_dir):
         pointfinder_db_dir = pathlib.Path(pointfinder_db_dir)
     if not pointfinder_db_dir.joinpath('config').exists():
         print("\x1b[0;33m Downloading pointfinder database...\n\033[0;0m")
-        print(pointfinder_db_dir)
         download_git_repo('master', 
                         'https://bitbucket.org/genomicepidemiology/pointfinder_db.git',
                         pointfinder_db_dir)
-
-        version = get_commit_git(pointfinder_db_dir)
-        print("versionnnnnnnnnnnn")
-        print(version)
+        try:
         #Installing
-        current_dir = os.getcwd()
-        os.chdir(pointfinder_db_dir)
-        os.system(f"python3 INSTALL.py")
-        os.chdir(current_dir)
-
+            current_dir = os.getcwd()
+            os.chdir(pointfinder_db_dir)
+            os.system(f"python3 INSTALL.py")
+            os.chdir(current_dir)
+        except (OSError, IOError) as err:
+            print("OS error: ", err)
+            raise
+    #get the version
+    version = get_commit_git(pointfinder_db_dir)
     return version
 
 #Get all downloads for juno-amr pipeline
@@ -121,19 +119,10 @@ def get_downloads_juno_amr(db_dir, current_dir, update_dbs):
         except:
             rm_dir.kill()
             raise
-    #print("dbdir:", db_dir)
-    print("before")
-    print("db_dir: ", db_dir)
-    
-    db_dir = "/mnt/db/juno-amr"
-    print("after")
-    print(db_dir)
-    software_version = {'resfinder': download_software_resfinder(f"{db_dir}/resfinder"),
-                        'resfinder_db': download_db_resfinder(f"{db_dir}/resfinderdb"),
-                        'pointfinder_db': download_db_pointfinder(f"{db_dir}/pointfinderdb")}
+    software_version = {'resfinder': download_software_resfinder(current_dir.joinpath('resfinder')),
+                    'resfinder_db': download_db_resfinder(db_dir.joinpath('resfinderdb')),
+                    'pointfinder_db': download_db_pointfinder(db_dir.joinpath('pointfinderdb'))}
     return software_version
-
-
 
 if __name__ == '__main__':
     main()

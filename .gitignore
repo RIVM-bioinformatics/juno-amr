@@ -3,7 +3,9 @@ resfinder
 output
 testdata
 .snakemake
-
+bin/resfinder
+/mnt/db/juno-amr/pointfinderdb
+/mnt/db/juno-amr/resfinderdb
 
 
 #files to ignore

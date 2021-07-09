@@ -9,10 +9,9 @@ rule runResfinderFastq:
         #Directory per sample
         output_dir = directory(OUT + "/results_per_sample/{sample}")
     
-    conda:
-    #TODO put this command in a config for easy access
-        "../../envs/resfinder.yaml"
-    
+    #conda:
+        #"../../envs/resfinder.yaml"
+
     message:
         "Processing received fastq samples in resfinder"
 
@@ -29,13 +28,12 @@ rule runResfinderFastq:
         mem_mb=config["mem_mb"]
 
     threads: config["threads"]
-
+    
     shell:
-    #TODO add KMA path/db
         """
 if [ {params.run_pointfinder} == "1" ]; then
-    python3 resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired --point -ifq {input} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
+    python3 bin/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired --point -ifq {input} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
 else
-    python3 resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired -ifq {input} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
+    python3 bin/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired -ifq {input} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
 fi
         """
