@@ -1,72 +1,17 @@
-#fasta
-samples_fasta:
-  '1122000121': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000084': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000048': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000290': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000158': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000061': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000190': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000191': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000045': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000029': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000351': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000152': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000676': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000159': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000024': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000105': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000181': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000160': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000153': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000164': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000017': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000120': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000154': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000083': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000053': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000011': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000266': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000161': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000026': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000265': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000102': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000188': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000331': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000113': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000166': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000090': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000288': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000027': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000111': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000039': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000065': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000114': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000168': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000001': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000054': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000060': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000189': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000165': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000184': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000202': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000285': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000128': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000072': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000006': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000112': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000140': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000078': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000167': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000009': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000034': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
-  '1122000044': /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered/1122000044.fasta
+#fastqr1
+samples_fastq_r1:
+  '1071900063': testdata/fastq_zipped/1071900063_pR1.fastq.gz
+
+
+#fastqr2
+samples_fastq_r2:
+  '1071900063': testdata/fastq_zipped/1071900063_pR2.fastq.gz
 
 # parameters for pipeline given by user
 Parameters:
-  output_dir: /data/BioGrid/wolthuir/output_benchmark_sampleset_fasta/Ecoli
-  input_dir: /data/BioGrid/wolthuir/Juno_assembly_output/Ecoli/de_novo_assembly_filtered
-  species: escherichia coli
+  output_dir: output
+  input_dir: testdata/fastq_zipped
+  species: salmonella
   coverage: 0.6
   threshold: 0.8
   pointfinder_db: /mnt/db/juno-amr/pointfinderdb
@@ -74,4 +19,4 @@ Parameters:
   db_update: false
   run_pointfinder: '1'
   dryrun: false
-  input_isfastq_boolean: false
+  input_isfastq_boolean: true

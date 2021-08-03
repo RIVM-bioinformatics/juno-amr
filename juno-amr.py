@@ -31,9 +31,20 @@ class JunoAmrWrapper:
 
     def get_species_names_from_pointfinder_db(self):
         self.species_options = []
-        for entry in os.scandir(self.path_to_pointfinder_db):
-            if not entry.name.startswith('.') and entry.is_dir():
-                self.species_options.append(entry.name)
+
+        # If de database directory exists
+        if Path(self.path_to_pointfinder_db).is_dir():
+            print("Database present, collect species from database")
+            for entry in os.scandir(self.path_to_pointfinder_db):
+                if not entry.name.startswith('.') and entry.is_dir():
+                    self.species_options.append(entry.name)
+        
+        else:
+            print("No database found, using local file to collect species")
+            #TODO hardcoded path
+            with open("files/pointfinder_species.txt") as f:
+                self.species_options = f.readlines()
+                self.species_options = [species.strip() for species in self.species_options]
 
         self.species_options.append("other")
         return self.species_options
@@ -311,7 +322,7 @@ class JunoAmrWrapper:
             snakemake.snakemake(
                 "Snakefile",
                 use_conda = True,
-                latency_wait = 30,
+                latency_wait = 60,
                 cores = cores,
                 drmaa =f"-q bio -n {{threads}} -o {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.err -R \"span[hosts=1]\" -R \"rusage[mem={{resources.mem_mb}}]\"",
                 drmaa_log_dir = f"{self.output_file_path}/log/drmaa"
@@ -323,12 +334,11 @@ class JunoAmrWrapper:
                 "Snakefile",
                 use_conda = True,
                 dryrun = True,
-                latency_wait = 30,
+                latency_wait = 60,
                 cores = cores,
                 drmaa =f"-q bio -n {{threads}} -o {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.err -R \"span[hosts=1]\" -R \"rusage[mem={{resources.mem_mb}}]\"",
                 drmaa_log_dir = f"{self.output_file_path}/log/drmaa"
             )
-#yaml = YAML()
 
 
 def main():

@@ -12,7 +12,7 @@ rule makeResfinderSummary:
     #    "../../envs/resfinder.yaml"
 
     message:
-        "Creating a summary file"
+        "Creating ResFinder summary file"
     
     resources:
         mem_mb=config["mem_mb"]

@@ -13,7 +13,7 @@ rule runResfinderFastq:
         #"../../envs/resfinder.yaml"
 
     message:
-        "Processing received fastq samples in resfinder"
+        "Processing received fastq sample in ResFinder and PointFinder"
 
     params:
     #get parameters from configfile

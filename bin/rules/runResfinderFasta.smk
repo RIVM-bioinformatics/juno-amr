@@ -12,7 +12,7 @@ rule runResfinderFasta:
     #    "../../envs/resfinder.yaml"
     
     message:
-        "Processing received fasta samples in resfinder"
+        "Processing received fasta sample in ResFinder and PointFinder"
 
     params:
     #get parameters from configfile

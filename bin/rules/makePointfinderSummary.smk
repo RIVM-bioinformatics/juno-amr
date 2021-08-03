@@ -11,7 +11,7 @@ rule makePointfinderSummary:
     #    "../../envs/resfinder.yaml"
 
     message:
-        "Creating a summary file"
+        "Creating PointFinder summary file"
     
     resources:
         mem_mb=config["mem_mb"]

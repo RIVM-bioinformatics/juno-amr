@@ -1,0 +1,11 @@
+campylobacter
+escherichia_coli
+salmonella
+plasmodium_falciparum
+neisseria_gonorrhoeae
+mycobacterium_tuberculosis
+enterococcus_faecalis
+enterococcus_faecium
+klebsiella
+helicobacter_pylori
+staphylococcus_aureus
