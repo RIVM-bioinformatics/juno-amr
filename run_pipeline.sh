@@ -6,10 +6,52 @@ set -euo pipefail
 
 #----------------------------------------------#
 # User parameters
-#TODO is this correct?
-species="${1%/}"
-input_dir="${2%/}"
-output_dir="${3%/}"
+#input_dir="${1%/}"
+#output_dir="${2%/}"
+#PROJECT_NAME="${irods_input_projectID}"
+
+if [ ! -z "${1}" ] || [ ! -z "${2}" ] || [ ! -z "${irods_input_projectID}" ]
+then
+   INPUTDIR="${1}"
+   output_dir="${2}"
+   PROJECT_NAME="${irods_input_projectID}"
+else
+    echo "One of the parameters is missing, make sure there is an input directory, output directory and project name(param 1, 2 or irods_input_projectID)."
+    exit 1
+fi
+
+if [ ! -d "${input_dir}" ] || [ ! -d "${output_dir}" ]
+then
+    echo "The input directory $input_dir or output directory $output_dir does not exist"
+    exit 1
+fi
+
+case $PROJECT_NAME in
+
+  adhoc|gasadhoc|bacid|rogas|svgasuit|bsr_rvp)
+    GENUS_ALL="other"
+    ;;
+  dsshig|svshig)
+    GENUS_ALL="Shigella"
+    ;;
+  salm|svsalent|svsaltyp)
+    GENUS_ALL="Salmonella"
+    ;;
+  svlismon)
+    GENUS_ALL="Listeria"
+    ;;
+  svstec)
+    GENUS_ALL="Escherichia"
+    ;;
+  campy)
+    GENUS_ALL="Campylobacter"
+    ;;
+  *)
+    GENUS_ALL="other"
+    ;;
+    
+esac
+
 
 #----------------------------------------------#
 # Create/update necessary environments
@@ -45,7 +87,7 @@ fi
 
 set -euo pipefail
 
-python juno-amr.py --queue "${QUEUE}" -s "${species}" -i "${input_dir}" -o "${output_dir}"
+python juno-amr.py --queue "${QUEUE}" -i "${input_dir}" -o "${output_dir}" -s "${GENUS_ALL}"
 
 result=$?
 

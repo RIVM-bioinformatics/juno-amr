@@ -163,6 +163,16 @@ class JunoAmrWrapper:
                 help="If you want to run a dry run type --dryrun in your command"
             )
 
+            self.parser.add_argument(
+                "-q",
+                "--queue",
+                type=str,
+                required=False,
+                default="bio",
+                dest="queue",
+                help="Queue used if running in a cluster"
+            )
+
             # parse arguments
             self.dict_arguments = vars(self.parser.parse_args())
             #set pathlib.path as string for yaml, yaml doesnt want a posixpath
@@ -316,6 +326,7 @@ class JunoAmrWrapper:
         open_config_parameters = open("config/user_parameters.yaml")
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
         self.output_file_path = parsed_config['Parameters']['output_dir']
+        self.queue = parsed_config['Parameters']['queue']
         
         #run snakemake API with or without dryrun
         if self.dict_arguments["dryrun"] is False:
@@ -324,7 +335,7 @@ class JunoAmrWrapper:
                 use_conda = True,
                 latency_wait = 60,
                 cores = cores,
-                drmaa =f"-q bio -n {{threads}} -o {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.err -R \"span[hosts=1]\" -R \"rusage[mem={{resources.mem_mb}}]\"",
+                drmaa =f"-q {self.queue} -n {{threads}} -o {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.err -R \"span[hosts=1]\" -R \"rusage[mem={{resources.mem_mb}}]\"",
                 drmaa_log_dir = f"{self.output_file_path}/log/drmaa"
             )
 
