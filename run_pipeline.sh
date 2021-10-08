@@ -6,10 +6,6 @@ set -euo pipefail
 
 #----------------------------------------------#
 # User parameters
-#input_dir="${1%/}"
-#output_dir="${2%/}"
-#PROJECT_NAME="${irods_input_projectID}"
-
 if [ ! -z "${1}" ] || [ ! -z "${2}" ] || [ ! -z "${irods_input_projectID}" ]
 then
    INPUTDIR="${1}"
