@@ -28,19 +28,19 @@ case $PROJECT_NAME in
     GENUS_ALL="other"
     ;;
   dsshig|svshig)
-    GENUS_ALL="Shigella"
+    GENUS_ALL="escherichia_coli"
     ;;
-  salm|svsalent|svsaltyp)
-    GENUS_ALL="Salmonella"
+  salm|svsalent|svsaltyp|vdl_salm)
+    GENUS_ALL="salmonella"
     ;;
-  svlismon)
-    GENUS_ALL="Listeria"
+  svlismon|vdl_list)
+    GENUS_ALL="other"
     ;;
-  svstec)
-    GENUS_ALL="Escherichia"
+  svstec|vdl_ecoli|vdl_stec)
+    GENUS_ALL="escherichia_coli"
     ;;
-  campy)
-    GENUS_ALL="Campylobacter"
+  campy|vdl_campy)
+    GENUS_ALL="campylobacter"
     ;;
   *)
     GENUS_ALL="other"
