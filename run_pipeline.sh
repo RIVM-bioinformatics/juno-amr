@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Wrapper for juno typing pipeline
+# Wrapper for juno AMR pipeline
 
 set -euo pipefail
 
