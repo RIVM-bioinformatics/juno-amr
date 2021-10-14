@@ -3,7 +3,7 @@
     <br />
     <h2> Pipeline for antimicrobial restistance</h2>
     <br />
-    <img src="https://via.placeholder.com/150" alt="pipeline logo">
+    <img src="files/juno_antimicrobial_lightbg.png" alt="pipeline logo">
 </div>
 
 ## Pipeline information
