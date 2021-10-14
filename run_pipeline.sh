@@ -24,7 +24,7 @@ fi
 
 case $PROJECT_NAME in
 
-  adhoc|gasadhoc|bacid|rogas|svgasuit|bsr_rvp)
+  adhoc|gasadhoc|bacid|rogas|svgasuit)
     GENUS_ALL="other"
     ;;
   dsshig|svshig)
