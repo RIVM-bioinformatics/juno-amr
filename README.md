@@ -1,7 +1,7 @@
 <div align="center">
     <h1> Juno-amr</h1>
     <br />
-    <h2> Pipeline for antimicrobial restistance</h2>
+    <h2> Pipeline for antimicrobial resistance</h2>
     <br />
     <img src="files/juno_antimicrobial_lightbg.png" alt="pipeline logo">
 </div>
