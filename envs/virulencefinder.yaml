@@ -1,0 +1,10 @@
+name: virulencefinder
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - kma==1.3.14
+  - cgecore==1.5.5
+  - blast==2.12.0
+  - pip:
+    - tabulate==0.8.0

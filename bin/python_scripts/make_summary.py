@@ -75,8 +75,8 @@ class JunoSummary:
             required = True,
             metavar="name",
             dest="summary_type",
-            help="The type of summaries to create, choose from: resfinder or pointfinder",
-            choices= ["resfinder", "pointfinder"]
+            help="The type of summaries to create, choose from: resfinder, pointfinder, amrfinderplus or virulencefinder",
+            choices= ["resfinder", "pointfinder", "amrfinderplus", "virulencefinder"]
         )
 
         # parse arguments
@@ -277,6 +277,11 @@ class JunoSummary:
         final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
         final_df.to_csv(f'{pointfinder_prediction_output}', mode='a', index=False)
     
+    def amrfinderplus_summary():
+        #meep
+    
+    def virulencefinder_summary():
+
 def main():
     m = JunoSummary()
     m.get_user_arguments()

@@ -6,7 +6,7 @@ rule runResfinderFasta:
 
     output:
         #Make an output directory per sample
-        output_dir = directory(OUT + "/results_per_sample/{sample}")
+        output_dir = directory(OUT + "/results/resfinder/{sample}")
     
     #conda:
     #    "../../envs/resfinder.yaml"

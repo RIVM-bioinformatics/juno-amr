@@ -1,22 +1,13 @@
-#fastqr1
-samples_fastq_r1:
-  '1091901608': /mnt/scratch_dir/wolthuir/amr_testdata_irods/input/1091901608_pR1.fastq.gz
-  '1091901865': /mnt/scratch_dir/wolthuir/amr_testdata_irods/input/1091901865_pR1.fastq.gz
-  1091901335_Sen_BSR_EPI_48477-H04_ACAGTGTATGGAACATACGG_L001: /mnt/scratch_dir/wolthuir/amr_testdata_irods/input/1091901335_Sen_BSR_EPI_48477-H04_ACAGTGTATGGAACATACGG_L001_pR1.fastq.gz
-  1091900558_S4_L001: /mnt/scratch_dir/wolthuir/amr_testdata_irods/input/1091900558_S4_L001_pR1.fastq.gz
-
-
-#fastqr2
-samples_fastq_r2:
-  '1091901865': /mnt/scratch_dir/wolthuir/amr_testdata_irods/input/1091901865_pR2.fastq.gz
-  1091901335_Sen_BSR_EPI_48477-H04_ACAGTGTATGGAACATACGG_L001: /mnt/scratch_dir/wolthuir/amr_testdata_irods/input/1091901335_Sen_BSR_EPI_48477-H04_ACAGTGTATGGAACATACGG_L001_pR2.fastq.gz
-  '1091901608': /mnt/scratch_dir/wolthuir/amr_testdata_irods/input/1091901608_pR2.fastq.gz
-  1091900558_S4_L001: /mnt/scratch_dir/wolthuir/amr_testdata_irods/input/1091900558_S4_L001_pR2.fastq.gz
+#fasta
+samples_fasta:
+  '1122000006': /mnt/scratch_dir/wolthuir/amr_testdata_irods/input/fasta/1122000009.fasta
+  '1122000001': /mnt/scratch_dir/wolthuir/amr_testdata_irods/input/fasta/1122000009.fasta
+  '1122000009': /mnt/scratch_dir/wolthuir/amr_testdata_irods/input/fasta/1122000009.fasta
 
 # parameters for pipeline given by user
 Parameters:
   output_dir: /mnt/scratch_dir/wolthuir/amr_testdata_irods/outt
-  input_dir: /mnt/scratch_dir/wolthuir/amr_testdata_irods/input
+  input_dir: /mnt/scratch_dir/wolthuir/amr_testdata_irods/input/fasta
   species: salmonella
   coverage: 0.6
   threshold: 0.8
@@ -26,4 +17,4 @@ Parameters:
   run_pointfinder: '1'
   dryrun: false
   queue: bio
-  input_isfastq_boolean: true
+  input_isfastq_boolean: false

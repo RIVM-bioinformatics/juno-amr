@@ -4,9 +4,10 @@ output
 testdata
 .snakemake
 bin/resfinder
+bin/virulencefinder
 /mnt/db/juno-amr/pointfinderdb
 /mnt/db/juno-amr/resfinderdb
 
 
 #files to ignore
-config/user_parameters.yml
+config/user_parameters.yaml
