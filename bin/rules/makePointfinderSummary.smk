@@ -1,11 +1,11 @@
 rule makePointfinderSummary:    
     input:
     #TODO make fasta or fastq
-        resfinder_output_dir = expand(OUT + "/results_per_sample/{sample}", sample=SAMPLE_NAME)
+        resfinder_output_dir = expand(OUT + "/results/resfinder/{sample}", sample=SAMPLE_NAME)
 
     output:
-        pointfinder_results = OUT + "/summary/summary_amr_pointfinder_results.csv",
-        pointfinder_prediction = OUT + "/summary/summary_amr_pointfinder_prediction.csv"
+        pointfinder_results = OUT + "/results/summary/summary_amr_pointfinder_results.csv",
+        pointfinder_prediction = OUT + "/results/summary/summary_amr_pointfinder_prediction.csv"
 
     #conda: 
     #    "../../envs/resfinder.yaml"
