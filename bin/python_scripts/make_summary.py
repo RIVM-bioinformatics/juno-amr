@@ -56,6 +56,25 @@ class JunoSummary:
         )
 
         self.parser.add_argument(
+            "-sv",
+            "--summary_virulencefinder",
+            type=str,
+            metavar="file",
+            dest="virulencefinder_summary_file_names",
+            nargs=1,
+            help="The name for the virulencefinder summary file for example: virulencefinder_summary"
+        )
+
+        self.parser.add_argument(
+            "-sa",
+            "--summary_amrfinderplus",
+            type=str,
+            metavar="file",
+            dest="amrfinderplus_summary_file_names",
+            nargs=1,
+            help="The name for the amrfinderplus summary file for example: amrfinderplus_summary"
+        )
+        self.parser.add_argument(
             "-i",
             "--input",
             type=str,
@@ -106,6 +125,8 @@ class JunoSummary:
         #Collect summary file names from the parser
         self.resfinder_summary_file_names = self.dict_arguments.get("resfinder_summary_file_names")
         self.pointfinder_summary_file_names = self.dict_arguments.get("pointfinder_summary_file_names")
+        self.virulencefinder_summary_file_names = self.dict_arguments.get("virulencefinder_summary_file_names")
+        self.amrfinderplus_summary_file_names = self.dict_arguments.get("amrfinderplus_summary_file_names")
 
         return self.output_dir_name, self.samplenames, dirpath
 
@@ -277,11 +298,64 @@ class JunoSummary:
         final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
         final_df.to_csv(f'{pointfinder_prediction_output}', mode='a', index=False)
     
-    def amrfinderplus_summary():
-        #meep
-    
-    def virulencefinder_summary():
+    def virulencefinder_summary(self):
+        virulence_summary_location = self.virulencefinder_summary_file_names[0]
+        with open(virulence_summary_location, 'w', newline='') as csvfile:
+            summary_file = csv.writer(csvfile)
 
+            #Set the header for the file
+            #Just taking the first sample to get the header for the csv file
+            pathname = f"{self.input_paths[0]}/results_tab.tsv"
+            opened_file = open(pathname, "r")
+
+            #get the column names
+            header = opened_file.readline().split("\t")
+            header.insert(0, "Sample")
+            summary_file.writerow(header)
+
+            # for each sample get the data
+            sample_counter = 0
+            for path in self.input_paths:
+                pathname = f"{path}/results_tab.tsv"
+                opened_file = open(pathname, "r")
+                data_lines = opened_file.readlines()[1:]    
+
+                #Write elements of interest to the generated summary file
+                for line in data_lines:
+                    elements_in_line = line.split("\t")
+                    elements_in_line.insert(0, self.samplenames[sample_counter])
+                    summary_file.writerow(elements_in_line)
+                sample_counter = sample_counter + 1
+
+    def amrfinderplus_summary(self):
+        amrfinderplus_summary_location = self.amrfinderplus_summary_file_names[0]
+        with open(amrfinderplus_summary_location, 'w', newline='') as csvfile:
+            summary_file = csv.writer(csvfile)
+
+            #Set the header for the file
+            #Just taking the first sample to get the header for the csv file
+            pathname = f"{self.input_paths[0]}/amrfinder_result.txt"
+            opened_file = open(pathname, "r")
+
+            #get the column names
+            header = opened_file.readline().split("\t")
+            header.insert(0, "Sample")
+            summary_file.writerow(header)
+
+            # for each sample get the data
+            sample_counter = 0
+            for path in self.input_paths:
+                pathname = f"{path}/amrfinder_result.txt"
+                opened_file = open(pathname, "r")
+                data_lines = opened_file.readlines()[1:]    
+
+                #Write elements of interest to the generated summary file
+                for line in data_lines:
+                    elements_in_line = line.split("\t")
+                    elements_in_line.insert(0, self.samplenames[sample_counter])
+                    summary_file.writerow(elements_in_line)
+                sample_counter = sample_counter + 1
+            
 def main():
     m = JunoSummary()
     m.get_user_arguments()
@@ -297,6 +371,12 @@ def main():
     elif summary_type == "pointfinder":
         m.pointfinder_result_summary()
         m.pointfinder_prediction_summary()
+    
+    elif summary_type == "amrfinderplus":
+        m.amrfinderplus_summary()
+    
+    elif summary_type == "virulencefinder":
+        m.virulencefinder_summary()
 
 if __name__ == '__main__':
     main()
