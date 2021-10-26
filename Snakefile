@@ -27,6 +27,8 @@ else:
 
 include: "bin/rules/makeResfinderSummary.smk"
 include: "bin/rules/makePointfinderSummary.smk"
+include: "bin/rules/makeVirulencefinderSummary.smk"
+include: "bin/rules/makeAmrfinderplusSummary.smk"
 
 #################################################################################
 #####   Specify final output                                                #####
@@ -41,6 +43,8 @@ if config["Parameters"]["species"] == "other":
         input: 
             expand(OUT + "/results/summary/summary_amr_genes.csv"),
             expand(OUT + "/results/summary/summary_amr_phenotype.csv"),
+            expand(OUT + "/results/summary/summary_virulencefinder.csv"),
+            expand(OUT + "/results/summary/summary_amrfinderplus.csv"),
             expand(OUT + "/results/resfinder/{sample}", sample=SAMPLE_NAME),
             expand(OUT + "/results/virulencefinder/{sample}/", sample=SAMPLE_NAME),
             expand(OUT + "/results/amrfinderplus/{sample}/", sample=SAMPLE_NAME)
@@ -53,6 +57,8 @@ else:
         input:
             expand(OUT + "/results/summary/summary_amr_genes.csv"),
             expand(OUT + "/results/summary/summary_amr_phenotype.csv"),
+            expand(OUT + "/results/summary/summary_virulencefinder.csv"),
+            expand(OUT + "/results/summary/summary_amrfinderplus.csv"),
             expand(OUT + "/results/summary/summary_amr_pointfinder_results.csv"),
             expand(OUT + "/results/summary/summary_amr_pointfinder_prediction.csv"),
             expand(OUT + "/results/resfinder/{sample}", sample=SAMPLE_NAME),
