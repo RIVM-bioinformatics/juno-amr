@@ -207,33 +207,33 @@ class JunoAmrWrapper:
                 # change _ to " " in species name & update species name in the arguments
                 self.dict_arguments[key] = self.dict_arguments[key].replace("_", " ")
 
-    #TODO this function is not being used yet
-    def check_directory_format(self, given_path):
-        if given_path.endswith("/"):
-            print("path is correct:", given_path)
-            return given_path
-        else:
-            print("path is incorrect format, changing format")
-            correct_format = given_path + "/"
-            print("format changed")
-            return correct_format
-
     def is_directory_with_correct_file_format(self, input_dir):
         #allowed extensions
         #TODO theres more extensions
-        allowed_file_extensions = ['.fastq', '.fq', '.fastq.gz', '.fq.gz', ".faa", ".fasta", "fasta.gz", "faa.gz"]
+        allowed_file_extensions_fastq = ['.fastq', '.fq', '.fastq.gz', '.fq.gz']
+        allowed_file_extensions_fasta = [".faa", ".fasta", "fasta.gz", "faa.gz"]
         #check if dir exists
         if os.path.isdir(input_dir):
             input_dir_to_path = Path(input_dir)
             folder = os.listdir(input_dir)
-            # split de ext van folder[0]
-            #for filename in folder, check of de extension gelijk is
-            # for each file check if the file has the correct extension
-            # TODO als er gemengde files zijn gaat het nog fout, iedere extension is nu goed, maar het kan maar 1 extension per dir zijn
+            fastq_count = 0
+            fasta_count = 0
+            fasta_bool = False
+            fastq_bool = False
             for filename in folder:
                 extension = "".join(pathlib.Path(filename).suffixes)
-                if extension not in allowed_file_extensions:
-                    self.parser.error("Files in the input directory do not have a correct file format. Please give a directory with files in the format: {}".format(allowed_file_extensions))   
+                if extension in allowed_file_extensions_fastq:
+                    #check if there is at least one fasta or at least 2 fastq files?
+                    fastq_count += 1
+                    fastq_bool = True
+                if extension in allowed_file_extensions_fasta:
+                    fasta_count += 1
+                    fasta_bool = True
+            if fastq_count < 2 and fastq_bool == True:
+                self.parser.error("Files in the input directory do not have a correct file format or there are not enough files. Please give a directory with files in the correct format. For fastq use: {}.".format(allowed_file_extensions_fastq))   
+            elif fasta_count < 1 and fasta_bool == True:
+                self.parser.error("Files in the input directory do not have a correct file format or there are not enough files. Please give a directory with files in the correct format. For fasta use: {}.".format(allowed_file_extensions_fasta))   
+
         else:
             print(f'\"{input_dir}\" is not a directory. Give an existing directory.')
             sys.exit(1)      
@@ -328,15 +328,17 @@ class JunoAmrWrapper:
         self.output_file_path = parsed_config['Parameters']['output_dir']
         self.queue = parsed_config['Parameters']['queue']
         
-        #run snakemake API with or without dryrun
         if self.dict_arguments["dryrun"] is False:
             snakemake.snakemake(
                 "Snakefile",
                 use_conda = True,
                 latency_wait = 60,
                 cores = cores,
-                drmaa =f"-q {self.queue} -n {{threads}} -o {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.err -R \"span[hosts=1]\" -R \"rusage[mem={{resources.mem_mb}}]\"",
-                drmaa_log_dir = f"{self.output_file_path}/log/drmaa"
+                nodes = cores,
+                keepgoing = True,
+                conda_frontend='mamba',
+                cluster =f"bsub -q {self.queue} -n {{threads}} -o {self.output_file_path}/log/cluster/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/cluster/{{name}}_{{wildcards}}_{{jobid}}.err -M {{resources.mem_mb}}M"
+                #drmaa_log_dir = f"{self.output_file_path}/log/drmaa"
             )
 
         elif self.dict_arguments["dryrun"] is True:
@@ -347,10 +349,12 @@ class JunoAmrWrapper:
                 dryrun = True,
                 latency_wait = 60,
                 cores = cores,
-                drmaa =f"-q bio -n {{threads}} -o {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/drmaa/{{name}}_{{wildcards}}_{{jobid}}.err -R \"span[hosts=1]\" -R \"rusage[mem={{resources.mem_mb}}]\"",
-                drmaa_log_dir = f"{self.output_file_path}/log/drmaa"
+                nodes = cores,
+                keepgoing = True,
+                conda_frontend='mamba',
+                cluster =f"bsub -q {self.queue} -n {{threads}} -o {self.output_file_path}/log/cluster/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/cluster/{{name}}_{{wildcards}}_{{jobid}}.err -M {{resources.mem_mb}}M"
+                #drmaa_log_dir = f"{self.output_file_path}/log/drmaa"
             )
-
 
 def main():
     j = JunoAmrWrapper()

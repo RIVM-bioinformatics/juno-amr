@@ -8,7 +8,7 @@ set -euo pipefail
 # User parameters
 if [ ! -z "${1}" ] || [ ! -z "${2}" ] || [ ! -z "${irods_input_projectID}" ]
 then
-   INPUTDIR="${1}"
+   input_dir="${1}"
    output_dir="${2}"
    PROJECT_NAME="${irods_input_projectID}"
 else
@@ -16,10 +16,12 @@ else
     exit 1
 fi
 
-if [ ! -d "${input_dir}" ] || [ ! -d "${output_dir}" ]
+if [ ! -d "${input_dir}" ] || [ ! -d "${output_dir}" ] || [ ! -d "${input_dir}/clean_fastq" ]
 then
-    echo "The input directory $input_dir or output directory $output_dir does not exist"
-    exit 1
+  echo "The input directory $input_dir, output directory $output_dir or fastq dir ${input_dir}/clean_fastq does not exist"
+  exit 1
+else
+  input_fastq="${input_dir}/clean_fastq"
 fi
 
 case $PROJECT_NAME in
