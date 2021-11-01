@@ -7,7 +7,6 @@ Date: 30 - 03 - 2021
 Documentation: -
 """
 
-#imports
 import sys
 import argparse
 import os
@@ -77,7 +76,6 @@ class JunoAmrWrapper:
                 help="Path to the directory you want to use as an output directory, if non is given the default will be an output directory in the Juno-amr folder"
             )
 
-            #TODO decide on fasta or fastq
             self.parser.add_argument(
                 "-i",
                 "--input",
@@ -317,12 +315,10 @@ class JunoAmrWrapper:
                 yaml.dump(config, file)
 
     def run_snakemake_api(self):
-        #Get cores from config
         open_config_parameters = open("config/database_config.yaml")
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
         cores = parsed_config['db-cores']
 
-        #Get output dir from other config
         open_config_parameters = open("config/user_parameters.yaml")
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
         self.output_file_path = parsed_config['Parameters']['output_dir']
@@ -337,8 +333,7 @@ class JunoAmrWrapper:
                 nodes = cores,
                 keepgoing = True,
                 conda_frontend='mamba',
-                cluster =f"bsub -q {self.queue} -n {{threads}} -o {self.output_file_path}/log/cluster/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/cluster/{{name}}_{{wildcards}}_{{jobid}}.err -M {{resources.mem_mb}}M"
-                #drmaa_log_dir = f"{self.output_file_path}/log/drmaa"
+                cluster =f"bsub -q {self.queue} -W 60 -n {{threads}} -o {self.output_file_path}/log/cluster/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/cluster/{{name}}_{{wildcards}}_{{jobid}}.err -M {{resources.mem_mb}}M"
             )
 
         elif self.dict_arguments["dryrun"] is True:
@@ -352,8 +347,7 @@ class JunoAmrWrapper:
                 nodes = cores,
                 keepgoing = True,
                 conda_frontend='mamba',
-                cluster =f"bsub -q {self.queue} -n {{threads}} -o {self.output_file_path}/log/cluster/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/cluster/{{name}}_{{wildcards}}_{{jobid}}.err -M {{resources.mem_mb}}M"
-                #drmaa_log_dir = f"{self.output_file_path}/log/drmaa"
+                cluster =f"bsub -q {self.queue} -W 60 -n {{threads}} -o {self.output_file_path}/log/cluster/{{name}}_{{wildcards}}_{{jobid}}.out -e {self.output_file_path}/log/cluster/{{name}}_{{wildcards}}_{{jobid}}.err -M {{resources.mem_mb}}M"
             )
 
 def main():
