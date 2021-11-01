@@ -19,7 +19,6 @@ The Juno Antimicrobial Resistance(Juno AMR) pipeline is a pipeline that is used 
 ## Prerequisities
 * **Linux environment**
 * **(mini)conda**
-* **TBD** to be discussed.
 * **Python3.7.6** Python is the scripting language used to create the program.
 
 
@@ -34,29 +33,25 @@ git clone https://github.com/RIVM-bioinformatics/Juno-amr.git
 cd Juno-amr
 ```
 
-3. Create mamba directory.
+3. Create & activate mamba environment.
 ```
-TBT
+conda create --name mamba mamba=0.16.0
 ```
-
-4. Activate mamba.
 ```
 conda activate mamba
 ```
 
-5. Create mamba environment.
+4. Create & activate juno environment.
 ```
 mamba env create -f envs/juno_amr_master.yaml
 ```
-
-6. Activate the environment,
 ```
 conda activate juno-amr_master
 ```
 
-7. [need to test again if these steps are still correct]
+7. Example of run:
 ```
-test
+python3 juno-amr.py -i [input] -o [output] -s [species]
 ```
 
 ## Parameters & Usage
