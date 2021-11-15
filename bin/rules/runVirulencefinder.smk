@@ -19,6 +19,7 @@ rule runVirulencefinder:
     threads: config["threads"]
 
     shell:
+    #the sample name directory is not being made by virulence finder
         """
-        python3 bin/virulencefinder/virulencefinder.py -i {input} -o {output.output_dir} -p /mnt/db/juno-amr/virulencefinderdb/ -x
+        mkdir -p {output.output_dir} && python3 bin/virulencefinder/virulencefinder.py -i {input} -o {output.output_dir} -p /mnt/db/juno-amr/virulencefinderdb/ -x
         """

@@ -9,6 +9,7 @@ Documentation: -
 
 import sys
 import argparse
+from pandas.core.arrays.sparse import dtype
 import yaml
 import csv
 import os
@@ -127,7 +128,6 @@ class JunoSummary:
         self.pointfinder_summary_file_names = self.dict_arguments.get("pointfinder_summary_file_names")
         self.virulencefinder_summary_file_names = self.dict_arguments.get("virulencefinder_summary_file_names")
         self.amrfinderplus_summary_file_names = self.dict_arguments.get("amrfinderplus_summary_file_names")
-
         return self.output_dir_name, self.samplenames, dirpath
 
     def create_amr_genes_summary(self):
@@ -300,62 +300,34 @@ class JunoSummary:
     
     def virulencefinder_summary(self):
         virulence_summary_location = self.virulencefinder_summary_file_names[0]
-        with open(virulence_summary_location, 'w', newline='') as csvfile:
-            summary_file = csv.writer(csvfile)
-
-            #Set the header for the file
-            #Just taking the first sample to get the header for the csv file
-            pathname = f"{self.input_paths[0]}/results_tab.tsv"
-            opened_file = open(pathname, "r")
-
-            #get the column names
-            header = opened_file.readline().split("\t")
-            header.insert(0, "Sample")
-            summary_file.writerow(header)
-
-            # for each sample get the data
-            sample_counter = 0
-            for path in self.input_paths:
-                pathname = f"{path}/results_tab.tsv"
-                opened_file = open(pathname, "r")
-                data_lines = opened_file.readlines()[1:]    
-
-                #Write elements of interest to the generated summary file
-                for line in data_lines:
-                    elements_in_line = line.split("\t")
-                    elements_in_line.insert(0, self.samplenames[sample_counter])
-                    summary_file.writerow(elements_in_line)
-                sample_counter = sample_counter + 1
+        sample_counter = 0
+        dflist = []
+        for path in self.input_paths:
+            pathname = f"{path}/results_tab.tsv"
+            opened_file = pd.read_csv(pathname, sep="\t", dtype=object, keep_default_na=False)
+            filtered_df = opened_file.filter(['Virulence factor', 'Identity', 'Query / Template length', 'Protein function'], axis=1)
+            filtered_df.insert(0, "Samplename", self.samplenames[sample_counter])   
+            sample_counter = sample_counter + 1  
+            dflist.append(filtered_df)
+        
+        final_df = pd.concat(dflist, axis=0, ignore_index=True)
+        final_df.to_csv(virulence_summary_location, mode='a', index=False)
 
     def amrfinderplus_summary(self):
         amrfinderplus_summary_location = self.amrfinderplus_summary_file_names[0]
-        with open(amrfinderplus_summary_location, 'w', newline='') as csvfile:
-            summary_file = csv.writer(csvfile)
+        sample_counter = 0
+        dflist = []
+        for path in self.input_paths:
+            pathname = f"{path}/amrfinder_result.txt"
+            opened_file = pd.read_csv(pathname, sep="\t", dtype=object, keep_default_na=False)
+            filtered_df = opened_file.filter(['Gene symbol', 'Sequence name', 'Element type', 'Element subtype', 'Class', 'Subclass', '% Coverage of reference sequence', '% Identity to reference sequence'], axis=1)
+            filtered_df.insert(0, "Samplename", self.samplenames[sample_counter])   
+            sample_counter = sample_counter + 1  
+            dflist.append(filtered_df)
+        
+        final_df = pd.concat(dflist, axis=0, ignore_index=True)
+        final_df.to_csv(amrfinderplus_summary_location, mode='a', index=False)
 
-            #Set the header for the file
-            #Just taking the first sample to get the header for the csv file
-            pathname = f"{self.input_paths[0]}/amrfinder_result.txt"
-            opened_file = open(pathname, "r")
-
-            #get the column names
-            header = opened_file.readline().split("\t")
-            header.insert(0, "Sample")
-            summary_file.writerow(header)
-
-            # for each sample get the data
-            sample_counter = 0
-            for path in self.input_paths:
-                pathname = f"{path}/amrfinder_result.txt"
-                opened_file = open(pathname, "r")
-                data_lines = opened_file.readlines()[1:]    
-
-                #Write elements of interest to the generated summary file
-                for line in data_lines:
-                    elements_in_line = line.split("\t")
-                    elements_in_line.insert(0, self.samplenames[sample_counter])
-                    summary_file.writerow(elements_in_line)
-                sample_counter = sample_counter + 1
-            
 def main():
     m = JunoSummary()
     m.get_user_arguments()
