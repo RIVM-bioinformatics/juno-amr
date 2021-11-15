@@ -23,5 +23,5 @@ rule runamrfinderplus:
     #Do this with a boolean or?
     #amrfinder -u
         """
-        amrfinder -n {input} --plus -o {output.output_dir}/amrfinder_result.txt
+        mkdir -p {output.output_dir} && amrfinder -n {input} --plus -o {output.output_dir}/amrfinder_result.txt
         """
