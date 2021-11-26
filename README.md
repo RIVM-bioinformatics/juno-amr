@@ -54,6 +54,11 @@ conda activate juno-amr_master
 python3 juno-amr.py -i [input] -o [output] -s [species]
 ```
 
+**Note:** To get an overview of the available species for chromosomal point mutations use the command:
+```
+python3 juno-amr.py -s -h
+```
+
 ## Parameters & Usage
 ### Command for help
 * ```-h, --help``` Shows the help of the pipeline
