@@ -14,7 +14,15 @@
 * **Commissioned by:**      Maaike van den Beld
 
 ## About this project
-The Juno Antimicrobial Resistance(Juno AMR) pipeline is a pipeline that is used to automate [ResFinder](https://bitbucket.org/genomicepidemiology/resfinder/src/master/) and [PointFinder](https://bitbucket.org/genomicepidemiology/pointfinder/src/master/).The tools that are being used are created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/). These tools identify acquired genes and find chromosal mutations mediating antimicrobial resistance in DNA secuences of bacteria. This can be partial or total sequences. The output of both tools can be used for analysis and is also combined in four summary files for a quick overview of the most important results.  
+The Juno Antimicrobial Resistance(Juno AMR) pipeline is a pipeline that is used to automate multiple antimicrobial resistance related tools. 
+
+The tools used in this pipeline:
+[ResFinder](https://bitbucket.org/genomicepidemiology/resfinder/src/master/) - created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/)
+[PointFinder](https://bitbucket.org/genomicepidemiology/pointfinder/src/master/) - created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/)
+[VirulenceFinder](https://bitbucket.org/genomicepidemiology/virulencefinder/src/master/) - created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/)
+[AMRFinderPlus](https://github.com/ncbi/amr) - created by [The National Center for Biotechnology Information](https://www.ncbi.nlm.nih.gov/)
+
+These tools help identify: acquired antimicrobial resistance genes, chromosomal mutations mediating antimicrobial resistance, virulence factors, biocide, heat, acid, and metal resistance genes. The input can be partial or total DNA sequences of bacteria. The output of both tools can be used for analysis and is also combined in multiple summary files for a quick overview of the most important results.
 
 ## Prerequisities
 * **Linux environment**
@@ -52,6 +60,11 @@ conda activate juno-amr_master
 7. Example of run:
 ```
 python3 juno-amr.py -i [input] -o [output] -s [species]
+```
+
+**Note:** To get an overview of the available species for chromosomal point mutations use the command:
+```
+python3 juno-amr.py -s -h
 ```
 
 ## Parameters & Usage
