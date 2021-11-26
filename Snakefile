@@ -89,14 +89,3 @@ else:
                 expand(OUT + "/results/summary/summary_amr_pointfinder_results.csv"),
                 expand(OUT + "/results/summary/summary_amr_pointfinder_prediction.csv"),
                 expand(OUT + "/results/resfinder/{sample}", sample=SAMPLE_NAME)
-
-        input:
-            expand(OUT + "/results/summary/summary_amr_genes.csv"),
-            expand(OUT + "/results/summary/summary_amr_phenotype.csv"),
-            expand(OUT + "/results/summary/summary_virulencefinder.csv"),
-            expand(OUT + "/results/summary/summary_amrfinderplus.csv"),
-            expand(OUT + "/results/summary/summary_amr_pointfinder_results.csv"),
-            expand(OUT + "/results/summary/summary_amr_pointfinder_prediction.csv"),
-            expand(OUT + "/results/resfinder/{sample}", sample=SAMPLE_NAME),
-            expand(OUT + "/results/virulencefinder/{sample}/", sample=SAMPLE_NAME),
-            expand(OUT + "/results/amrfinderplus/{sample}/", sample=SAMPLE_NAME)
