@@ -21,168 +21,164 @@ import csv
 import pandas as pd
 
 sys.path.insert(0, 'bin/python_scripts/')
-import download_dbs
+from start_pipeline import *
+from download_dbs import * 
 
 class JunoAmrWrapper:
-    def __init__(self, arguments=None):
+    def __init__(self, input_dir):
         """constructor, containing all variables"""
-        self.path_to_pointfinder_db = "/mnt/db/juno-amr/pointfinderdb"
+        #arguments=None
+        #self.path_to_pointfinder_db = "/mnt/db/juno-amr/pointfinderdb"
+        #input_dir = dict_arguments["input_dir"]
+        self.input_dir = pathlib.Path(input_dir)
 
-    def get_species_names_from_pointfinder_db(self):
-        self.species_options = []
 
-        # If de database directory exists
-        if Path(self.path_to_pointfinder_db).is_dir():
-            print("Database present, collect species from database")
-            for entry in os.scandir(self.path_to_pointfinder_db):
-                if not entry.name.startswith('.') and entry.is_dir():
-                    self.species_options.append(entry.name)
-        
+
+    # Start juno pipeline ale function 
+    def start_juno_pipeline(self):
+        '''
+        This function performs calls other functions in the class to complete 
+        all the necessary steps needed for a robust and well documented Juno
+        pipeline. For instance, validating directories, making sample_dict 
+        (from which a sample_sheet can be made), etc. This is the main (and 
+        often only) function that is usually needed to run a Juno pipeline
+        '''
+        print("start juno")
+        #print(self.input_dir)
+        self.supported_extensions = {'fastq': ('.fastq', '.fastq.gz', '.fq', '.fq.gz'),
+                                    'fasta': ('.fasta')}
+        self.__subdirs_ = self.__define_input_subdirs()
+        self.__validate_input_dir()
+        print("Making a list of samples to be processed in this pipeline run...")
+        self.sample_dict = self.make_sample_dict()
+        print("Validating that all expected input files per sample are present in the input directory...")
+        self.validate_sample_dict()
+    
+    def __validate_input_dir(self):
+        '''
+        Function to check that input directory is indeed an existing directory 
+        that contains files with the expected extension (fastq or fasta)
+        '''
+        if self.input_type == 'both':
+            fastq_subdir_validated = self.__validate_input_subdir(self.__subdirs_['fastq'], 
+                                                                self.supported_extensions['fastq'])
+            fasta_subdir_validated = self.__validate_input_subdir(self.__subdirs_['fasta'], 
+                                                                self.supported_extensions['fasta'])
+            return (fastq_subdir_validated and fasta_subdir_validated)
         else:
-            print("No database found, using local file to collect species")
-            #TODO hardcoded path
-            with open("files/pointfinder_species.txt") as f:
-                self.species_options = f.readlines()
-                self.species_options = [species.strip() for species in self.species_options]
+            return self.__validate_input_subdir(self.__subdirs_[self.input_type], 
+                                                self.supported_extensions[self.input_type])
 
-        self.species_options.append("other")
-        return self.species_options
 
-    def get_user_arguments(self):
-        """Function to parse the command line arguments from the user"""
-        # Select 2 arguments in the case someone asks for help on the species
-        user_help_input = str(sys.argv[1] + sys.argv[2])
-        if user_help_input == "-s-h":
-            #Give the help and exit the program
-            print(f"Choose the full scientific name of the species sample, use underscores not spaces. Options: {self.species_options}. If you don't know the species choose 'other' as species option")
-            sys.exit()
+    #check if input dir is juno assembly output
+    def __input_dir_is_juno_assembly_output(self):
+        '''
+        Function to check whether the input directory is actually the output 
+        of the Juno_assembly pipeline. The Juno_assembly pipeline is often the 
+        first step for downstream analyses, so its output becomes the input 
+        directory of other pipelines
+        '''
+        is_juno_assembly_output = (self.input_dir.joinpath('clean_fastq').exists() 
+                                        and self.input_dir.joinpath('de_novo_assembly_filtered').exists())
+        if is_juno_assembly_output:
+            return True
         else:
-            # Create argparser
-            self.parser = argparse.ArgumentParser(
-                usage= "python3 juno-amr.py -s [species]  -i [directory with fastq files]",
-                description = "Juno-amr pipeline. Automated pipeline to use resfinder and pointfinder on given input data.",
-                add_help = True
-            )
-          
-            # Add arguments
-            self.parser.add_argument(
-                "-o",
-                "--output",
-                type=pathlib.Path,
-                required=False,
-                metavar="dir",
-                default="output",
-                dest="output_dir",
-                help="Path to the directory you want to use as an output directory, if non is given the default will be an output directory in the Juno-amr folder"
-            )
+            return False
 
-            self.parser.add_argument(
-                "-i",
-                "--input",
-                type=self.is_directory_with_correct_file_format,
-                required=True,
-                metavar="dir",
-                dest="input_dir",
-                help="Path to the directory of your input. Example: path/to/input/fastq"
-            )
+    #function to check if the input from juno assembly or regular input
+    def __define_input_subdirs(self):
+        '''
+        Function to check whether the input is from the Juno assembly 
+        pipeline or just a simple input directory
+        '''
+        # Only when the input_dir comes from the Juno-assembly pipeline 
+        # the fastq and fasta files do not need to be in the same 
+        # folder (fastq are then expected in a subfolder called 
+        # <input_dir>/clean_fastq and the fasta assembly files are
+        # expected in a subfolder called <input_dir>/de_novo_assembly_filtered)
+        if self.__input_dir_is_juno_assembly_output():
+            return {'fastq': self.input_dir.joinpath('clean_fastq'),
+                    'fasta': self.input_dir.joinpath('de_novo_assembly_filtered')}
+        else:
+            return {'fastq': self.input_dir,
+                    'fasta': self.input_dir}
 
-            self.parser.add_argument(
-                "-s",
-                "--species",
-                type = str.lower,
-                required = True,
-                metavar="str",
-                dest="species",
-                #space does not work on commandline, reason why the names are with underscore
-                help = f"Full scientific name of the species sample, use underscores not spaces. Options: {self.species_options}",
-                choices = self.species_options
-            )
+    # Function to make sample dict --> yses enlist_fastq and enlist_fasta function
+    def make_sample_dict(self):
+        '''
+        Function to make a sample sheet from the input directory (expecting 
+        either fastq or fasta files as input)
+        '''
+        print("start make dict")
+        if self.input_type == 'fastq':
+            samples = self.__enlist_fastq_samples()
+        elif self.input_type == 'fasta':
+            samples = self.__enlist_fasta_samples()
+        else:
+            samples = self.__enlist_fastq_samples()
+            samples_fasta = self.__enlist_fasta_samples()
+            for k in samples.keys():
+                samples[k]['assembly'] = samples_fasta[k]['assembly']
+        return samples
 
-            self.parser.add_argument(
-                "-l",
-                "--min_cov",
-                type=float,
-                metavar="float",
-                default=0.6,
-                dest="coverage",
-                help="Minimum coverage of ResFinder"
-            )
+    #makes fastq/fasta/orboth sample dicts
+    def __enlist_fastq_samples(self):
+        '''
+        Function to enlist the fastq files found in the input directory. 
+        Returns a dictionary with the form:
+        {sample: {R1: fastq_file1, R2: fastq_file2}}
+        '''
+        # Regex to detect different sample names in de fastq file names
+        # It does NOT accept sample names that contain _1 or _2 in the name
+        # because they get confused with the identifiers of forward and reverse
+        # reads.
+        print("enlist fastq")
+        pattern = re.compile("(.*?)(?:_S\d+_|_S\d+.|_|\.)(?:_L555_)?(?:p)?R?(1|2)(?:_.*\.|\..*\.|\.)f(ast)?q(\.gz)?")
+        samples = {}
+        for file_ in self.__subdirs_['fastq'].iterdir():
+            if self.validate_file_has_min_lines(file_, self.min_num_lines):
+                match = pattern.fullmatch(file_.name)
+                if match:
+                    sample = samples.setdefault(match.group(1), {})
+                    sample[f"R{match.group(2)}"] = str(file_)        
+        return samples
 
-            self.parser.add_argument(
-                "-t",
-                "--threshold",
-                type=float,
-                metavar="float",
-                default=0.8,
-                dest="threshold",
-                help="Threshold for identity of resfinder"
-            )
+    def __enlist_fasta_samples(self):
+        '''
+        Function to enlist the fasta files found in the input 
+        directory. Returns a dictionary with the form 
+        {sample: {assembly: fasta_file}}
+        '''
+        print("enlist fasta")
+        pattern = re.compile("(.*?).fasta")
+        samples = {}
+        for file_ in self.__subdirs_['fasta'].iterdir():
+            if self.validate_file_has_min_lines(file_, self.min_num_lines):
+                match = pattern.fullmatch(file_.name)
+                if match:
+                    sample = samples.setdefault(match.group(1), {})
+                    sample["assembly"] = str(file_)
+        return samples  
 
-            self.parser.add_argument(
-                "-db_point",
-                type=str,
-                metavar="dir",
-                default="/mnt/db/juno-amr/pointfinderdb",
-                dest="pointfinder_db",
-                help="Alternative database for pointfinder"
-            )
-
-            self.parser.add_argument(
-                "-db_res",
-                type=str,
-                metavar="dir",
-                default="/mnt/db/juno-amr/resfinderdb",
-                dest="resfinder_db",
-                help="Alternative database for resfinder"
-            )
-
-            self.parser.add_argument(
-                "-u",
-                "--update",
-                action='store_true',
-                dest="db_update",
-                help="Force database update even if they are present."
-            )
-
-            self.parser.add_argument(
-                "--point",
-                type=str,
-                default="1",
-                dest="run_pointfinder",
-                metavar="",
-                help="Type one to run pointfinder, type 0 to not run pointfinder, default is 1."
-            )
-
-            self.parser.add_argument(
-                "-n",
-                "--dryrun",
-                action='store_true',
-                dest="dryrun",
-                help="If you want to run a dry run type --dryrun in your command"
-            )
-
-            self.parser.add_argument(
-                "-q",
-                "--queue",
-                type=str,
-                required=False,
-                default="bio",
-                dest="queue",
-                help="Queue used if running in a cluster"
-            )
-
-            # parse arguments
-            self.dict_arguments = vars(self.parser.parse_args())
-            #set pathlib.path as string for yaml, yaml doesnt want a posixpath
-            self.dict_arguments["output_dir"] = str(self.dict_arguments.get("output_dir"))
-
-    def download_databases(self):
-        """Function to download software and databases necessary for running the Juno-amr pipeline"""
-        db_dir = "/mnt/db/juno-amr"
-        self.db_dir = pathlib.Path(db_dir)
-        self.db_dir.mkdir(parents = True, exist_ok = True)
-        self.update = self.dict_arguments["db_update"]
-        download_dbs.get_downloads_juno_amr(self.db_dir, 'bin', self.update)
+    #function that is used in enlist functions above
+    def validate_file_has_min_lines(self, file_path, min_num_lines=-1):
+        '''
+        Test if gzip file contains more than the desired number of lines. 
+        Returns True/False
+        '''
+        print("validate file length")
+        if not self.validate_is_nonempty_file(file_path, min_file_size=1):
+            return False
+        else:
+            with open(file_path, 'rb') as f:
+                line=0
+                file_right_num_lines = False
+                for lines in f:
+                    line=line+1
+                    if line >= min_num_lines:
+                        file_right_num_lines = True
+                        break
+            return file_right_num_lines
 
     def check_species(self):
         # check if species matches other
@@ -351,15 +347,19 @@ class JunoAmrWrapper:
             )
 
 def main():
-    j = JunoAmrWrapper()
-    j.get_species_names_from_pointfinder_db()
-    j.get_user_arguments()
-    j.download_databases()
-    j.check_species()
-    j.change_species_name_format()
-    j.get_input_files_from_input_directory()
-    j.create_yaml_file()
-    j.run_snakemake_api()
+    s = StartPipeline()
+    s.get_species_names_from_pointfinder_db()
+    user_arguments = s.get_user_arguments()
+    s.download_databases()
+    
+    j = JunoAmrWrapper(user_arguments["input_dir"])
+   # j.download_databases()
+    j.start_juno_pipeline()
+    #j.check_species()
+    #j.change_species_name_format()
+    #j.get_input_files_from_input_directory()
+    #j.create_yaml_file()
+    #j.run_snakemake_api()
 
 
 if __name__ == '__main__':
