@@ -10,6 +10,7 @@ import pathlib
 import subprocess
 import sys
 import os
+
 class DownloadDatabases:
     def __init__(self):
         """constructor, containing all variables"""
