@@ -1,0 +1,6 @@
+# Resources
+threads:
+  resfinder: 1
+
+mem_mb:
+  resfinder: 12000

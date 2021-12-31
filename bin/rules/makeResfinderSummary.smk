@@ -1,10 +1,8 @@
 rule makeResfinderSummary:    
     input:
-    #TODO make fasta or fastq
-        resfinder_output_dir = expand(OUT + "/results_per_sample/{sample}", sample=SAMPLE_NAME)
+        resfinder_output_dir = expand(OUT + "/results_per_sample/{sample}", sample=SAMPLES)
 
     output:
-        #hier gaat het nog fout
         genes_summary = OUT + "/summary/summary_amr_genes.csv",
         pheno_summary = OUT + "/summary/summary_amr_phenotype.csv"
 
@@ -15,13 +13,13 @@ rule makeResfinderSummary:
         "Creating ResFinder summary file"
     
     resources:
-        mem_mb=config["mem_mb"]
+        mem_mb=config["mem_mb"]["resfinder"]
 
     threads: 
-        config["threads"]
+        config["threads"]["resfinder"]
 
     params:
-        species = config["Parameters"]["species"]
+        species = config["species"]
 
     shell:
         "python3 bin/python_scripts/make_summary.py -sr {output.genes_summary} {output.pheno_summary} -i {input.resfinder_output_dir} -st resfinder"

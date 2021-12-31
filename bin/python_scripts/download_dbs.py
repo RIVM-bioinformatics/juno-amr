@@ -11,124 +11,118 @@ import subprocess
 import sys
 import os
 
-class DownloadDatabases:
-    def __init__(self):
-        """constructor, containing all variables"""
-        #arguments=None
+def download_git_repo(version, url, dest_dir):
+    """Function to download a git repo"""
+    # Delete old output dir if existing and create parent dirs if not existing
+    try:
+        rm_dir = subprocess.run(['rm','-rf', str(dest_dir)], check = True, timeout = 60)
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as err:
+        rm_dir.kill()
+        raise
 
-    def download_git_repo(self, version, url, dest_dir):
-        """Function to download a git repo"""
-        # Delete old output dir if existing and create parent dirs if not existing
+    if not isinstance(dest_dir, pathlib.PosixPath):
+        dest_dir = pathlib.Path(dest_dir)
+
+    dest_dir.parent.mkdir(exist_ok = True)
+    # Download
+    try:
+        downloading = subprocess.run(['git', 'clone', 
+                                        '-b', version, 
+                                        '--single-branch', '--depth=1', 
+                                        url, str(dest_dir)],
+                                        check = True,
+                                        timeout = 500)
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as err:
+        downloading.kill()
+        raise
+    
+def get_commit_git(gitrepo_dir):
+    """Function to get the commit number from a folder (must be a git repo)"""
+    try:
+        commit = subprocess.check_output(['git', 
+                                        '--git-dir', 
+                                        '{}/.git'.format(str(gitrepo_dir)), 
+                                        'log', '-n', '1', '--pretty=format:"%H"'],
+                                        timeout = 30)
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as err:
+        commit.kill()
+        raise                    
+    return commit
+
+#Download resfinder
+def download_software_resfinder(resfinder_software_dir, version = '4.1.3'):
+    """Function to download kmerfinder if it is not present"""
+    if not isinstance(resfinder_software_dir, pathlib.PosixPath):
+        resfinder_software_dir = pathlib.Path(resfinder_software_dir)
+    if not resfinder_software_dir.joinpath('run_resfinder.py').is_file():
+        print("\x1b[0;33m Downloading resfinder software...\n\033[0;0m")
+        download_git_repo(version, 
+                        'https://bitbucket.org/genomicepidemiology/resfinder.git',
+                        resfinder_software_dir)
+        
+    return version
+
+#Download resfinder db
+def download_db_resfinder(resfinder_db_dir):
+    """Function to download resfinder database if it is not present"""
+    if not isinstance(resfinder_db_dir, pathlib.PosixPath):
+        resfinder_db_dir = pathlib.Path(resfinder_db_dir)
+    if not resfinder_db_dir.joinpath('config').exists():
+        print("\x1b[0;33m Downloading resfinder database...\n\033[0;0m")
+        print(resfinder_db_dir)
+        download_git_repo('master', 
+                        'https://git@bitbucket.org/genomicepidemiology/resfinder_db.git',
+                        resfinder_db_dir)
         try:
-            rm_dir = subprocess.run(['rm','-rf', str(dest_dir)], check = True, timeout = 60)
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as err:
+            current_dir = os.getcwd()
+            os.chdir(resfinder_db_dir)
+            os.system(f"python3 INSTALL.py")
+            os.chdir(current_dir)
+        except (OSError, IOError) as err:
+            print("OS error: ", err)
+            raise
+
+    version = get_commit_git(resfinder_db_dir)
+    return version
+
+def download_db_pointfinder(pointfinder_db_dir):
+    """Function to download pointfinder database if it is not present"""
+    if not isinstance(pointfinder_db_dir, pathlib.PosixPath):
+        pointfinder_db_dir = pathlib.Path(pointfinder_db_dir)
+    if not pointfinder_db_dir.joinpath('config').exists():
+        print("\x1b[0;33m Downloading pointfinder database...\n\033[0;0m")
+        download_git_repo('master', 
+                        'https://bitbucket.org/genomicepidemiology/pointfinder_db.git',
+                        pointfinder_db_dir)
+        try:
+        #Installing
+            current_dir = os.getcwd()
+            os.chdir(pointfinder_db_dir)
+            os.system(f"python3 INSTALL.py")
+            os.chdir(current_dir)
+        except (OSError, IOError) as err:
+            print("OS error: ", err)
+            raise
+    #get the version
+    version = get_commit_git(pointfinder_db_dir)
+    return version
+
+#Get all downloads for juno-amr pipeline
+def get_downloads_juno_amr(db_dir, current_dir, update_dbs):
+    if not isinstance(db_dir, pathlib.PosixPath):
+        db_dir = pathlib.Path(db_dir)
+    if not isinstance(current_dir, pathlib.PosixPath):
+        current_dir = pathlib.Path(current_dir)
+    if update_dbs:
+        try:
+            rm_dir = subprocess.run(['rm', '-rf', str(db_dir)], check = True, timeout = 60)
+        except:
             rm_dir.kill()
             raise
-
-        if not isinstance(dest_dir, pathlib.PosixPath):
-            dest_dir = pathlib.Path(dest_dir)
-
-        dest_dir.parent.mkdir(exist_ok = True)
-        # Download
-        try:
-            downloading = subprocess.run(['git', 'clone', 
-                                            '-b', version, 
-                                            '--single-branch', '--depth=1', 
-                                            url, str(dest_dir)],
-                                            check = True,
-                                            timeout = 500)
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as err:
-            downloading.kill()
-            raise
-        
-    def get_commit_git(self, gitrepo_dir):
-        """Function to get the commit number from a folder (must be a git repo)"""
-        try:
-            commit = subprocess.check_output(['git', 
-                                            '--git-dir', 
-                                            '{}/.git'.format(str(gitrepo_dir)), 
-                                            'log', '-n', '1', '--pretty=format:"%H"'],
-                                            timeout = 30)
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as err:
-            commit.kill()
-            raise                    
-        return commit
-
-    #Download resfinder
-    def download_software_resfinder(self, resfinder_software_dir, version = '4.1.3'):
-        """Function to download kmerfinder if it is not present"""
-        if not isinstance(resfinder_software_dir, pathlib.PosixPath):
-            resfinder_software_dir = pathlib.Path(resfinder_software_dir)
-        if not resfinder_software_dir.joinpath('run_resfinder.py').is_file():
-            print("\x1b[0;33m Downloading resfinder software...\n\033[0;0m")
-            download_git_repo(version, 
-                            'https://bitbucket.org/genomicepidemiology/resfinder.git',
-                            resfinder_software_dir)
-            
-        return version
-
-    #Download resfinder db
-    def download_db_resfinder(self, resfinder_db_dir):
-        """Function to download resfinder database if it is not present"""
-        if not isinstance(resfinder_db_dir, pathlib.PosixPath):
-            resfinder_db_dir = pathlib.Path(resfinder_db_dir)
-        if not resfinder_db_dir.joinpath('config').exists():
-            print("\x1b[0;33m Downloading resfinder database...\n\033[0;0m")
-            print(resfinder_db_dir)
-            download_git_repo('master', 
-                            'https://git@bitbucket.org/genomicepidemiology/resfinder_db.git',
-                            resfinder_db_dir)
-            try:
-                current_dir = os.getcwd()
-                os.chdir(resfinder_db_dir)
-                os.system(f"python3 INSTALL.py")
-                os.chdir(current_dir)
-            except (OSError, IOError) as err:
-                print("OS error: ", err)
-                raise
-
-        version = self.get_commit_git(resfinder_db_dir)
-        return version
-
-    def download_db_pointfinder(self, pointfinder_db_dir):
-        """Function to download pointfinder database if it is not present"""
-        if not isinstance(pointfinder_db_dir, pathlib.PosixPath):
-            pointfinder_db_dir = pathlib.Path(pointfinder_db_dir)
-        if not pointfinder_db_dir.joinpath('config').exists():
-            print("\x1b[0;33m Downloading pointfinder database...\n\033[0;0m")
-            download_git_repo('master', 
-                            'https://bitbucket.org/genomicepidemiology/pointfinder_db.git',
-                            pointfinder_db_dir)
-            try:
-            #Installing
-                current_dir = os.getcwd()
-                os.chdir(pointfinder_db_dir)
-                os.system(f"python3 INSTALL.py")
-                os.chdir(current_dir)
-            except (OSError, IOError) as err:
-                print("OS error: ", err)
-                raise
-        #get the version
-        version = self.get_commit_git(pointfinder_db_dir)
-        return version
-
-    #Get all downloads for juno-amr pipeline
-    def get_downloads_juno_amr(self, db_dir, current_dir, update_dbs):
-        if not isinstance(db_dir, pathlib.PosixPath):
-            db_dir = pathlib.Path(db_dir)
-        if not isinstance(current_dir, pathlib.PosixPath):
-            current_dir = pathlib.Path(current_dir)
-        if update_dbs:
-            try:
-                rm_dir = subprocess.run(['rm', '-rf', str(db_dir)], check = True, timeout = 60)
-            except:
-                rm_dir.kill()
-                raise
-        software_version = {'resfinder': self.download_software_resfinder(current_dir.joinpath('resfinder')),
-                        'resfinder_db': self.download_db_resfinder(db_dir.joinpath('resfinderdb')),
-                        'pointfinder_db': self.download_db_pointfinder(db_dir.joinpath('pointfinderdb'))}
-        return software_version
+    software_version = {'resfinder': download_software_resfinder(current_dir.joinpath('resfinder')),
+                    'resfinder_db': download_db_resfinder(db_dir.joinpath('resfinderdb')),
+                    'pointfinder_db': download_db_pointfinder(db_dir.joinpath('pointfinderdb'))}
+    return software_version
 
 if __name__ == '__main__':
     main()
-        

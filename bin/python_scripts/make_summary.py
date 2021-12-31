@@ -86,7 +86,9 @@ class JunoSummary:
         #Get the output directory from the yaml file
         open_config_parameters = open(self.user_parameters_path)
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
-        self.output_dir_name = parsed_config['Parameters']['output_dir']
+        print("here")
+        print(parsed_config)
+        self.output_dir_name = parsed_config['output_dir']
         
         # Make new summary directory
         dirpath = Path(f"{self.output_dir_name}/{self.summary_folder_path}")
