@@ -56,7 +56,7 @@ python3 juno-amr.py -i [input] -o [output] -s [species]
 
 **Note:** To get an overview of the available species for chromosomal point mutations use the command:
 ```
-python3 juno-amr.py -s -h
+python3 juno-amr.py --species-help
 ```
 
 ## Parameters & Usage
@@ -65,7 +65,7 @@ python3 juno-amr.py -s -h
 
 ### Required parameters
 * ```-i, --input``` Path to the directory of your input. Can be fasta files or paired fastq files. It is important to link to the directory and not the files.
-* ```-s --species**``` Full scientific name of the species sample. Use underscores between the parts of a name and not spaces. A list of available species can be shown if you type ```python3 juno-amr.py -s -h```. It is possible to select 'other' as a species, if 'other' is selected the pipeline will only run ResFinder
+* ```-s --species**``` Full scientific name of the species sample. Use underscores between the parts of a name and not spaces. A list of available species can be shown if you type ```python3 juno-amr.py --species-help```. It is possible to select 'other' as a species, if 'other' is selected the pipeline will only run ResFinder
 
 ### Optional parameters
 * ```-l --min_cov```    Minimum coverage of ResFinder
