@@ -13,3 +13,4 @@ envs/src/
 
 #files to ignore
 config/user_parameters.yaml
+config/sample_sheet.yaml
