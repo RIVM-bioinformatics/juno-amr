@@ -13,7 +13,7 @@ rule makePointfinderSummary:
         "Creating PointFinder summary file"
     
     resources:
-        mem_mb=config["mem_mb"]["resfinder"]
+        mem_gb=config["mem_gb"]["resfinder"]
 
     threads: 
         config["threads"]["resfinder"]

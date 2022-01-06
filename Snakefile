@@ -29,13 +29,12 @@ include: "bin/rules/makePointfinderSummary.smk"
 #####   Specify final output                                                #####
 #################################################################################
 
+localrules:
+    all
 #If the species is other, pointfinder cannot be run, so there will be no output expected of this part
 if config["species"] == "other":
     rule all:
         """ Main rule that starts the complete workflow """
-        resources: 
-            mem_mb=config["mem_mb"]["resfinder"]
-
         input: 
             expand(OUT + "/results_per_sample/{sample}", sample=SAMPLES),
             expand(OUT + "/summary/summary_amr_genes.csv"),
@@ -43,9 +42,6 @@ if config["species"] == "other":
 else:
     rule all:
         """ Main rule that starts the complete workflow """
-        resources: 
-            mem_mb=config["mem_mb"]["resfinder"]
-
         input:
             expand(OUT + "/results_per_sample/{sample}", sample=SAMPLES),
             expand(OUT + "/summary/summary_amr_genes.csv"),

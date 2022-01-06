@@ -2,5 +2,5 @@
 threads:
   resfinder: 1
 
-mem_mb:
-  resfinder: 12000
+mem_gb:
+  resfinder: 12

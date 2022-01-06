@@ -8,7 +8,6 @@ Documentation: -
 """
 import pathlib
 import subprocess
-import sys
 import os
 
 def download_git_repo(version, url, dest_dir):

@@ -1,11 +1,50 @@
+from base_juno_pipeline import helper_functions
 import pathlib
 import sys
 import argparse
+import os
 
-sys.path.insert(0, 'bin/python_scripts/')
-import helper_functions
+class SpeciesHelpers:
+    '''Class with helper functions for checking the input species for the PointFinder tool'''
 
-class CollectUserArguments(helper_functions.JunoHelpers):
+    def get_species_names_from_pointfinder_db(self, path_to_pointfinder_db, path_to_species_file):
+        '''
+        Function to collect available species from PointFinder
+        '''
+        species_options = []
+        if pathlib.Path(path_to_pointfinder_db).is_dir():
+            print("Database present, collect species from database")
+            for entry in os.scandir(path_to_pointfinder_db):
+                if not entry.name.startswith('.') and entry.is_dir():
+                    species_options.append(entry.name)    
+        else:
+            print("No database found, using local file to collect species")
+            with open(path_to_species_file) as f:
+                species_options = f.readlines()
+                species_options = [species.strip() for species in species_options]
+
+        species_options.append("other")
+        return species_options
+
+    def set_pointfinder_boolean(self, argument_dict):
+        '''
+        Decide if pointfinder has to be run based on the given species.
+        '''
+        if argument_dict.species == "other":
+            argument_dict.run_pointfinder = "0"      
+        return argument_dict
+
+
+
+    def change_species_name_format(self, argument_dict):
+        '''
+        change _ to " " in species name & update species name in the arguments
+        '''
+        argument_dict.species = argument_dict.species.replace("_", " ")
+        return argument_dict
+
+
+class CollectUserArguments(SpeciesHelpers):
 
     def collect_arguments(self):
         #TODO hardcoded paths
@@ -134,6 +173,13 @@ class CollectUserArguments(helper_functions.JunoHelpers):
                 metavar = "INT",
                 default = 300,
                 help="Number of cores to use. Default is 300"
+            )
+            parser.add_argument(
+                "--snakemake-args",
+                nargs='*',
+                default={},
+                action=helper_functions.SnakemakeKwargsAction,
+                help="Extra arguments to be passed to snakemake API (https://snakemake.readthedocs.io/en/stable/api_reference/snakemake.html)."
             )
             raw_args = parser.parse_args()
             modified_species_args = self.change_species_name_format(raw_args)
