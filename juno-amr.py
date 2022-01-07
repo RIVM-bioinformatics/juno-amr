@@ -51,7 +51,7 @@ class JunoAmrRun(base_juno_pipeline.PipelineStartup,
 
         base_juno_pipeline.PipelineStartup.__init__(self,
             input_dir=pathlib.Path(input_dir).resolve(), 
-            input_type='both',
+            input_type='fastq',
             min_num_lines=1)
         base_juno_pipeline.RunSnakemake.__init__(self,
             pipeline_name='Juno-amr',
