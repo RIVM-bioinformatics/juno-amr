@@ -8,7 +8,9 @@ bin/virulencefinder
 bin/python_scripts/__pycache__
 /mnt/db/juno-amr/pointfinderdb
 /mnt/db/juno-amr/resfinderdb
-
+envs/src/base-juno
+__pycache__
 
 #files to ignore
 config/user_parameters.yaml
+config/sample_sheet.yaml

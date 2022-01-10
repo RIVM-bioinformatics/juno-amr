@@ -247,7 +247,7 @@ class JunoAmrWrapper:
         #Vraagteken bij de R weggehaald?
         fq_pattern = re.compile("(.*?)(?:_S\d+_|_S\d+.|_|\.)(?:p)?R(1|2)(?:_.*\.|\..*\.|\.)f(ast)?q(\.gz)?")
         #TODO is this fasta pattern correct?
-        fa_pattern = re.compile("(.*?)(?:_S\d+_|_S\d+.|_|\.)?(?:_.*\.|\..*\.|\.)f(ast)?(a|q)(\.gz)?")
+        fa_pattern = re.compile("(.*?).fasta")
         # Get the filenames that are used as input for resfinder, only filenames with pR1 and pR2 will be used.
         for key in self.dict_arguments:
             if key == "input_dir":
