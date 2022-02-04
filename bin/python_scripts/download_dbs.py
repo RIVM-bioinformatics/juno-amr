@@ -8,7 +8,6 @@ Documentation: -
 """
 import pathlib
 import subprocess
-import sys
 import os
 
 def download_git_repo(version, url, dest_dir):
@@ -126,4 +125,3 @@ def get_downloads_juno_amr(db_dir, current_dir, update_dbs):
 
 if __name__ == '__main__':
     main()
-    

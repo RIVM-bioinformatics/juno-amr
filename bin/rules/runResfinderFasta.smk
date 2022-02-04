@@ -24,7 +24,7 @@ rule runResfinderFasta:
         run_pointfinder = config["Parameters"]["run_pointfinder"]
         
     resources: 
-        mem_mb=config["mem_mb"]
+        mem_gb=config["mem_gb"]
 
     threads: config["threads"]
 

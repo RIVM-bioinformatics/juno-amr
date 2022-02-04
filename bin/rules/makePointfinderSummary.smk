@@ -1,7 +1,6 @@
 rule makePointfinderSummary:    
     input:
-    #TODO make fasta or fastq
-        resfinder_output_dir = expand(OUT + "/results_per_sample/{sample}", sample=SAMPLE_NAME)
+        resfinder_output_dir = expand(OUT + "/results_per_sample/{sample}", sample=SAMPLES)
 
     output:
         pointfinder_results = OUT + "/summary/summary_amr_pointfinder_results.csv",
@@ -14,13 +13,13 @@ rule makePointfinderSummary:
         "Creating PointFinder summary file"
     
     resources:
-        mem_mb=config["mem_mb"]
+        mem_gb=config["mem_gb"]["resfinder"]
 
     threads: 
-        config["threads"]
+        config["threads"]["resfinder"]
 
     params:
-        species = config["Parameters"]["species"]
+        species = config["species"]
 
     shell:
         "python3 bin/python_scripts/make_summary.py -sp {output.pointfinder_results} {output.pointfinder_prediction} -i {input.resfinder_output_dir} -st pointfinder"
