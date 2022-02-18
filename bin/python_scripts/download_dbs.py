@@ -76,6 +76,9 @@ def download_db_resfinder(resfinder_db_dir):
             current_dir = os.getcwd()
             os.chdir(resfinder_db_dir)
             os.system(f"python3 INSTALL.py")
+            #Applying a change in the phenotypes.txt file of resfinder_db for gene OXA-244
+            oxa_cmd="sed -i 's/\(blaOXA-244_1_KP659189\)\(\tBeta-lactam\)\(\tUnknown Beta-lactam\)/\\1\\2\tAmoxicillin, Amoxicillin+Clavulanic acid, Ampcillin, Ampicillin+Clavulanic acid, Imipenem, Meropenem, Piperacillin, Piperacillin+Tazobactam/' phenotypes.txt"
+            os.system(oxa_cmd)
             os.chdir(current_dir)
         except (OSError, IOError) as err:
             print("OS error: ", err)
