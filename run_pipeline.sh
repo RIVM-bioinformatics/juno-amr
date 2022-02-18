@@ -90,22 +90,27 @@ python juno-amr.py --queue "${QUEUE}" -i "${input_dir}/clean_fastq/" -o "${outpu
 result=$?
 
 # Propagate metadata
-# SEQ_KEYS=
-# SEQ_ENV=`env | grep irods_input_sequencing`
-# for SEQ_AVU in ${SEQ_ENV}
-# do
-#     SEQ_KEYS="${SEQ_KEYS} ${SEQ_AVU%%=*}"
-# done
 
-# for key in $SEQ_KEYS irods_input_illumina__Flowcell irods_input_illumina__Instrument \
-#     irods_input_illumina__Date irods_input_illumina__Run_number irods_input_illumina__Run_Id
-# do
-#     if [ ! -z ${!key} ] ; then
-#         attrname=${key:12}
-#         attrname=${attrname/__/::}
-#         echo "${attrname}: '${!key}'" >> ${OUTPUTDIR}/metadata.yml
-#     fi
-# done
+set +euo pipefail
+
+SEQ_KEYS=
+SEQ_ENV=`env | grep irods_input_sequencing`
+for SEQ_AVU in ${SEQ_ENV}
+do
+    SEQ_KEYS="${SEQ_KEYS} ${SEQ_AVU%%=*}"
+done
+
+for key in $SEQ_KEYS irods_input_illumina__Flowcell irods_input_illumina__Instrument \
+    irods_input_illumina__Date irods_input_illumina__Run_number irods_input_illumina__Run_Id
+do
+    if [ ! -z ${!key} ] ; then
+        attrname=${key:12}
+        attrname=${attrname/__/::}
+        echo "${attrname}: '${!key}'" >> ${OUTPUTDIR}/metadata.yml
+    fi
+done
+
+set -euo pipefail
 
 exit ${result}
 # Produce svg with rules
