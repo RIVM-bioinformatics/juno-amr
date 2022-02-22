@@ -1,6 +1,6 @@
 rule makeResfinderSummary:    
     input:
-        resfinder_output_dir = expand(OUT + "/results_per_sample/{sample}", sample=SAMPLES)
+        resfinder_output_dir = expand(OUT + "/results/resfinder/{sample}", sample=SAMPLES)
 
     output:
         genes_summary = OUT + "/summary/summary_amr_genes.csv",

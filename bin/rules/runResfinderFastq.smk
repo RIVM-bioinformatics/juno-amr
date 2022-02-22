@@ -5,7 +5,10 @@ rule runResfinderFastq:
         r2 = lambda wildcards: SAMPLES[wildcards.sample]["R2"]
 
     output:
-        output_dir = directory(OUT + "/results_per_sample/{sample}")
+        #TODO check which one is the good one
+        #output_dir = directory(OUT + "/results_per_sample/{sample}")
+        #Directory per sample
+        output_dir = directory(OUT + "/results/resfinder/{sample}")
     
     #conda:
         #"../../envs/resfinder.yaml"

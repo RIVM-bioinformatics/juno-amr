@@ -26,6 +26,7 @@ class JunoAmrRun(base_juno_pipeline.PipelineStartup,
                 species,
                 resfinder_min_coverage=0.6,
                 resfinder_identity_threshold=0.8,
+                input_isfastq_boolean=False,
                 db_dir = "/mnt/db/juno-amr",
                 update=False,
                 rerunincomplete=False,
@@ -71,15 +72,15 @@ class JunoAmrRun(base_juno_pipeline.PipelineStartup,
 
         # Specific Juno-AMR pipeline attributes
         self.species = species
-        self.resfinder_min_coverage=resfinder_min_coverage
-        self.resfinder_identity_threshold= resfinder_identity_threshold
+        self.resfinder_min_coverage = resfinder_min_coverage
+        self.input_isfastq_boolean = input_isfastq_boolean
+        self.resfinder_identity_threshold = resfinder_identity_threshold
         self.run_pointfinder=run_pointfinder
         self.update = update
         self.workdir = pathlib.Path(__file__).parent.absolute()
         self.useconda = True
         self.user_parameters = pathlib.Path("config/user_parameters.yaml")
         self.restarttimes = 2      
-        
         # Start pipeline  
         self.run_juno_amr_pipeline()
 
@@ -100,6 +101,7 @@ class JunoAmrRun(base_juno_pipeline.PipelineStartup,
                         'species': str(self.species),
                         'run_pointfinder': str(self.run_pointfinder),
                         'resfinder_min_coverage': self.resfinder_min_coverage,
+                        'input_isfastq_boolean': self.input_isfastq_boolean,
                         'resfinder_identity_threshold': self.resfinder_identity_threshold,
                         'resfinder_db': str(self.db_dir.joinpath('resfinderdb')),
                         'pointfinder_db': str(self.db_dir.joinpath('pointfinderdb'))}
@@ -131,6 +133,7 @@ if __name__ == '__main__':
                     run_pointfinder=args.run_pointfinder,
                     db_dir = args.db_dir,
                     resfinder_min_coverage = args.resfinder_min_coverage,
+                    input_isfastq_boolean = args.input_isfastq_boolean,
                     resfinder_identity_threshold = args.resfinder_identity_threshold,
                     cores = args.cores,
                     local = args.local,

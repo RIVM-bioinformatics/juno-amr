@@ -9,6 +9,7 @@ Documentation: -
 
 import sys
 import argparse
+from pandas.core.arrays.sparse import dtype
 import yaml
 import csv
 import os
@@ -56,6 +57,25 @@ class JunoSummary:
         )
 
         self.parser.add_argument(
+            "-sv",
+            "--summary_virulencefinder",
+            type=str,
+            metavar="file",
+            dest="virulencefinder_summary_file_names",
+            nargs=1,
+            help="The name for the virulencefinder summary file for example: virulencefinder_summary"
+        )
+
+        self.parser.add_argument(
+            "-sa",
+            "--summary_amrfinderplus",
+            type=str,
+            metavar="file",
+            dest="amrfinderplus_summary_file_names",
+            nargs=1,
+            help="The name for the amrfinderplus summary file for example: amrfinderplus_summary"
+        )
+        self.parser.add_argument(
             "-i",
             "--input",
             type=str,
@@ -75,8 +95,8 @@ class JunoSummary:
             required = True,
             metavar="name",
             dest="summary_type",
-            help="The type of summaries to create, choose from: resfinder or pointfinder",
-            choices= ["resfinder", "pointfinder"]
+            help="The type of summaries to create, choose from: resfinder, pointfinder, amrfinderplus or virulencefinder",
+            choices= ["resfinder", "pointfinder", "amrfinderplus", "virulencefinder"]
         )
 
         # parse arguments
@@ -108,7 +128,8 @@ class JunoSummary:
         #Collect summary file names from the parser
         self.resfinder_summary_file_names = self.dict_arguments.get("resfinder_summary_file_names")
         self.pointfinder_summary_file_names = self.dict_arguments.get("pointfinder_summary_file_names")
-
+        self.virulencefinder_summary_file_names = self.dict_arguments.get("virulencefinder_summary_file_names")
+        self.amrfinderplus_summary_file_names = self.dict_arguments.get("amrfinderplus_summary_file_names")
         return self.output_dir_name, self.samplenames, dirpath
 
     def create_amr_genes_summary(self):
@@ -279,6 +300,36 @@ class JunoSummary:
         final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
         final_df.to_csv(f'{pointfinder_prediction_output}', mode='a', index=False)
     
+    def virulencefinder_summary(self):
+        virulence_summary_location = self.virulencefinder_summary_file_names[0]
+        sample_counter = 0
+        dflist = []
+        for path in self.input_paths:
+            pathname = f"{path}/results_tab.tsv"
+            opened_file = pd.read_csv(pathname, sep="\t", dtype=object, keep_default_na=False)
+            filtered_df = opened_file.filter(['Virulence factor', 'Identity', 'Query / Template length', 'Protein function'], axis=1)
+            filtered_df.insert(0, "Samplename", self.samplenames[sample_counter])   
+            sample_counter = sample_counter + 1  
+            dflist.append(filtered_df)
+        
+        final_df = pd.concat(dflist, axis=0, ignore_index=True)
+        final_df.to_csv(virulence_summary_location, mode='a', index=False)
+
+    def amrfinderplus_summary(self):
+        amrfinderplus_summary_location = self.amrfinderplus_summary_file_names[0]
+        sample_counter = 0
+        dflist = []
+        for path in self.input_paths:
+            pathname = f"{path}/amrfinder_result.txt"
+            opened_file = pd.read_csv(pathname, sep="\t", dtype=object, keep_default_na=False)
+            filtered_df = opened_file.filter(['Gene symbol', 'Sequence name', 'Element type', 'Element subtype', 'Class', 'Subclass', '% Coverage of reference sequence', '% Identity to reference sequence'], axis=1)
+            filtered_df.insert(0, "Samplename", self.samplenames[sample_counter])   
+            sample_counter = sample_counter + 1  
+            dflist.append(filtered_df)
+        
+        final_df = pd.concat(dflist, axis=0, ignore_index=True)
+        final_df.to_csv(amrfinderplus_summary_location, mode='a', index=False)
+
 def main():
     m = JunoSummary()
     m.get_user_arguments()
@@ -294,6 +345,12 @@ def main():
     elif summary_type == "pointfinder":
         m.pointfinder_result_summary()
         m.pointfinder_prediction_summary()
+    
+    elif summary_type == "amrfinderplus":
+        m.amrfinderplus_summary()
+    
+    elif summary_type == "virulencefinder":
+        m.virulencefinder_summary()
 
 if __name__ == '__main__':
     main()
