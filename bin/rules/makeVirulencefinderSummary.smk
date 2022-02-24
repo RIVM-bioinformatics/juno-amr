@@ -9,7 +9,7 @@ rule makeVirulencefinderSummary:
         "Creating Virulencefinder summary file"
     
     resources:
-#TODO check if this needs other mem, same for other rules and threads as well
+        #TODO check if this needs other mem, same for other rules and threads as well
         mem_gb=config["mem_gb"]["virulencefinder"]
 
     threads: 

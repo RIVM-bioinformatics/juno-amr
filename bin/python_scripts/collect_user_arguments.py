@@ -154,16 +154,7 @@ class CollectUserArguments(SpeciesHelpers):
                 action='store_true',
                 help="Running pipeline locally (instead of in a computer cluster). Default is running it in a cluster."
             )
-            #TODO remove this and find another solution
-            parser.add_argument(
-                "--input_isfastq_boolean",
-                type=bool,
-                metavar="bool",
-                default=True,
-                dest="input_isfastq_boolean",
-                help="Argument for the filetype",
-            )
-            # Snakemake arguments
+            #Snakemake arguments
             parser.add_argument(
                 "-u",
                 "--unlock",

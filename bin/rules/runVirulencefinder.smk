@@ -1,7 +1,6 @@
 rule runVirulencefinder:
     """Run VirulenceFinder for each sample"""
     input:
-        #Samples retrieved from config.yaml
         fasta_sample = lambda wildcards: SAMPLES[wildcards.sample]["assembly"]
 
     output:

@@ -6,9 +6,6 @@ rule makePointfinderSummary:
         pointfinder_results = OUT + "/summary/summary_amr_pointfinder_results.csv",
         pointfinder_prediction = OUT + "/summary/summary_amr_pointfinder_prediction.csv"
 
-    #conda: 
-    #    "../../envs/resfinder.yaml"
-
     message:
         "Creating PointFinder summary file"
     

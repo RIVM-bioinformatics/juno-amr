@@ -22,7 +22,7 @@ The tools used in this pipeline:
 [VirulenceFinder](https://bitbucket.org/genomicepidemiology/virulencefinder/src/master/) - created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/)
 [AMRFinderPlus](https://github.com/ncbi/amr) - created by [The National Center for Biotechnology Information](https://www.ncbi.nlm.nih.gov/)
 
-These tools help identify: acquired antimicrobial resistance genes, chromosomal mutations mediating antimicrobial resistance, virulence factors, biocide, heat, acid, and metal resistance genes. The input can be partial or total DNA sequences of bacteria. The output of both tools can be used for analysis and is also combined in multiple summary files for a quick overview of the most important results.
+These tools help identify: acquired antimicrobial resistance genes, chromosomal mutations mediating antimicrobial resistance, virulence factors, biocide, heat, acid, and metal resistance genes. The input can be partial or total DNA sequences of bacteria. The output of the tools can be used for analysis and is also combined in multiple summary files for a quick overview of the most important results.
 
 ## Prerequisities
 * **Linux environment**
@@ -72,7 +72,7 @@ python3 juno-amr.py --species-help
 * ```-h, --help``` Shows the help of the pipeline
 
 ### Required parameters
-* ```-i, --input``` Path to the directory of your input. Can be fasta files or paired fastq files. It is important to link to the directory and not the files.
+* ```-i, --input``` Path to the directory of your input. Can be fasta files and paired fastq files combined in one directory or the output directory of the Juno-assembly pipeline. It is important to link to the directory and not the files.
 * ```-s --species**``` Full scientific name of the species sample. Use underscores between the parts of a name and not spaces. A list of available species can be shown if you type ```python3 juno-amr.py --species-help```. It is possible to select 'other' as a species, if 'other' is selected the pipeline will only run ResFinder
 
 ### Optional parameters
@@ -87,12 +87,15 @@ python3 juno-amr.py --species-help
 
 ### The base command to run this program. 
 ```
-python3 juno-amr.py -s [species] -i [dir/to/fasta_or_fastq_files]
+python3 juno-amr.py -s [species] -i [dir/to/fasta_and_fastq_files]
+```
+```
+python3 juno-amr.py -s [species] -i [dir/to/juno_assembly_output]
 ```
 
 ### An example on how to run the pipeline.
 ```
-python3 juno-amr.py -s salmonella -i dir/to/fastq_files -o output -l 0.8 -t 0.6
+python3 juno-amr.py -s salmonella -i dir/to/fastq_and_fasta_files -o output -l 0.8 -t 0.6
 ```
 
 Detailed information about the pipeline can be found in the [documentation](https://www.google.com "Pipeline documentation"). This documentation is only accessible for users that have access to the RIVM Linux environment.

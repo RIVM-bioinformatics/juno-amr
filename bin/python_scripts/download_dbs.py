@@ -23,7 +23,6 @@ def download_git_repo(version, url, dest_dir):
         dest_dir = pathlib.Path(dest_dir)
 
     dest_dir.parent.mkdir(exist_ok = True)
-    # Download
     try:
         downloading = subprocess.run(['git', 'clone', 
                                         '-b', version, 
@@ -107,7 +106,6 @@ def download_db_pointfinder(pointfinder_db_dir):
                         'https://bitbucket.org/genomicepidemiology/pointfinder_db.git',
                         pointfinder_db_dir)
         try:
-        #Installing
             current_dir = os.getcwd()
             os.chdir(pointfinder_db_dir)
             os.system(f"python3 INSTALL.py")
@@ -115,7 +113,6 @@ def download_db_pointfinder(pointfinder_db_dir):
         except (OSError, IOError) as err:
             print("OS error: ", err)
             raise
-    #get the version
     version = get_commit_git(pointfinder_db_dir)
     return version
 
@@ -141,7 +138,6 @@ def download_db_virulencefinder(virulencefinder_db_dir):
     version = get_commit_git(virulencefinder_db_dir)
     return version   
 
-#Get all downloads for juno-amr pipeline
 def get_downloads_juno_amr(db_dir, current_dir, update_dbs):
     if not isinstance(db_dir, pathlib.PosixPath):
         db_dir = pathlib.Path(db_dir)

@@ -6,9 +6,6 @@ rule makeResfinderSummary:
         genes_summary = OUT + "/summary/summary_amr_genes.csv",
         pheno_summary = OUT + "/summary/summary_amr_phenotype.csv"
 
-    #conda: 
-    #    "../../envs/resfinder.yaml"
-
     message:
         "Creating ResFinder summary file"
     
