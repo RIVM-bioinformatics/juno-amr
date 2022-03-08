@@ -45,6 +45,17 @@ class JunoSummary:
         )
 
         self.parser.add_argument(
+            "-si",
+            "--summary_iles",
+            #TODO TYPE is een path of file
+            type=str,
+            metavar="file",
+            dest="iles_summary_file_names",
+            nargs=1,
+            help="The name for the iles summary file"
+        )
+
+        self.parser.add_argument(
             "-sp",
             "--summary_pointfinder",
             type=str,
@@ -76,7 +87,7 @@ class JunoSummary:
             metavar="name",
             dest="summary_type",
             help="The type of summaries to create, choose from: resfinder or pointfinder",
-            choices= ["resfinder", "pointfinder"]
+            choices= ["resfinder", "pointfinder", "iles"]
         )
 
         # parse arguments
@@ -89,6 +100,7 @@ class JunoSummary:
         print("here")
         print(parsed_config)
         self.output_dir_name = parsed_config['output_dir']
+        self.species = parsed_config['species']
         
         # Make new summary directory
         dirpath = Path(f"{self.output_dir_name}/{self.summary_folder_path}")
@@ -108,6 +120,7 @@ class JunoSummary:
         #Collect summary file names from the parser
         self.resfinder_summary_file_names = self.dict_arguments.get("resfinder_summary_file_names")
         self.pointfinder_summary_file_names = self.dict_arguments.get("pointfinder_summary_file_names")
+        self.iles_summary_file_names = self.dict_arguments.get("iles_summary_file_names")
 
         return self.output_dir_name, self.samplenames, dirpath
 
@@ -278,12 +291,58 @@ class JunoSummary:
         #concat all dfs and write to file
         final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
         final_df.to_csv(f'{pointfinder_prediction_output}', mode='a', index=False)
-    
+
+    def iles_summary(self):
+        """Summary file specific for iles/lims"""
+
+        sample_counter = 0
+        df_list = []
+        print("meep", self.input_paths)
+        for filename in self.input_paths:
+            self.species = self.species.replace(" ", "_")
+            dirpath = f"{filename}/pheno_table_{self.species}.txt"
+            opened_file = open(dirpath, "r")
+            #select lines starting with 'antimicrobial'
+            data_lines = opened_file.readlines()[17:41]
+
+            df = pd.DataFrame([x.split('\t') for x in data_lines], dtype='object')
+            df.columns=['Antimicrobial', 'Class', 'WGS-predicted phenotype', 'Match', 'Genetic background']
+
+            # select antimicrobial rows per species
+            if self.species == "escherichia_coli" or self.species == "salmonella":
+                antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim"]
+                filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_ecoli_salm)]
+            elif self.species == "shigella":
+                antibiotics_shig = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "trimethoprim", "cotrimoxazole"]
+                filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_shig)]
+            elif self.species == "campylobacter":
+                antibiotics_camp = ["ciprofloxacin", "gentamicin", "erytromycin", "tetracyclin"]
+                filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_camp)]
+
+            else:
+                print("No iles summary for this species")
+                return
+
+            selected_rows  = filtered_df[["Antimicrobial", "WGS-predicted phenotype", "Genetic background"]].copy()
+            selected_rows.loc[selected_rows['WGS-predicted phenotype'] == "Resistant", 'WGS-predicted phenotype'] = selected_rows['Genetic background']
+            final = selected_rows[["Antimicrobial", "WGS-predicted phenotype"]].copy()
+
+            #flip the df
+            final.set_index('Antimicrobial',inplace=True)
+            transposed = final.transpose()
+
+            #add the samplename as col
+            transposed.insert(0,"samplename", self.samplenames[sample_counter])
+            sample_counter = sample_counter + 1
+            df_list.append(transposed)
+
+        final_df = pd.concat(df_list, axis=0, ignore_index=True)
+        final_df.to_csv(self.iles_summary_file_names[0], mode='a', index=False)
+
 def main():
     m = JunoSummary()
     m.get_user_arguments()
     m.preproccesing_for_summary_files()
-
     summary_type = m.dict_arguments.get("summary_type")
 
     if summary_type == "resfinder":
@@ -294,6 +353,9 @@ def main():
     elif summary_type == "pointfinder":
         m.pointfinder_result_summary()
         m.pointfinder_prediction_summary()
+
+    elif summary_type == "iles":
+        m.iles_summary()
 
 if __name__ == '__main__':
     main()
