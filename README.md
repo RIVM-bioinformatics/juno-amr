@@ -35,7 +35,7 @@ cd Juno-amr
 
 3. Create & activate mamba environment.
 ```
-conda create --name mamba mamba=0.16.0
+conda env update -f envs/mamba.yaml
 ```
 ```
 conda activate mamba
@@ -43,7 +43,7 @@ conda activate mamba
 
 4. Create & activate juno environment.
 ```
-mamba env create -f envs/juno_amr_master.yaml
+mamba env update -f envs/juno_amr_master.yaml
 ```
 ```
 conda activate juno-amr_master
