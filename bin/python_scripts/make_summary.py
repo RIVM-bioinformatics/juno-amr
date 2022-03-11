@@ -300,23 +300,23 @@ class JunoSummary:
         print("meep", self.input_paths)
         for filename in self.input_paths:
             self.species = self.species.replace(" ", "_")
-            dirpath = f"{filename}/pheno_table_{self.species}.txt"
+            dirpath = f"{filename}/pheno_table.txt"
             opened_file = open(dirpath, "r")
             #select lines starting with 'antimicrobial'
-            data_lines = opened_file.readlines()[17:41]
+            data_lines = opened_file.readlines()[17:]
 
             df = pd.DataFrame([x.split('\t') for x in data_lines], dtype='object')
             df.columns=['Antimicrobial', 'Class', 'WGS-predicted phenotype', 'Match', 'Genetic background']
 
             # select antimicrobial rows per species
             if self.species == "escherichia_coli" or self.species == "salmonella":
-                antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim"]
+                antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
                 filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_ecoli_salm)]
-            elif self.species == "shigella":
-                antibiotics_shig = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "trimethoprim", "cotrimoxazole"]
-                filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_shig)]
+            # elif self.species == "shigella":
+            #     antibiotics_shig = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "trimethoprim", "cotrimoxazole"]
+            #     filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_shig)]
             elif self.species == "campylobacter":
-                antibiotics_camp = ["ciprofloxacin", "gentamicin", "erytromycin", "tetracyclin"]
+                antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
                 filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_camp)]
 
             else:
