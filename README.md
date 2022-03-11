@@ -64,7 +64,7 @@ python3 juno-amr.py --species-help
 * ```-h, --help``` Shows the help of the pipeline
 
 ### Required parameters
-* ```-i, --input``` Path to the directory of your input. Can be fasta files or paired fastq files. It is important to link to the directory and not the files.
+* ```-i, --input``` Path to a directory with paired fastq files or path to the output directory of the juno assembly pipeline. It is important to link to the directory and not the files.
 * ```-s --species**``` Full scientific name of the species sample. Use underscores between the parts of a name and not spaces. A list of available species can be shown if you type ```python3 juno-amr.py --species-help```. It is possible to select 'other' as a species, if 'other' is selected the pipeline will only run ResFinder
 
 ### Optional parameters
@@ -79,7 +79,7 @@ python3 juno-amr.py --species-help
 
 ### The base command to run this program. 
 ```
-python3 juno-amr.py -s [species] -i [dir/to/fasta_or_fastq_files]
+python3 juno-amr.py -s [species] -i [dir/to/fastq_files]
 ```
 
 ### An example on how to run the pipeline.
