@@ -312,9 +312,7 @@ class JunoSummary:
             if self.species == "escherichia_coli" or self.species == "salmonella":
                 antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
                 filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_ecoli_salm)]
-            # elif self.species == "shigella":
-            #     antibiotics_shig = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "trimethoprim", "cotrimoxazole"]
-            #     filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_shig)]
+                #print(filtered_df.to_string())
             elif self.species == "campylobacter":
                 antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
                 filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_camp)]
@@ -330,13 +328,19 @@ class JunoSummary:
             #flip the df
             final.set_index('Antimicrobial',inplace=True)
             transposed = final.transpose()
-
+            if self.species == "escherichia_coli" or self.species == "salmonella":
+                transposed["cotrimoxazole"] = transposed[["trimethoprim", "sulfamethoxazole"]].agg(" ".join, axis=1)
+                transposed["cotrimoxazole"] = transposed["cotrimoxazole"].replace("No resistance", "", regex=True)
+            print(transposed.to_string())
             #add the samplename as col
             transposed.insert(0,"samplename", self.samplenames[sample_counter])
             sample_counter = sample_counter + 1
             df_list.append(transposed)
 
         final_df = pd.concat(df_list, axis=0, ignore_index=True)
+        final_df = final_df.replace(",", " ", regex=True)
+        final_df = final_df.replace("\n", "", regex=True)
+        #print(final_df.to_string())
         final_df.to_csv(self.iles_summary_file_names[0], mode='a', index=False)
 
 def main():
