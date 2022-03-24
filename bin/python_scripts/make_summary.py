@@ -312,7 +312,6 @@ class JunoSummary:
             if self.species == "escherichia_coli" or self.species == "salmonella":
                 antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
                 filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_ecoli_salm)]
-                #print(filtered_df.to_string())
             elif self.species == "campylobacter":
                 antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
                 filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_camp)]
@@ -329,8 +328,16 @@ class JunoSummary:
             final.set_index('Antimicrobial',inplace=True)
             transposed = final.transpose()
             if self.species == "escherichia_coli" or self.species == "salmonella":
-                transposed["cotrimoxazole"] = transposed[["trimethoprim", "sulfamethoxazole"]].agg(" ".join, axis=1)
-                transposed["cotrimoxazole"] = transposed["cotrimoxazole"].replace("No resistance", "", regex=True)
+                #if trimepthoprim or sulfamethoxazole == no resistance then cotrimoxazole == no resistance, because there is no resistance against one of the two means that there is no resistance
+                if "No resistance" in transposed["trimethoprim"].values or "No resistance" in transposed["sulfamethoxazole"].values:
+                    print("testing here")
+                    print(transposed.to_string())
+                    transposed["cotrimoxazole"] = "No resistance"
+                else:
+                    print("testing here - failing")
+                    print(transposed.to_string())
+                    transposed["cotrimoxazole"] = transposed[["trimethoprim", "sulfamethoxazole"]].agg(" ".join, axis=1)
+
             print(transposed.to_string())
             #add the samplename as col
             transposed.insert(0,"samplename", self.samplenames[sample_counter])
