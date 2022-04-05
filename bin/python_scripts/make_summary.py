@@ -7,6 +7,8 @@ Date: 30 - 03 - 2021
 Documentation: -
 """
 
+from operator import index
+from statistics import mode
 import sys
 import argparse
 import yaml
@@ -97,8 +99,6 @@ class JunoSummary:
         #Get the output directory from the yaml file
         open_config_parameters = open(self.user_parameters_path)
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
-        print("here")
-        print(parsed_config)
         self.output_dir_name = parsed_config['output_dir']
         self.species = parsed_config['species']
         
@@ -297,7 +297,8 @@ class JunoSummary:
 
         sample_counter = 0
         df_list = []
-        print("meep", self.input_paths)
+        df_list_point = []
+        #print("meep", self.input_paths)
         for filename in self.input_paths:
             self.species = self.species.replace(" ", "_")
             dirpath = f"{filename}/pheno_table.txt"
@@ -330,25 +331,59 @@ class JunoSummary:
             if self.species == "escherichia_coli" or self.species == "salmonella":
                 #if trimepthoprim or sulfamethoxazole == no resistance then cotrimoxazole == no resistance, because there is no resistance against one of the two means that there is no resistance
                 if "No resistance" in transposed["trimethoprim"].values or "No resistance" in transposed["sulfamethoxazole"].values:
-                    print("testing here")
-                    print(transposed.to_string())
                     transposed["cotrimoxazole"] = "No resistance"
                 else:
-                    print("testing here - failing")
-                    print(transposed.to_string())
                     transposed["cotrimoxazole"] = transposed[["trimethoprim", "sulfamethoxazole"]].agg(" ".join, axis=1)
 
-            print(transposed.to_string())
             #add the samplename as col
             transposed.insert(0,"samplename", self.samplenames[sample_counter])
             sample_counter = sample_counter + 1
             df_list.append(transposed)
+        
+        sample_counter_pointfinder = 0
+        for filename in self.input_paths:
+            dirpath = f"{filename}/PointFinder_results.txt"
+            opened_file = open(dirpath, "r")
+            pointfinder_data = opened_file.readlines()[1:]
+            mut_res_combos = []
+            # get the mutation and resistance
+            for line in pointfinder_data:
+                    line = line.split("\t")
+                    mutation = line[0]
+                    resistance = line[3].split(",")
+                    unique_resistance = []
+                    for x in resistance:
+                        if x not in unique_resistance:
+                            unique_resistance.append(x)
 
+                    #link the mutation to the resistance
+                    for x in unique_resistance:
+                        dictlist = [mutation, x]
+                        mut_res_combos.append(dictlist)
+
+            #create df
+            df = pd.DataFrame(mut_res_combos, columns=["0","1"])
+            df = df.set_index('1')
+            transposed = df.transpose()
+            complete_df = transposed.astype(str).groupby(transposed.columns, axis=1).agg(lambda x: x.apply(','.join, 1))
+            complete_df.insert(0,"samplename", self.samplenames[sample_counter_pointfinder])
+
+            df_list_point.append(complete_df)
+            #for each pointfinder results file add the df to a list
+            # concat all the dfs later
+            #TODO merge this with the df of pheno_table or with resfinder output?
+
+        # make colnames to lower case for final_df_point and for final_df
+        # if colnames have similar names merge them by name
+        final_df_point = pd.concat(df_list_point)    
         final_df = pd.concat(df_list, axis=0, ignore_index=True)
         final_df = final_df.replace(",", " ", regex=True)
         final_df = final_df.replace("\n", "", regex=True)
-        #print(final_df.to_string())
+        inner_merged_total = pd.merge(final_df, final_df_point, on=["samplename"])
+
         final_df.to_csv(self.iles_summary_file_names[0], mode='a', index=False)
+        final_df_point.to_csv(f"{self.iles_summary_file_names[0]}_test", mode='a', index=False)
+        inner_merged_total.to_csv(f"{self.iles_summary_file_names[0]}_testt", mode='a', index=False)
 
 def main():
     m = JunoSummary()
