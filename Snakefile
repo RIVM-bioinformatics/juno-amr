@@ -36,7 +36,7 @@ include: "bin/rules/makeAmrfinderplusSummary.smk"
 #####   Specify final output                                                #####
 #################################################################################
 
-if ["species"] == "other":
+if config["species"] == "other":
     rule all:
         """ Main rule that starts the complete workflow """
         input: 
