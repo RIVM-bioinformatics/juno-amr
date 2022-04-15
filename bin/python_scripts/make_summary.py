@@ -291,7 +291,10 @@ class JunoSummary:
         #concat all dfs and write to file
         final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
         final_df.to_csv(f'{pointfinder_prediction_output}', mode='a', index=False)
-
+    
+    def sjoin(self, x):
+        return ';'.join(x[x.notnull()].astype(str))
+    
     def iles_summary(self):
         """Summary file specific for iles/lims"""
 
@@ -365,25 +368,62 @@ class JunoSummary:
             df = pd.DataFrame(mut_res_combos, columns=["0","1"])
             df = df.set_index('1')
             transposed = df.transpose()
-            complete_df = transposed.astype(str).groupby(transposed.columns, axis=1).agg(lambda x: x.apply(','.join, 1))
+            print("transposed")
+            transposed.columns= transposed.columns.str.lower()
+
+            print(transposed.to_string())
+            if self.species == "escherichia_coli" or self.species == "salmonella":    
+                antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
+                filtered = transposed.filter(regex='|'.join(antibiotics_ecoli_salm))
+            elif self.species == "campylobacter":
+                antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
+                filtered = transposed.filter(regex='|'.join(antibiotics_camp))
+            else:
+                print("No iles summary for this species")
+                return
+            #TODOditstukjewerktniet            
+            # if self.species == "escherichia_coli" or self.species == "salmonella":
+            #     #if trimepthoprim or sulfamethoxazole == no resistance then cotrimoxazole == no resistance, because there is no resistance against one of the two means that there is no resistance
+            #    if "No resistance" in filtered["trimethoprim"].values or "No resistance" in filtered["sulfamethoxazole"].values:
+            #        filtered["cotrimoxazole"] = "No resistance"
+            #    else:
+            #        filtered["cotrimoxazole"] = filtered[["trimethoprim", "sulfamethoxazole"]].agg(" ".join, axis=1)
+
+            complete_df = filtered.astype(str).groupby(filtered.columns, axis=1).agg(lambda x: x.apply(','.join, 1))
             complete_df.insert(0,"samplename", self.samplenames[sample_counter_pointfinder])
-
             df_list_point.append(complete_df)
-            #for each pointfinder results file add the df to a list
-            # concat all the dfs later
-            #TODO merge this with the df of pheno_table or with resfinder output?
+            sample_counter_pointfinder = sample_counter_pointfinder + 1
 
-        # make colnames to lower case for final_df_point and for final_df
-        # if colnames have similar names merge them by name
         final_df_point = pd.concat(df_list_point)    
-        final_df = pd.concat(df_list, axis=0, ignore_index=True)
-        final_df = final_df.replace(",", " ", regex=True)
-        final_df = final_df.replace("\n", "", regex=True)
-        inner_merged_total = pd.merge(final_df, final_df_point, on=["samplename"])
+        #TODO deze is niet meer nodig denk ik want staat ook in regel 371
+        final_df_point.columns= final_df_point.columns.str.lower()
 
-        final_df.to_csv(self.iles_summary_file_names[0], mode='a', index=False)
-        final_df_point.to_csv(f"{self.iles_summary_file_names[0]}_test", mode='a', index=False)
-        inner_merged_total.to_csv(f"{self.iles_summary_file_names[0]}_testt", mode='a', index=False)
+        final_df = pd.concat(df_list, axis=0, ignore_index=True)
+        final_df.columns= final_df.columns.str.lower()
+        print("testing")
+        print(final_df.to_string())
+        print("testing2")
+        print(final_df_point.to_string())
+        inner_merged_total = pd.merge(final_df_point, final_df, on=["samplename"], how="inner")
+        inner_merged_total = inner_merged_total.replace(",", " ", regex=True)
+        inner_merged_total = inner_merged_total.replace("\n", "", regex=True)
+
+        #remove suffix to combine columns
+        inner_merged_total.columns = inner_merged_total.columns.str.rstrip('_x')
+        inner_merged_total.columns = inner_merged_total.columns.str.rstrip('_y')
+        
+        #blub = inner_merged_total.groupby(level=0, axis=1).apply(lambda x: x.apply(self.sjoin, axis=1))
+        #inner_merged_total.set_index('samplename')
+        blub = inner_merged_total.groupby(level=0, axis=1).first()
+        
+        #test = blub.set_index(['samplename'], inplace=True)
+        print("blub")
+        col_name = "samplename"
+        first_col = blub.pop(col_name)
+        blub.insert(0, col_name, first_col)
+        print(blub.to_string())
+
+        blub.to_csv(self.iles_summary_file_names[0], index=False)
 
 def main():
     m = JunoSummary()
