@@ -298,12 +298,14 @@ class JunoSummary:
     def iles_summary(self):
         """Summary file specific for iles/lims"""
 
-        sample_counter = 0
+        self.species = self.species.replace(" ", "_")
+        sample_counter_pheno_table = 0
+        sample_counter_pointfinder = 0
         df_list = []
         df_list_point = []
-        #print("meep", self.input_paths)
+
+        #loop over for pheno table
         for filename in self.input_paths:
-            self.species = self.species.replace(" ", "_")
             dirpath = f"{filename}/pheno_table.txt"
             opened_file = open(dirpath, "r")
             #select lines starting with 'antimicrobial'
@@ -312,7 +314,8 @@ class JunoSummary:
             df = pd.DataFrame([x.split('\t') for x in data_lines], dtype='object')
             df.columns=['Antimicrobial', 'Class', 'WGS-predicted phenotype', 'Match', 'Genetic background']
 
-            # select antimicrobial rows per species
+            #select antimicrobial rows per species
+            #TODO dit kan samen met wat helemaal onderaan staat
             if self.species == "escherichia_coli" or self.species == "salmonella":
                 antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
                 filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_ecoli_salm)]
@@ -331,19 +334,11 @@ class JunoSummary:
             #flip the df
             final.set_index('Antimicrobial',inplace=True)
             transposed = final.transpose()
-            if self.species == "escherichia_coli" or self.species == "salmonella":
-                #if trimepthoprim or sulfamethoxazole == no resistance then cotrimoxazole == no resistance, because there is no resistance against one of the two means that there is no resistance
-                if "No resistance" in transposed["trimethoprim"].values or "No resistance" in transposed["sulfamethoxazole"].values:
-                    transposed["cotrimoxazole"] = "No resistance"
-                else:
-                    transposed["cotrimoxazole"] = transposed[["trimethoprim", "sulfamethoxazole"]].agg(" ".join, axis=1)
-
-            #add the samplename as col
-            transposed.insert(0,"samplename", self.samplenames[sample_counter])
-            sample_counter = sample_counter + 1
+            transposed.insert(0,"samplename", self.samplenames[sample_counter_pheno_table])
+            sample_counter_pheno_table = sample_counter_pheno_table + 1
             df_list.append(transposed)
         
-        sample_counter_pointfinder = 0
+        #loop over for pointfinder file
         for filename in self.input_paths:
             dirpath = f"{filename}/PointFinder_results.txt"
             opened_file = open(dirpath, "r")
@@ -368,42 +363,27 @@ class JunoSummary:
             df = pd.DataFrame(mut_res_combos, columns=["0","1"])
             df = df.set_index('1')
             transposed = df.transpose()
-            print("transposed")
             transposed.columns= transposed.columns.str.lower()
 
-            print(transposed.to_string())
-            if self.species == "escherichia_coli" or self.species == "salmonella":    
-                antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
-                filtered = transposed.filter(regex='|'.join(antibiotics_ecoli_salm))
-            elif self.species == "campylobacter":
-                antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
-                filtered = transposed.filter(regex='|'.join(antibiotics_camp))
-            else:
-                print("No iles summary for this species")
-                return
-            #TODOditstukjewerktniet            
-            # if self.species == "escherichia_coli" or self.species == "salmonella":
-            #     #if trimepthoprim or sulfamethoxazole == no resistance then cotrimoxazole == no resistance, because there is no resistance against one of the two means that there is no resistance
-            #    if "No resistance" in filtered["trimethoprim"].values or "No resistance" in filtered["sulfamethoxazole"].values:
-            #        filtered["cotrimoxazole"] = "No resistance"
-            #    else:
-            #        filtered["cotrimoxazole"] = filtered[["trimethoprim", "sulfamethoxazole"]].agg(" ".join, axis=1)
+            #select only the used antimicrobials
+            # if self.species == "escherichia_coli" or self.species == "salmonella":    
+            #     antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
+            #     transposed.filter(regex='|'.join(antibiotics_ecoli_salm))
+            # elif self.species == "campylobacter":
+            #     antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
+            #     transposed.filter(regex='|'.join(antibiotics_camp))
+            # else:
+            #     print("No iles summary for this species")
+            #     return
 
-            complete_df = filtered.astype(str).groupby(filtered.columns, axis=1).agg(lambda x: x.apply(','.join, 1))
+            complete_df = transposed.astype(str).groupby(transposed.columns, axis=1).agg(lambda x: x.apply(','.join, 1))
             complete_df.insert(0,"samplename", self.samplenames[sample_counter_pointfinder])
             df_list_point.append(complete_df)
             sample_counter_pointfinder = sample_counter_pointfinder + 1
 
         final_df_point = pd.concat(df_list_point)    
-        #TODO deze is niet meer nodig denk ik want staat ook in regel 371
-        final_df_point.columns= final_df_point.columns.str.lower()
-
         final_df = pd.concat(df_list, axis=0, ignore_index=True)
         final_df.columns= final_df.columns.str.lower()
-        print("testing")
-        print(final_df.to_string())
-        print("testing2")
-        print(final_df_point.to_string())
         inner_merged_total = pd.merge(final_df_point, final_df, on=["samplename"], how="inner")
         inner_merged_total = inner_merged_total.replace(",", " ", regex=True)
         inner_merged_total = inner_merged_total.replace("\n", "", regex=True)
@@ -411,19 +391,29 @@ class JunoSummary:
         #remove suffix to combine columns
         inner_merged_total.columns = inner_merged_total.columns.str.rstrip('_x')
         inner_merged_total.columns = inner_merged_total.columns.str.rstrip('_y')
-        
-        #blub = inner_merged_total.groupby(level=0, axis=1).apply(lambda x: x.apply(self.sjoin, axis=1))
-        #inner_merged_total.set_index('samplename')
-        blub = inner_merged_total.groupby(level=0, axis=1).first()
-        
-        #test = blub.set_index(['samplename'], inplace=True)
-        print("blub")
-        col_name = "samplename"
-        first_col = blub.pop(col_name)
-        blub.insert(0, col_name, first_col)
-        print(blub.to_string())
+        final_combined = inner_merged_total.groupby(level=0, axis=1).first()
 
-        blub.to_csv(self.iles_summary_file_names[0], index=False)
+        if self.species == "escherichia_coli" or self.species == "salmonella":    
+            antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
+            final_combined.filter(regex='|'.join(antibiotics_ecoli_salm))
+        elif self.species == "campylobacter":
+            antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
+            final_combined.filter(regex='|'.join(antibiotics_camp))
+        else:
+            print("No iles summary for this species")
+            return
+
+        if self.species == "escherichia_coli" or self.species == "salmonella":
+            #if trimepthoprim or sulfamethoxazole == no resistance then cotrimoxazole == no resistance, because there is no resistance against one of the two means that there is no resistance
+            if "No resistance" in final_combined["trimethoprim"].values or "No resistance" in final_combined["sulfamethoxazole"].values:
+                final_combined["cotrimoxazole"] = "No resistance"
+            else:
+                final_combined["cotrimoxazole"] = final_combined[["trimethoprim", "sulfamethoxazole"]].agg(" ".join, axis=1)
+
+        col_name = "samplename"
+        first_col = final_combined.pop(col_name)
+        final_combined.insert(0, col_name, first_col)
+        final_combined.to_csv(self.iles_summary_file_names[0], index=False)
 
 def main():
     m = JunoSummary()
