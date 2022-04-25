@@ -292,9 +292,6 @@ class JunoSummary:
         final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
         final_df.to_csv(f'{pointfinder_prediction_output}', mode='a', index=False)
     
-    def sjoin(self, x):
-        return ';'.join(x[x.notnull()].astype(str))
-    
     def iles_summary(self):
         """Summary file specific for iles/lims"""
 
@@ -351,6 +348,7 @@ class JunoSummary:
                     resistance = line[3].split(",")
                     unique_resistance = []
                     for x in resistance:
+                        x = x.strip(" ")
                         if x not in unique_resistance:
                             unique_resistance.append(x)
 
@@ -361,22 +359,26 @@ class JunoSummary:
 
             #create df
             df = pd.DataFrame(mut_res_combos, columns=["0","1"])
+            print("df")
+            print(df.to_string())
             df = df.set_index('1')
             transposed = df.transpose()
             transposed.columns= transposed.columns.str.lower()
 
-            #select only the used antimicrobials
-            # if self.species == "escherichia_coli" or self.species == "salmonella":    
-            #     antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
-            #     transposed.filter(regex='|'.join(antibiotics_ecoli_salm))
-            # elif self.species == "campylobacter":
-            #     antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
-            #     transposed.filter(regex='|'.join(antibiotics_camp))
-            # else:
-            #     print("No iles summary for this species")
-            #     return
+            #TODO get nalicilix acid out of the cols
 
-            complete_df = transposed.astype(str).groupby(transposed.columns, axis=1).agg(lambda x: x.apply(','.join, 1))
+            #select only the used antimicrobials
+            if self.species == "escherichia_coli" or self.species == "salmonella":   
+                antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
+                filtered_transposed = transposed.filter(regex='|'.join(antibiotics_ecoli_salm))
+            elif self.species == "campylobacter":
+                antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
+                filtered_transposed = transposed.filter(regex='|'.join(antibiotics_camp))
+            else:
+                print("No iles summary for this species")
+                return
+
+            complete_df = filtered_transposed.astype(str).groupby(filtered_transposed.columns, axis=1).agg(lambda x: x.apply(','.join, 1))
             complete_df.insert(0,"samplename", self.samplenames[sample_counter_pointfinder])
             df_list_point.append(complete_df)
             sample_counter_pointfinder = sample_counter_pointfinder + 1
