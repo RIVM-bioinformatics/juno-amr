@@ -7,6 +7,8 @@ Date: 30 - 03 - 2021
 Documentation: -
 """
 
+from operator import index
+from statistics import mode
 import sys
 import argparse
 import yaml
@@ -45,6 +47,17 @@ class JunoSummary:
         )
 
         self.parser.add_argument(
+            "-si",
+            "--summary_iles",
+            #TODO TYPE is een path of file
+            type=str,
+            metavar="file",
+            dest="iles_summary_file_names",
+            nargs=1,
+            help="The name for the iles summary file"
+        )
+
+        self.parser.add_argument(
             "-sp",
             "--summary_pointfinder",
             type=str,
@@ -76,7 +89,7 @@ class JunoSummary:
             metavar="name",
             dest="summary_type",
             help="The type of summaries to create, choose from: resfinder or pointfinder",
-            choices= ["resfinder", "pointfinder"]
+            choices= ["resfinder", "pointfinder", "iles"]
         )
 
         # parse arguments
@@ -86,9 +99,8 @@ class JunoSummary:
         #Get the output directory from the yaml file
         open_config_parameters = open(self.user_parameters_path)
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
-        print("here")
-        print(parsed_config)
         self.output_dir_name = parsed_config['output_dir']
+        self.species = parsed_config['species']
         
         # Make new summary directory
         dirpath = Path(f"{self.output_dir_name}/{self.summary_folder_path}")
@@ -108,6 +120,7 @@ class JunoSummary:
         #Collect summary file names from the parser
         self.resfinder_summary_file_names = self.dict_arguments.get("resfinder_summary_file_names")
         self.pointfinder_summary_file_names = self.dict_arguments.get("pointfinder_summary_file_names")
+        self.iles_summary_file_names = self.dict_arguments.get("iles_summary_file_names")
 
         return self.output_dir_name, self.samplenames, dirpath
 
@@ -279,11 +292,135 @@ class JunoSummary:
         final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
         final_df.to_csv(f'{pointfinder_prediction_output}', mode='a', index=False)
     
+    def iles_summary(self):
+        """Summary file specific for iles/lims"""
+
+        self.species = self.species.replace(" ", "_")
+        sample_counter_pheno_table = 0
+        sample_counter_pointfinder = 0
+        df_list = []
+        df_list_point = []
+
+        #loop over for pheno table
+        for filename in self.input_paths:
+            dirpath = f"{filename}/pheno_table.txt"
+            opened_file = open(dirpath, "r")
+            #select lines starting with 'antimicrobial'
+            data_lines = opened_file.readlines()[17:]
+
+            df = pd.DataFrame([x.split('\t') for x in data_lines], dtype='object')
+            df.columns=['Antimicrobial', 'Class', 'WGS-predicted phenotype', 'Match', 'Genetic background']
+
+            #select antimicrobial rows per species
+            #TODO dit kan samen met wat helemaal onderaan staat
+            if self.species == "escherichia_coli" or self.species == "salmonella":
+                antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
+                filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_ecoli_salm)]
+            elif self.species == "campylobacter":
+                antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
+                filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_camp)]
+
+            else:
+                print("No iles summary for this species")
+                return
+
+            selected_rows  = filtered_df[["Antimicrobial", "WGS-predicted phenotype", "Genetic background"]].copy()
+            selected_rows.loc[selected_rows['WGS-predicted phenotype'] == "Resistant", 'WGS-predicted phenotype'] = selected_rows['Genetic background']
+            final = selected_rows[["Antimicrobial", "WGS-predicted phenotype"]].copy()
+
+            #flip the df
+            final.set_index('Antimicrobial',inplace=True)
+            transposed = final.transpose()
+            transposed.insert(0,"samplename", self.samplenames[sample_counter_pheno_table])
+            sample_counter_pheno_table = sample_counter_pheno_table + 1
+            df_list.append(transposed)
+        
+        #loop over for pointfinder file
+        for filename in self.input_paths:
+            dirpath = f"{filename}/PointFinder_results.txt"
+            opened_file = open(dirpath, "r")
+            pointfinder_data = opened_file.readlines()[1:]
+            mut_res_combos = []
+            # get the mutation and resistance
+            for line in pointfinder_data:
+                    line = line.split("\t")
+                    mutation = line[0]
+                    resistance = line[3].split(",")
+                    unique_resistance = []
+                    for x in resistance:
+                        x = x.strip(" ")
+                        if x not in unique_resistance:
+                            unique_resistance.append(x)
+
+                    #link the mutation to the resistance
+                    for x in unique_resistance:
+                        dictlist = [mutation, x]
+                        mut_res_combos.append(dictlist)
+
+            #create df
+            df = pd.DataFrame(mut_res_combos, columns=["0","1"])
+            print("df")
+            print(df.to_string())
+            df = df.set_index('1')
+            transposed = df.transpose()
+            transposed.columns= transposed.columns.str.lower()
+
+            #TODO get nalicilix acid out of the cols
+
+            #select only the used antimicrobials
+            if self.species == "escherichia_coli" or self.species == "salmonella":   
+                antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
+                filtered_transposed = transposed.filter(regex='|'.join(antibiotics_ecoli_salm))
+            elif self.species == "campylobacter":
+                antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
+                filtered_transposed = transposed.filter(regex='|'.join(antibiotics_camp))
+            else:
+                print("No iles summary for this species")
+                return
+
+            complete_df = filtered_transposed.astype(str).groupby(filtered_transposed.columns, axis=1).agg(lambda x: x.apply(','.join, 1))
+            complete_df.insert(0,"samplename", self.samplenames[sample_counter_pointfinder])
+            df_list_point.append(complete_df)
+            sample_counter_pointfinder = sample_counter_pointfinder + 1
+
+        final_df_point = pd.concat(df_list_point)    
+        final_df = pd.concat(df_list, axis=0, ignore_index=True)
+        final_df.columns= final_df.columns.str.lower()
+        inner_merged_total = pd.merge(final_df_point, final_df, on=["samplename"], how="inner")
+        inner_merged_total = inner_merged_total.replace(",", " ", regex=True)
+        inner_merged_total = inner_merged_total.replace("\n", "", regex=True)
+
+        #remove suffix to combine columns
+        inner_merged_total.columns = inner_merged_total.columns.str.rstrip('_x')
+        inner_merged_total.columns = inner_merged_total.columns.str.rstrip('_y')
+        final_combined = inner_merged_total.groupby(level=0, axis=1).first()
+
+        if self.species == "escherichia_coli" or self.species == "salmonella":    
+            antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
+            final_combined.filter(regex='|'.join(antibiotics_ecoli_salm))
+        elif self.species == "campylobacter":
+            antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
+            final_combined.filter(regex='|'.join(antibiotics_camp))
+        else:
+            print("No iles summary for this species")
+            return
+
+        if self.species == "escherichia_coli" or self.species == "salmonella":
+            #if trimepthoprim or sulfamethoxazole == no resistance then cotrimoxazole == no resistance, because there is no resistance against one of the two means that there is no resistance
+            if "No resistance" in final_combined["trimethoprim"].values or "No resistance" in final_combined["sulfamethoxazole"].values:
+                final_combined["cotrimoxazole"] = "No resistance"
+            else:
+                final_combined["cotrimoxazole"] = final_combined[["trimethoprim", "sulfamethoxazole"]].agg(" ".join, axis=1)
+
+        col_name = "samplename"
+        first_col = final_combined.pop(col_name)
+        final_combined.insert(0, col_name, first_col)
+        final_combined.to_csv(self.iles_summary_file_names[0], index=False)
+
 def main():
     m = JunoSummary()
     m.get_user_arguments()
     m.preproccesing_for_summary_files()
-
     summary_type = m.dict_arguments.get("summary_type")
 
     if summary_type == "resfinder":
@@ -294,6 +431,9 @@ def main():
     elif summary_type == "pointfinder":
         m.pointfinder_result_summary()
         m.pointfinder_prediction_summary()
+
+    elif summary_type == "iles":
+        m.iles_summary()
 
 if __name__ == '__main__':
     main()
