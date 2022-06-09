@@ -91,6 +91,14 @@ class CollectUserArguments(SpeciesHelpers):
                 choices = self.species_options
             )
             parser.add_argument(
+                '-ex',
+                '--exclusionfile',
+                type=pathlib.Path,
+                metavar='FILE',
+                dest="exclusion_file",
+                help='Path to the file that contains samplenames to be excluded.'  
+            )
+            parser.add_argument(
                 "--resfinder_min_coverage",
                 type=float,
                 metavar="NUM",

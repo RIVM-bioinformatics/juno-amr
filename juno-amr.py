@@ -24,6 +24,7 @@ class JunoAmrRun(base_juno_pipeline.PipelineStartup,
                 input_dir,
                 output_dir,
                 species,
+                exclusion_file,
                 resfinder_min_coverage=0.6,
                 resfinder_identity_threshold=0.8,
                 db_dir = "/mnt/db/juno-amr",
@@ -71,6 +72,7 @@ class JunoAmrRun(base_juno_pipeline.PipelineStartup,
 
         # Specific Juno-AMR pipeline attributes
         self.species = species
+        self.exclusion_file = exclusion_file
         self.resfinder_min_coverage=resfinder_min_coverage
         self.resfinder_identity_threshold= resfinder_identity_threshold
         self.run_pointfinder=run_pointfinder
@@ -98,6 +100,7 @@ class JunoAmrRun(base_juno_pipeline.PipelineStartup,
         config_params = {'input_dir': str(self.input_dir),
                         'output_dir': str(self.output_dir),
                         'species': str(self.species),
+                        'exclusion_file': str(self.exclusion_file),
                         'run_pointfinder': str(self.run_pointfinder),
                         'resfinder_min_coverage': self.resfinder_min_coverage,
                         'resfinder_identity_threshold': self.resfinder_identity_threshold,
@@ -128,6 +131,7 @@ if __name__ == '__main__':
     JunoAmrRun(input_dir = args.input_dir, 
                     output_dir = args.output_dir, 
                     species=args.species,
+                    exclusion_file = args.exclusion_file,
                     run_pointfinder=args.run_pointfinder,
                     db_dir = args.db_dir,
                     resfinder_min_coverage = args.resfinder_min_coverage,
