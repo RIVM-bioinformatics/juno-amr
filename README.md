@@ -1,5 +1,5 @@
 <div align="center">
-    <h1> Juno-amr</h1>
+    <h1> Juno-AMR</h1>
     <br />
     <h2> Pipeline for antimicrobial resistance</h2>
     <br />
@@ -14,7 +14,7 @@
 * **Commissioned by:**      Maaike van den Beld
 
 ## About this project
-The Juno Antimicrobial Resistance(Juno AMR) pipeline is a pipeline that is used to automate [ResFinder](https://bitbucket.org/genomicepidemiology/resfinder/src/master/) and [PointFinder](https://bitbucket.org/genomicepidemiology/pointfinder/src/master/).The tools that are being used are created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/). These tools identify acquired genes and find chromosal mutations mediating antimicrobial resistance in DNA secuences of bacteria. This can be partial or total sequences. The output of both tools can be used for analysis and is also combined in four summary files for a quick overview of the most important results.  
+The Juno Antimicrobial Resistance (Juno-AMR) pipeline is a pipeline that is used to automate [ResFinder](https://bitbucket.org/genomicepidemiology/resfinder/src/master/) and [PointFinder](https://bitbucket.org/genomicepidemiology/pointfinder/src/master/).The tools that are being used are created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/). These tools identify acquired genes and find chromosal mutations mediating antimicrobial resistance in DNA secuences of bacteria. This can be partial or total sequences. The output of both tools can be used for analysis and is also combined in four summary files for a quick overview of the most important results.  
 
 ## Prerequisities
 * **Linux environment**
@@ -25,12 +25,12 @@ The Juno Antimicrobial Resistance(Juno AMR) pipeline is a pipeline that is used 
 ## Installation
 1. Clone the repository.
 ```
-git clone https://github.com/RIVM-bioinformatics/Juno-amr.git
+git clone https://github.com/RIVM-bioinformatics/juno-amr.git
 ```
 
 2. Go to Juno directory.
 ```
-cd Juno-amr
+cd juno-amr
 ```
 
 3. Create & activate mamba environment.
@@ -64,13 +64,13 @@ python3 juno-amr.py --species-help
 * ```-h, --help``` Shows the help of the pipeline
 
 ### Required parameters
-* ```-i, --input``` Path to a directory with paired fastq files or path to the output directory of the juno assembly pipeline. It is important to link to the directory and not the files.
+* ```-i, --input``` Path to a directory with paired fastq files or path to the output directory of the Juno-Assembly pipeline. It is important to link to the directory and not the files.
 * ```-s --species**``` Full scientific name of the species sample. Use underscores between the parts of a name and not spaces. A list of available species can be shown if you type ```python3 juno-amr.py --species-help```. It is possible to select 'other' as a species, if 'other' is selected the pipeline will only run ResFinder
 
 ### Optional parameters
 * ```-l --min_cov```    Minimum coverage of ResFinder
 * ```-t --threshold```  Threshold for identity of ResFinder
-* ```-o, --output```    Path to the directory that is used for the output. If none is given the default will be an output directory in the Juno-amr folder.
+* ```-o, --output```    Path to the directory that is used for the output. If none is given the default will be an output directory in the juno-amr folder.
 * ```-n --dryrun```     If you want to run a dry run use one of these parameters
 * ```-db_point```       Path for alternative database for PointFinder
 * ```-db_res```         Path for alternative database for ResFinder
