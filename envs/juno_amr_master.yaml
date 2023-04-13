@@ -1,22 +1,26 @@
-name: juno-amr_master
+name: juno_amr_vir
 channels:
   - bioconda
   - conda-forge
   - anaconda
   - defaults
 dependencies:
-  - git
+  - git=2.34.1
   - mamba>0.19
   - pip>=21.2
   - pandas==1.3.2
-  - python>3.7.6
+  - python==3.7.6
   - snakemake==6.6.1
   - xlrd==1.2.0
   - kma==1.3.14
   - blast==2.12
   - cgecore==1.5.5
-  
   - pip:
     - PyYAML==5.3.1
     - tabulate==0.8.0
     - "--editable=git+https://github.com/RIVM-bioinformatics/base_juno_pipeline.git@v0.2.6#egg=base_juno"
+
+
+
+
+
