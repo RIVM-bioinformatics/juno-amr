@@ -18,4 +18,4 @@ dependencies:
   - pip:
     - PyYAML==5.3.1
     - tabulate==0.8.0
-    - "--editable=git+https://github.com/RIVM-bioinformatics/base_juno_pipeline.git@exclusion_file#egg=base_juno"
+    - "--editable=git+https://github.com/RIVM-bioinformatics/base_juno_pipeline.git@v0.2.9#egg=base_juno"
