@@ -94,7 +94,7 @@ fi
 
 set -euo pipefail
 
-python juno-amr.py --queue "${QUEUE}" -i "${input_dir}/clean_fastq/" -o "${output_dir}" -s "${GENUS_ALL}"
+python juno_amr.py --queue "${QUEUE}" -i "${input_dir}/clean_fastq/" -o "${output_dir}" -s "${GENUS_ALL}"
 
 result=$?
 
