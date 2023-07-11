@@ -1,9 +1,8 @@
-name: juno-amr_master
+name: juno_amr
 channels:
   - bioconda
   - conda-forge
-  - anaconda
-  - defaults
+  - nodefaults
 dependencies:
   - git=2.34.1
   - mamba>0.19

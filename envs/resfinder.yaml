@@ -2,7 +2,7 @@ name: resfinder
 channels:
   - bioconda
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - kma=1.3.14
 prefix: /home/wolthuir/.conda/envs/juno_amr_master
