@@ -10,7 +10,54 @@ import pathlib
 import subprocess
 import os
 
-def download_git_repo(version, url, dest_dir):
+def download_git_repo(version, url, dest_dir, commit_hash=None):
+    """Function to download a git repo"""
+    # Delete old output dir if existing and create parent dirs if not existing
+    try:
+        rm_dir = subprocess.run(['rm','-rf', str(dest_dir)], check = True, timeout = 60)
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as err:
+        rm_dir.kill()
+        raise
+
+    if not isinstance(dest_dir, pathlib.PosixPath):
+        dest_dir = pathlib.Path(dest_dir)
+
+    dest_dir.parent.mkdir(exist_ok = True)
+    # Download
+    if commit_hash is None:
+        try:
+            downloading = subprocess.run(['git', 'clone', 
+                                        '-b', version, 
+                                        '--single-branch', '--depth=1', 
+                                        url, str(dest_dir)],
+                                        check = True,
+                                        timeout = 500)
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as err:
+            downloading.kill()
+            raise
+    else:
+        try:
+            downloading = subprocess.run(['git', 'clone', 
+                                        '-b', version, 
+                                        url, str(dest_dir)],
+                                        check = True,
+                                        timeout = 500)
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as err:
+            downloading.kill()
+            raise
+        try:
+            checking_out = subprocess.run(['git', 
+                                    '--git-dir', f"{str(dest_dir)}/.git", 
+                                    '--work-tree', str(dest_dir),
+                                    'checkout',
+                                    commit_hash],
+                                    check = True,
+                                    timeout = 500)
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as err:
+            checking_out.kill()
+            raise
+    
+def download_git_repo_using_commit_hash(version, url, dest_dir):
     """Function to download a git repo"""
     # Delete old output dir if existing and create parent dirs if not existing
     try:
@@ -34,7 +81,7 @@ def download_git_repo(version, url, dest_dir):
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as err:
         downloading.kill()
         raise
-    
+
 def get_commit_git(gitrepo_dir):
     """Function to get the commit number from a folder (must be a git repo)"""
     try:
@@ -49,7 +96,7 @@ def get_commit_git(gitrepo_dir):
     return commit
 
 #Download resfinder
-def download_software_resfinder(resfinder_software_dir, version = '4.1.3'):
+def download_software_resfinder(resfinder_software_dir, version = "master", commit_hash = "e976708dc742d53dd0eb15422a4e7f2285518787"):
     """Function to download kmerfinder if it is not present"""
     if not isinstance(resfinder_software_dir, pathlib.PosixPath):
         resfinder_software_dir = pathlib.Path(resfinder_software_dir)
@@ -57,7 +104,7 @@ def download_software_resfinder(resfinder_software_dir, version = '4.1.3'):
         print("\x1b[0;33m Downloading resfinder software...\n\033[0;0m")
         download_git_repo(version, 
                         'https://bitbucket.org/genomicepidemiology/resfinder.git',
-                        resfinder_software_dir)
+                        resfinder_software_dir, commit_hash)
         
     return version
 
