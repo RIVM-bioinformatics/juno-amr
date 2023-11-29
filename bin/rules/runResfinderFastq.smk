@@ -5,10 +5,7 @@ rule runResfinderFastq:
         r2 = lambda wildcards: SAMPLES[wildcards.sample]["R2"]
 
     output:
-        output_dir = directory(OUT + "/results_per_sample/{sample}")
-    
-    #conda:
-        #"../../envs/resfinder.yaml"
+        output_dir = directory(OUT + "/results/resfinder/{sample}")
 
     message:
         "Processing received fastq sample in ResFinder and PointFinder"

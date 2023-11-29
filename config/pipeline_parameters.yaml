@@ -1,6 +1,10 @@
 # Resources
 threads:
   resfinder: 1
+  amrfinderplus: 1
+  virulencefinder: 1
 
 mem_gb:
   resfinder: 12
+  amrfinderplus: 12
+  virulencefinder: 12

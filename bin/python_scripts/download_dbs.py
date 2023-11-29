@@ -70,7 +70,6 @@ def download_git_repo_using_commit_hash(version, url, dest_dir):
         dest_dir = pathlib.Path(dest_dir)
 
     dest_dir.parent.mkdir(exist_ok = True)
-    # Download
     try:
         downloading = subprocess.run(['git', 'clone', 
                                         '-b', version, 
@@ -96,7 +95,7 @@ def get_commit_git(gitrepo_dir):
     return commit
 
 #Download resfinder
-def download_software_resfinder(resfinder_software_dir, version = "master", commit_hash = "e976708dc742d53dd0eb15422a4e7f2285518787"):
+def download_software_resfinder(resfinder_software_dir, version = '4.1.3'):
     """Function to download kmerfinder if it is not present"""
     if not isinstance(resfinder_software_dir, pathlib.PosixPath):
         resfinder_software_dir = pathlib.Path(resfinder_software_dir)
@@ -108,7 +107,18 @@ def download_software_resfinder(resfinder_software_dir, version = "master", comm
         
     return version
 
-#Download resfinder db
+def download_software_virulencefinder(virulencefinder_software_dir, version = '2.0.4'):
+    """Function to download kmerfinder if it is not present"""
+    if not isinstance(virulencefinder_software_dir, pathlib.PosixPath):
+        virulencefinder_software_dir = pathlib.Path(virulencefindersoftware_dir)
+    if not virulencefinder_software_dir.joinpath('virulencefinder.py').is_file():
+        print("\x1b[0;33m Downloading virulencefinder software...\n\033[0;0m")
+        download_git_repo(version, 
+                        'https://bitbucket.org/genomicepidemiology/virulencefinder.git',
+                        virulencefinder_software_dir)
+        
+    return version
+
 def download_db_resfinder(resfinder_db_dir):
     """Function to download resfinder database if it is not present"""
     if not isinstance(resfinder_db_dir, pathlib.PosixPath):
@@ -144,7 +154,6 @@ def download_db_pointfinder(pointfinder_db_dir):
                         'https://bitbucket.org/genomicepidemiology/pointfinder_db.git',
                         pointfinder_db_dir)
         try:
-        #Installing
             current_dir = os.getcwd()
             os.chdir(pointfinder_db_dir)
             os.system(f"python3 INSTALL.py")
@@ -152,11 +161,31 @@ def download_db_pointfinder(pointfinder_db_dir):
         except (OSError, IOError) as err:
             print("OS error: ", err)
             raise
-    #get the version
     version = get_commit_git(pointfinder_db_dir)
     return version
 
-#Get all downloads for juno-amr pipeline
+def download_db_virulencefinder(virulencefinder_db_dir):
+    """Function to download virulencefinder database if it is not present"""
+    if not isinstance(virulencefinder_db_dir, pathlib.PosixPath):
+        virulencefinder_db_dir = pathlib.Path(virulencefinder_db_dir)
+    if not virulencefinder_db_dir.joinpath('config').exists():
+        print("\x1b[0;33m Downloading virulencefinder database...\n\033[0;0m")
+        print(virulencefinder_db_dir)
+        download_git_repo('master', 
+                        'https://bitbucket.org/genomicepidemiology/virulencefinder_db.git',
+                        virulencefinder_db_dir)
+        try:
+            current_dir = os.getcwd()
+            os.chdir(virulencefinder_db_dir)
+            os.system(f"python3 INSTALL.py")
+            os.chdir(current_dir)
+        except (OSError, IOError) as err:
+            print("OS error: ", err)
+            raise
+
+    version = get_commit_git(virulencefinder_db_dir)
+    return version   
+
 def get_downloads_juno_amr(db_dir, current_dir, update_dbs):
     if not isinstance(db_dir, pathlib.PosixPath):
         db_dir = pathlib.Path(db_dir)
@@ -169,8 +198,10 @@ def get_downloads_juno_amr(db_dir, current_dir, update_dbs):
             rm_dir.kill()
             raise
     software_version = {'resfinder': download_software_resfinder(current_dir.joinpath('resfinder')),
+                    'virulencefinder': download_software_virulencefinder(current_dir.joinpath('virulencefinder')),
                     'resfinder_db': download_db_resfinder(db_dir.joinpath('resfinderdb')),
-                    'pointfinder_db': download_db_pointfinder(db_dir.joinpath('pointfinderdb'))}
+                    'pointfinder_db': download_db_pointfinder(db_dir.joinpath('pointfinderdb')),
+                    'virulencefinder_db': download_db_virulencefinder(db_dir.joinpath('virulencefinderdb'))}
     return software_version
 
 if __name__ == '__main__':

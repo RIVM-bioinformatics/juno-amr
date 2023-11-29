@@ -14,7 +14,15 @@
 * **Commissioned by:**      Maaike van den Beld
 
 ## About this project
-The Juno Antimicrobial Resistance (Juno-AMR) pipeline is a pipeline that is used to automate [ResFinder](https://bitbucket.org/genomicepidemiology/resfinder/src/master/) and [PointFinder](https://bitbucket.org/genomicepidemiology/pointfinder/src/master/).The tools that are being used are created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/). These tools identify acquired genes and find chromosal mutations mediating antimicrobial resistance in DNA secuences of bacteria. This can be partial or total sequences. The output of both tools can be used for analysis and is also combined in four summary files for a quick overview of the most important results.  
+The Juno Antimicrobial Resistance(Juno AMR) pipeline is a pipeline that is used to automate multiple antimicrobial resistance related tools. 
+
+The tools used in this pipeline:
+[ResFinder](https://bitbucket.org/genomicepidemiology/resfinder/src/master/) - created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/)
+[PointFinder](https://bitbucket.org/genomicepidemiology/pointfinder/src/master/) - created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/)
+[VirulenceFinder](https://bitbucket.org/genomicepidemiology/virulencefinder/src/master/) - created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/)
+[AMRFinderPlus](https://github.com/ncbi/amr) - created by [The National Center for Biotechnology Information](https://www.ncbi.nlm.nih.gov/)
+
+These tools help identify: acquired antimicrobial resistance genes, chromosomal mutations mediating antimicrobial resistance, virulence factors, biocide, heat, acid, and metal resistance genes. The input can be partial or total DNA sequences of bacteria. The output of the tools can be used for analysis and is also combined in multiple summary files for a quick overview of the most important results.
 
 ## Prerequisities
 * **Linux environment**
@@ -64,7 +72,7 @@ python3 juno-amr.py --species-help
 * ```-h, --help``` Shows the help of the pipeline
 
 ### Required parameters
-* ```-i, --input``` Path to a directory with paired fastq files or path to the output directory of the Juno-Assembly pipeline. It is important to link to the directory and not the files.
+* ```-i, --input``` Path to the directory of your input. Can be fasta files and paired fastq files combined in one directory or the output directory of the Juno-assembly pipeline. It is important to link to the directory and not the files.
 * ```-s --species**``` Full scientific name of the species sample. Use underscores between the parts of a name and not spaces. A list of available species can be shown if you type ```python3 juno-amr.py --species-help```. It is possible to select 'other' as a species, if 'other' is selected the pipeline will only run ResFinder
 
 ### Optional parameters
@@ -79,12 +87,15 @@ python3 juno-amr.py --species-help
 
 ### The base command to run this program. 
 ```
-python3 juno-amr.py -s [species] -i [dir/to/fastq_files]
+python3 juno-amr.py -s [species] -i [dir/to/fasta_and_fastq_files]
+```
+```
+python3 juno-amr.py -s [species] -i [dir/to/juno_assembly_output]
 ```
 
 ### An example on how to run the pipeline.
 ```
-python3 juno-amr.py -s salmonella -i dir/to/fastq_files -o output -l 0.8 -t 0.6
+python3 juno-amr.py -s salmonella -i dir/to/fastq_and_fasta_files -o output -l 0.8 -t 0.6
 ```
 
 Detailed information about the pipeline can be found in the [documentation](https://www.google.com "Pipeline documentation"). This documentation is only accessible for users that have access to the RIVM Linux environment.

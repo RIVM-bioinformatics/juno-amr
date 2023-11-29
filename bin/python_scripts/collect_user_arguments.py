@@ -162,7 +162,7 @@ class CollectUserArguments(SpeciesHelpers):
                 action='store_true',
                 help="Running pipeline locally (instead of in a computer cluster). Default is running it in a cluster."
             )
-            # Snakemake arguments
+            #Snakemake arguments
             parser.add_argument(
                 "-u",
                 "--unlock",

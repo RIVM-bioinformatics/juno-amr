@@ -42,7 +42,6 @@ class JunoAmrRun(base_juno_pipeline.PipelineStartup,
         """Initiating Juno-amr pipeline"""
         
         # Process arguments needed for base_juno classes
-
         output_dir = pathlib.Path(output_dir).resolve()
         workdir = pathlib.Path(__file__).parent.resolve()
         self.db_dir = pathlib.Path(db_dir).resolve()
@@ -52,7 +51,7 @@ class JunoAmrRun(base_juno_pipeline.PipelineStartup,
 
         base_juno_pipeline.PipelineStartup.__init__(self,
             input_dir=pathlib.Path(input_dir).resolve(), 
-            input_type='fastq',
+            input_type='both',
             min_num_lines=1)
         base_juno_pipeline.RunSnakemake.__init__(self,
             pipeline_name='Juno-amr',
@@ -73,15 +72,14 @@ class JunoAmrRun(base_juno_pipeline.PipelineStartup,
         # Specific Juno-AMR pipeline attributes
         self.species = species
         self.exclusion_file = exclusion_file
-        self.resfinder_min_coverage=resfinder_min_coverage
-        self.resfinder_identity_threshold= resfinder_identity_threshold
+        self.resfinder_min_coverage = resfinder_min_coverage
+        self.resfinder_identity_threshold = resfinder_identity_threshold
         self.run_pointfinder=run_pointfinder
         self.update = update
         self.workdir = pathlib.Path(__file__).parent.absolute()
         self.useconda = True
         self.user_parameters = pathlib.Path("config/user_parameters.yaml")
         self.restarttimes = 2      
-        
         # Start pipeline  
         self.run_juno_amr_pipeline()
 

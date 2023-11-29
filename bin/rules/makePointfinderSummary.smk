@@ -1,13 +1,10 @@
 rule makePointfinderSummary:    
     input:
-        resfinder_output_dir = expand(OUT + "/results_per_sample/{sample}", sample=SAMPLES)
+        resfinder_output_dir = expand(OUT + "/results/resfinder/{sample}", sample=SAMPLES)
 
     output:
         pointfinder_results = OUT + "/summary/summary_amr_pointfinder_results.csv",
         pointfinder_prediction = OUT + "/summary/summary_amr_pointfinder_prediction.csv"
-
-    #conda: 
-    #    "../../envs/resfinder.yaml"
 
     message:
         "Creating PointFinder summary file"
