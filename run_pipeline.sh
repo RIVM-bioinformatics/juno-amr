@@ -21,7 +21,7 @@ then
   echo "The input directory $input_dir, output directory $output_dir or fastq dir ${input_dir}/clean_fastq does not exist"
   exit 1
 else
-  input_fastq="${input_dir}/clean_fastq"
+  input_fastq="${input_dir}"
 fi
 
 case $PROJECT_NAME in
@@ -94,7 +94,7 @@ fi
 
 set -euo pipefail
 
-python juno_amr.py --queue "${QUEUE}" -i "${input_dir}/clean_fastq/" -o "${output_dir}" -s "${GENUS_ALL}"
+python juno_amr.py --queue "${QUEUE}" -i "${input_dir}" -o "${output_dir}" -s "${GENUS_ALL}"
 
 result=$?
 
