@@ -95,7 +95,7 @@ def get_commit_git(gitrepo_dir):
     return commit
 
 #Download resfinder
-def download_software_resfinder(resfinder_software_dir, version = '4.1.3'):
+def download_software_resfinder(resfinder_software_dir, version = "master", commit_hash = "e976708dc742d53dd0eb15422a4e7f2285518787"):
     """Function to download kmerfinder if it is not present"""
     if not isinstance(resfinder_software_dir, pathlib.PosixPath):
         resfinder_software_dir = pathlib.Path(resfinder_software_dir)
