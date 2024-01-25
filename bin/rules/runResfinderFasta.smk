@@ -19,9 +19,9 @@ rule runResfinderFasta:
         run_pointfinder = config["run_pointfinder"]
         
     resources: 
-        mem_gb=config["mem_gb"]["resfinder"]
+        mem_gb=int(config["mem_gb"]["resfinder"])
 
-    threads: config["threads"]["resfinder"]
+    threads: int(config["threads"]["resfinder"])
 
 
     shell:

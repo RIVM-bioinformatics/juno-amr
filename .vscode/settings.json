@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./envs/src/base-juno"
+    ]
+}

@@ -13,9 +13,10 @@ rule runVirulencefinder:
         "Processing received fasta sample in virulencefinder"
         
     resources: 
-        mem_gb=config["mem_gb"]["virulencefinder"]
+        mem_gb=int(config["mem_gb"]["virulencefinder"])
 
-    threads: config["threads"]["virulencefinder"]
+    threads: 
+        int(config["threads"]["virulencefinder"])
 
     shell:
     #the sample name directory is not being made by virulence finder

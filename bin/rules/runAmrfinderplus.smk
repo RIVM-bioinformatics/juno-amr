@@ -13,9 +13,9 @@ rule runamrfinderplus:
         "Processing received fasta sample(s) in amrfinderplus"
 
     resources: 
-        mem_gb=config["mem_gb"]["amrfinderplus"]
+        mem_gb=int(config["mem_gb"]["amrfinderplus"])
 
-    threads: config["threads"]["amrfinderplus"]
+    threads: int(config["threads"]["amrfinderplus"])
     
     shell:
     #TODO amrfinder needs to be run with -u in order to update

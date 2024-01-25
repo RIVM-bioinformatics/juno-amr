@@ -7,138 +7,223 @@ Date: 30 - 03 - 2021
 Documentation: -
 """
 
-from base_juno_pipeline import *
-import sys
+# Dependencies
+import argparse
+import subprocess
 import yaml
-import pathlib
+from dataclasses import dataclass, field
+from version import __package_name__, __version__, __description__
+from pathlib import Path
+from juno_library import Pipeline
 
-sys.path.insert(0, 'bin/python_scripts/')
-import download_dbs
-from collect_user_arguments import CollectUserArguments
+#own scripts
+import bin.downloads
 
-class JunoAmrRun(base_juno_pipeline.PipelineStartup,
-                base_juno_pipeline.RunSnakemake):
-    """Class with the arguments and specifications that are only for the Juno-amr pipeline but inherit from PipelineStartup and RunSnakemake"""
+def main() -> None:
+    juno_amr = JunoAmr()
+    juno_amr.run()
 
-    def __init__(self,
-                input_dir,
-                output_dir,
-                species,
-                exclusion_file,
-                resfinder_min_coverage=0.6,
-                resfinder_identity_threshold=0.8,
-                db_dir = "/mnt/db/juno-amr",
-                update=False,
-                rerunincomplete=False,
-                # This has to be 0 or 1, because True and False does not work with the shell command.
-                run_pointfinder="1",
-                dryrun=False,
-                cores=300,
-                local=False,
-                queue="bio",
-                unlock=False,
-                **kwargs):
+def get_species() -> list[str]:
+    with open(
+        Path(__file__).parent.joinpath("files", "pointfinder_species.txt"), mode="r"
+    ) as f:
+        species = [s.strip().lower() for s in f.readlines()]
+        species.append("other")
+        return species
 
-        """Initiating Juno-amr pipeline"""
+@dataclass
+class JunoAmr(Pipeline):
+    pipeline_name: str = __package_name__
+    pipeline_version: str = __version__
+    input_type: str = "both"
+    species: list[str] = field(default_factory=get_species)
+
+    def _add_args_to_parser(self) -> None:
+        super()._add_args_to_parser()
+        species = self.species
         
-        # Process arguments needed for base_juno classes
-        output_dir = pathlib.Path(output_dir).resolve()
-        workdir = pathlib.Path(__file__).parent.resolve()
-        self.db_dir = pathlib.Path(db_dir).resolve()
-        self.path_to_audit = output_dir.joinpath('audit_trail')
-        
-        # Initiate base_juno classes
+        class HelpSpeciesAction(argparse.BooleanOptionalAction):
+            def __call__(self, *args, **kwargs) -> None:  # type: ignore
+                print("\n".join([f"The accepted species are:"] + species))
+                exit(0)
 
-        base_juno_pipeline.PipelineStartup.__init__(self,
-            input_dir=pathlib.Path(input_dir).resolve(), 
-            input_type='both',
-            min_num_lines=1)
-        base_juno_pipeline.RunSnakemake.__init__(self,
-            pipeline_name='Juno-amr',
-            pipeline_version='0.2',
-            output_dir=output_dir,
-            workdir=workdir,
-            cores=cores,
-            local=local,
-            queue=queue,
-            unlock=unlock,
-            rerunincomplete=rerunincomplete,
-            dryrun=dryrun,
-            restarttimes=2,
-            latency_wait=60,
-            name_snakemake_report=str(self.path_to_audit.joinpath('juno_amr_report.html')),
-            **kwargs)
+        self.parser.description = "Juno-amr pipeline. Automated pipeline for bacterial AMR analysis."
 
-        # Specific Juno-AMR pipeline attributes
-        self.species = species
-        self.exclusion_file = exclusion_file
-        self.resfinder_min_coverage = resfinder_min_coverage
-        self.resfinder_identity_threshold = resfinder_identity_threshold
-        self.run_pointfinder=run_pointfinder
-        self.update = update
-        self.workdir = pathlib.Path(__file__).parent.absolute()
-        self.useconda = True
-        self.user_parameters = pathlib.Path("config/user_parameters.yaml")
-        self.restarttimes = 2      
-        # Start pipeline  
-        self.run_juno_amr_pipeline()
+        self.add_argument(
+            "--help-species",
+            action=HelpSpeciesAction,
+            help="Prints the genera accepted by this pipeline.",
+        )
+        self.add_argument(
+            "-s",
+            "--species",
+            type = str.lower,
+            required = True,
+            metavar="STR",
+            help = f"Full scientific name of the species sample, use underscores not spaces. If the species that you are looking for is not available choose 'other'. Options:{self.species}",
+            choices = self.species
+        )
+        self.add_argument(
+            "-m",
+            "--metadata",
+            type=Path,
+            default=None,
+            metavar="FILE",
+            dest="metadata_file",
+            help="Relative or absolute path to a .csv file. If provided, it must contain at least one column with the 'Sample' name (name of the file but removing _R1.fastq.gz) and a column called 'Genus' (mind the capital in the first letter). The genus provided will be used to choose the reference genome to analyze de QC of the de novo assembly.",
+        )
+        self.add_argument(
+            "--resfinder_min_coverage",
+            type=float,
+            metavar="NUM",
+            default=0.6,
+            help="Minimum coverage to be used for ResFinder. It accepts values from 0-1. Default is 0.6.",
+        )
+        self.add_argument(
+            "--resfinder_identity_threshold",
+            type=float,
+            metavar="NUM",
+            default=0.8,
+            help="Identity threshold to be used for ResFinder. It accepts values from 0-1. Default is 0.85",
+        )
+        self.add_argument(
+            "-d",
+            "--db_dir",
+            type=Path,
+            required=False,
+            metavar="DIR",
+            default="/mnt/db/juno-amr",
+            help="Relative or absolute path to the directory that contains the databases for all the tools used in this pipeline or where they should be downloaded. Default is: /mnt/db/juno-amr",
+        )
+        #TODO rename this specific or remove
+        # self.add_argument(
+        #     "--update",
+        #     action='store_true',
+        #     help="Force database update even if the databases are present."
+        # )
+        self.add_argument(
+            "--run_pointfinder",
+            type=bool,
+            default=True,
+            metavar="BOOL",
+            help="Type one to run pointfinder, type False to not run pointfinder, default is True."
+        )
 
-    def download_databases(self):
-        """Function to download software and databases necessary for running the Juno-amr pipeline"""
-        self.db_dir.mkdir(parents = True, exist_ok = True)
-        download_dbs.get_downloads_juno_amr(self.db_dir, 'bin', self.update)
+    def _parse_args(self) -> argparse.Namespace:
+        args = super()._parse_args()
+        # Remove this if containers can be used with juno-amr
+        if "--no-containers" not in self.argv:
+            self.argv.append("--no-containers")
 
-    def start_pipeline(self):
-        """Function to start the pipeline (some steps from PipelineStartup need to be modified for the Juno-typing pipeline to accept fastq and fasta input"""
-        self.start_juno_pipeline()
-        with open(self.sample_sheet, 'w') as file:
-            yaml.dump(self.sample_dict, file, default_flow_style=False)
-
-    def write_userparameters(self):
-        config_params = {'input_dir': str(self.input_dir),
-                        'output_dir': str(self.output_dir),
-                        'species': str(self.species),
-                        'exclusion_file': str(self.exclusion_file),
-                        'run_pointfinder': str(self.run_pointfinder),
-                        'resfinder_min_coverage': self.resfinder_min_coverage,
-                        'resfinder_identity_threshold': self.resfinder_identity_threshold,
-                        'resfinder_db': str(self.db_dir.joinpath('resfinderdb')),
-                        'pointfinder_db': str(self.db_dir.joinpath('pointfinderdb'))}
-                        
-        with open(self.user_parameters, 'w') as file:
-            yaml.dump(config_params, file, default_flow_style=False)
-
-        return config_params
-
-    def run_juno_amr_pipeline(self):
-        self.startup = self.start_pipeline()
-        # Parse arguments specific from the user
-        self.user_params = self.write_userparameters()
-        # Download databases if necessary
-        if not self.unlock and not self.dryrun:
-            self.download_databases()
-        self.successful_run = self.run_snakemake()
-        assert self.successful_run, f'Please check the log files'
-        if not self.dryrun or self.unlock:
-            self.make_snakemake_report()
-
+        args = super()._parse_args()
+        self.db_dir: Path = args.db_dir.resolve()
+        self.resfinder_min_coverage: float = args.resfinder_min_coverage
+        self.resfinder_identity_threshold: float = args.resfinder_identity_threshold
+        #TODO Keep or remove?
+        # self.update: bool = args.update
+        self.run_pointfinder: int = args.run_pointfinder
+        self.species =args.species
+        self.metadata_file: Path = args.metadata_file
+        # self.update_dbs: bool = args.update
+        return args
     
-if __name__ == '__main__':
-    c = CollectUserArguments()
-    args = c.collect_arguments()
-    JunoAmrRun(input_dir = args.input_dir, 
-                    output_dir = args.output_dir, 
-                    species=args.species,
-                    exclusion_file = args.exclusion_file,
-                    run_pointfinder=args.run_pointfinder,
-                    db_dir = args.db_dir,
-                    resfinder_min_coverage = args.resfinder_min_coverage,
-                    resfinder_identity_threshold = args.resfinder_identity_threshold,
-                    cores = args.cores,
-                    local = args.local,
-                    queue = args.queue,
-                    unlock = args.unlock,
-                    rerunincomplete = args.rerunincomplete,
-                    dryrun = args.dry_run,
-                    update = args.db_update,
-                    **args.snakemake_args)
+    def setup(self) -> None:
+        super().setup()
+        self.update_sample_dict_with_metadata()
+        
+        if self.snakemake_args["use_singularity"]:
+            self.snakemake_args["singularity_args"] = " ".join(
+                [
+                    self.snakemake_args["singularity_args"],
+                    f"--bind {self.db_dir}:{self.db_dir}",
+                ]
+            )
+
+        #Check species to decide wether or not to run pointfinder
+        if self.species == "other":
+                self.run_pointfinder =False
+
+        self.user_parameters = {
+            "input_dir": str(self.input_dir),
+            "out": str(self.output_dir),
+            "exclusion_file": str(self.exclusion_file),
+            "species": self.species,
+            #TODO check juno-typing serotypefinder for specific treshold per tool line: 163
+            "resfinder_min_coverage": self.resfinder_min_coverage,
+            "resfinder_identity_threshold": self.resfinder_identity_threshold,
+            "run_pointfinder": self.run_pointfinder,
+            # "update": self.update,
+            "run_in_container": self.snakemake_args["use_singularity"],
+            "db_dir": str(self.db_dir),
+            "resfinder_db": str(self.db_dir.joinpath("resfinder_db")),
+            "pointfinder_db": str(self.db_dir.joinpath("pointfinder_db")),
+            "virulencefinder_db": str(self.db_dir.joinpath("virulencefinderdb")),
+        }
+
+        with open(
+            Path(__file__).parent.joinpath("config/pipeline_parameters.yaml")
+        ) as f:
+            parameters_dict = yaml.safe_load(f)
+        self.snakemake_config.update(parameters_dict)
+
+    def update_sample_dict_with_metadata(self) -> None:
+
+        self.get_metadata_from_csv_file(
+            filepath=self.metadata_file, expected_colnames=["sample", "species"]
+        )
+        for sample, properties in self.sample_dict.items():
+            try:
+                properties["species"] = (
+                    self.juno_metadata[sample]["species"].strip().lower()
+                )
+            except (KeyError, TypeError, AttributeError):
+                properties["species"] = self.genus  # type: ignore
+
+    def run(self) -> None:
+        self.setup()
+        if not self.dryrun or self.unlock:
+            self.path_to_audit.mkdir(parents=True, exist_ok=True)
+            downloads_juno_amr = bin.downloads.DownloadsJunoAmr(
+                self.db_dir,
+                # update_dbs=self.update_dbs,
+                software_resfinder_asked_version="e976708dc742d53dd0eb15422a4e7f2285518787",
+                software_virulence_finder_asked_version="2.0.4",
+            )
+            self.downloads_versions = downloads_juno_amr.downloaded_versions
+            with open(
+                self.path_to_audit.joinpath("database_versions.yaml"), "w"
+            ) as file_:
+                yaml.dump(self.downloads_versions, file_, default_flow_style=False)
+
+        if not self.dryrun or self.unlock:
+            subprocess.run(
+                [
+                    "find",
+                    self.output_dir,
+                    "-type",
+                    "f",
+                    "-empty",
+                    "-exec",
+                    "rm",
+                    "{}",
+                    ";",
+                ]
+            )
+            subprocess.run(
+                [
+                    "find",
+                    self.output_dir,
+                    "-type",
+                    "d",
+                    "-empty",
+                    "-exec",
+                    "rm",
+                    "-rf",
+                    "{}",
+                    ";",
+                ]
+            )
+        super().run()
+
+if __name__ == "__main__":
+    main()

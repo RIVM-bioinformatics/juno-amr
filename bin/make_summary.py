@@ -119,12 +119,11 @@ class JunoSummary:
         #Get the output directory from the yaml file
         open_config_parameters = open(self.user_parameters_path)
         parsed_config = yaml.load(open_config_parameters, Loader=yaml.FullLoader)
-        self.output_dir_name = parsed_config['output_dir']
+        self.output_dir_name = parsed_config['out']
         self.species = parsed_config['species']
         
         # Make new summary directory
         dirpath = Path(f"{self.output_dir_name}/{self.summary_folder_path}")
-
         if not os.path.exists(dirpath):
             os.makedirs(dirpath)
 

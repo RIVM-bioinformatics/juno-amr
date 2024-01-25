@@ -1,0 +1,20 @@
+name: juno_amr
+channels:
+  - bioconda
+  - conda-forge
+  - nodefaults
+dependencies:
+  - git=2.34.1
+  - mamba=1.3.*
+  - pip=23.*
+  - pandas==1.5.3
+  - python=3.9.*
+  - snakemake==7.25.*
+  - xlrd==1.2.0
+  - kma==1.3.14
+  - blast==2.12
+  - cgecore==1.5.5
+  - pyyaml=6.0
+  - pip:
+    - tabulate==0.8.0
+    - "--editable=git+https://github.com/RIVM-bioinformatics/base_juno_pipeline.git@v2.1.1#egg=juno_library"
