@@ -6,7 +6,7 @@ channels:
 dependencies:
   - git=2.34.1
   - mamba>0.19
-  - pip>=21.2
+  - pip>=24.2
   - pandas==1.3.2
   - python>3.7.6
   - snakemake==6.6.1
