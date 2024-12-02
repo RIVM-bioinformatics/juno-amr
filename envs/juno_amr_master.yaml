@@ -15,6 +15,7 @@ dependencies:
   - blast==2.12
   - cgecore==1.5.5
   - pulp==2.7.0
+  - pyopenssl>=24.0.0
   - pip:
     - PyYAML==5.3.1
     - tabulate==0.8.0
