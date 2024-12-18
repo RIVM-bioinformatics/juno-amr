@@ -10,13 +10,13 @@ rule makeVirulencefinderSummary:
     
     resources:
         #TODO check if this needs other mem, same for other rules and threads as well
-        mem_gb=config["mem_gb"]["virulencefinder"]
+        mem_gb=int(config["mem_gb"]["virulencefinder"])
 
     threads: 
-        config["threads"]["virulencefinder"]
+        int(config["threads"]["virulencefinder"])
 
     params:
         species = config["species"]
 
     shell:
-        "python3 bin/python_scripts/make_summary.py -sv {output.vir_summary} -i {input.vir_output} -st virulencefinder"
+        "python3 bin/make_summary.py -sv {output.vir_summary} -i {input.vir_output} -st virulencefinder"

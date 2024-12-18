@@ -19,13 +19,13 @@ rule runResfinderFastq:
         run_pointfinder = config["run_pointfinder"]
 
     resources: 
-        mem_gb=config["mem_gb"]["resfinder"]
+        mem_gb=int(config["mem_gb"]["resfinder"])
 
-    threads: config["threads"]["resfinder"]
+    threads: int(config["threads"]["resfinder"])
     
     shell:
         """
-if [ {params.run_pointfinder} == "1" ]; then
+if [ {params.run_pointfinder} == True ]; then
     python3 bin/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired --point -ifq {input.r1} {input.r2} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
 else
     python3 bin/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired -ifq {input.r1} {input.r2} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}

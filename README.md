@@ -17,9 +17,13 @@
 The Juno Antimicrobial Resistance(Juno AMR) pipeline is a pipeline that is used to automate multiple antimicrobial resistance related tools. 
 
 The tools used in this pipeline:
+
 [ResFinder](https://bitbucket.org/genomicepidemiology/resfinder/src/master/) - created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/)
+
 [PointFinder](https://bitbucket.org/genomicepidemiology/pointfinder/src/master/) - created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/)
+
 [VirulenceFinder](https://bitbucket.org/genomicepidemiology/virulencefinder/src/master/) - created by [The Center For Genomic Epidemiology](https://www.genomicepidemiology.org/)
+
 [AMRFinderPlus](https://github.com/ncbi/amr) - created by [The National Center for Biotechnology Information](https://www.ncbi.nlm.nih.gov/)
 
 These tools help identify: acquired antimicrobial resistance genes, chromosomal mutations mediating antimicrobial resistance, virulence factors, biocide, heat, acid, and metal resistance genes. The input can be partial or total DNA sequences of bacteria. The output of the tools can be used for analysis and is also combined in multiple summary files for a quick overview of the most important results.
@@ -51,7 +55,7 @@ conda activate mamba
 
 4. Create & activate juno environment.
 ```
-mamba env update -f envs/juno_amr_master.yaml
+mamba env update -f envs/juno_amr.yaml
 ```
 ```
 conda activate juno-amr_master
@@ -64,7 +68,7 @@ python3 juno-amr.py -i [input] -o [output] -s [species]
 
 **Note:** To get an overview of the available species for chromosomal point mutations use the command:
 ```
-python3 juno-amr.py --species-help
+python3 juno-amr.py --help-species
 ```
 
 ## Parameters & Usage

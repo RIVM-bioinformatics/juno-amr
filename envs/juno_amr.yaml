@@ -5,18 +5,18 @@ channels:
   - nodefaults
 dependencies:
   - git=2.34.1
-  - mamba>0.19
-  - pip>=21.2
-  - pandas==1.3.2
-  - python>3.7.6
-  - snakemake==6.6.1
+  - mamba=1.3.*
+  - pip=23.*
+  - pandas==1.5.3
+  - python=3.9.*
+  - snakemake==7.25.*
   - xlrd==1.2.0
   - kma==1.3.14
   - blast==2.12
   - cgecore==1.5.5
   - pulp==2.7.0
   - pyopenssl>=24.0.0
+  - pyyaml=6.0
   - pip:
-    - PyYAML==5.3.1
     - tabulate==0.8.0
-    - "--editable=git+https://github.com/RIVM-bioinformatics/base_juno_pipeline.git@v0.2.9#egg=base_juno"
+    - "--editable=git+https://github.com/RIVM-bioinformatics/base_juno_pipeline.git@v2.1.1#egg=juno_library"

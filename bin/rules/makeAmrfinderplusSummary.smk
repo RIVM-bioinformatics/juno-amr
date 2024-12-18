@@ -9,13 +9,13 @@ rule makeAmrfinderplusSummary:
         "Creating Amrfinderplus summary file"
     
     resources:
-        mem_gb=config["mem_gb"]["amrfinderplus"]
+        mem_gb=int(config["mem_gb"]["amrfinderplus"])
 
     threads: 
-        config["threads"]["amrfinderplus"]
+        int(config["threads"]["amrfinderplus"])
 
     params:
         species = config["species"]
 
     shell:
-        "python3 bin/python_scripts/make_summary.py -sa {output.vir_summary} -i {input.vir_output} -st amrfinderplus"
+        "python3 bin/make_summary.py -sa {output.vir_summary} -i {input.vir_output} -st amrfinderplus"

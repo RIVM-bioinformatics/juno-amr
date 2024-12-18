@@ -9,13 +9,13 @@ rule makeIlesSummary:
         "Creating iles summary file"
     
     resources:
-        mem_gb=config["mem_gb"]["resfinder"]
+        mem_gb=int(config["mem_gb"]["resfinder"])
 
     threads: 
-        config["threads"]["resfinder"]
+        int(config["threads"]["resfinder"])
 
     params:
         species = config["species"]
 
     shell:
-        "python3 bin/python_scripts/make_summary.py -si {output.iles_summary} -i {input.resfinder_output_dir} -st iles"
+        "python3 bin/make_summary.py -si {output.iles_summary} -i {input.resfinder_output_dir} -st iles"
