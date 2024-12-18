@@ -56,7 +56,8 @@ if config["species"] == "other":
  
 else:
     species = config["species"]
-    if species == "escherichia coli" or species == "shigella" or species == "campylobacter" or species == "salmonella":
+    print(species)
+    if species == "escherichia_coli" or species == "shigella" or species == "campylobacter" or species == "salmonella":
         rule all:
             """ Main rule that starts the complete workflow """
             input:

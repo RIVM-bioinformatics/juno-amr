@@ -159,7 +159,6 @@ class JunoAmr(Pipeline):
             "pointfinder_db": str(self.db_dir.joinpath("pointfinder_db")),
             "virulencefinder_db": str(self.db_dir.joinpath("virulencefinderdb")),
         }
-
         with open(
             Path(__file__).parent.joinpath("config/pipeline_parameters.yaml")
         ) as f:
@@ -169,16 +168,16 @@ class JunoAmr(Pipeline):
     def update_sample_dict_with_metadata(self) -> None:
 
         self.get_metadata_from_csv_file(
-            filepath=self.metadata_file, expected_colnames=["sample", "species"]
+            filepath=self.metadata_file, expected_colnames=["sample", "full_species_name"]
         )
         for sample, properties in self.sample_dict.items():
             try:
                 properties["species"] = (
-                    self.juno_metadata[sample]["species"].strip().lower()
+                    self.juno_metadata[sample]["full_species_name"].strip().lower()
                 )
             except (KeyError, TypeError, AttributeError):
                 properties["species"] = self.genus  # type: ignore
-
+        print(self.sample_dict)
     def run(self) -> None:
         self.setup()
         if not self.dryrun or self.unlock:
