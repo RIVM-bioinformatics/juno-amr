@@ -1,4 +1,4 @@
-name: juno_amr
+name: juno_amr_newdb
 channels:
   - bioconda
   - conda-forge

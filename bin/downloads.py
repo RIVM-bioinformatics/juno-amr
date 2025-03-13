@@ -20,7 +20,7 @@ class DownloadsJunoAmr:
         self,
         db_dir,
         update_dbs=False,
-        software_resfinder_asked_version="e976708dc742d53dd0eb15422a4e7f2285518787",
+        software_resfinder_asked_version="4.6.0",
         software_virulence_finder_asked_version="2.0.4",
         # By default the db is collected from the master branch, the commit hash currently in use is: #50925ea425763a7a43d62a0b974302bf1d52575b
         db_resfinder_asked_version="master", 
@@ -151,7 +151,7 @@ class DownloadsJunoAmr:
             "-sr",
             "--software-resfinder-version",
             type=str,
-            default="e976708dc742d53dd0eb15422a4e7f2285518787",
+            default="4.6.0",
             help="Version to download for resfinder software.",
         )
         argument_parser.add_argument(

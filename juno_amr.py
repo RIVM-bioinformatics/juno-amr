@@ -155,8 +155,8 @@ class JunoAmr(Pipeline):
             # "update": self.update,
             "run_in_container": self.snakemake_args["use_singularity"],
             "db_dir": str(self.db_dir),
-            "resfinder_db": str(self.db_dir.joinpath("resfinder_db")),
-            "pointfinder_db": str(self.db_dir.joinpath("pointfinder_db")),
+            "resfinder_db": str(self.db_dir.joinpath("resfinder_new/resfinder_db")),
+            "pointfinder_db": str(self.db_dir.joinpath("pointfinder_new/pointfinder_db")),
             "virulencefinder_db": str(self.db_dir.joinpath("virulencefinderdb")),
         }
         with open(
@@ -185,7 +185,7 @@ class JunoAmr(Pipeline):
             downloads_juno_amr = bin.downloads.DownloadsJunoAmr(
                 self.db_dir,
                 # update_dbs=self.update_dbs,
-                software_resfinder_asked_version="e976708dc742d53dd0eb15422a4e7f2285518787",
+                software_resfinder_asked_version="4.6.0",
                 software_virulence_finder_asked_version="2.0.4",
             )
             self.downloads_versions = downloads_juno_amr.downloaded_versions

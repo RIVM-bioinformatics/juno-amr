@@ -6,6 +6,9 @@ rule runResfinderFastq:
 
     output:
         output_dir = directory(OUT + "/results/resfinder/{sample}")
+    
+    conda:
+        "../../envs/resfinder.yaml"
 
     message:
         "Processing received fastq sample in ResFinder and PointFinder"
@@ -26,8 +29,8 @@ rule runResfinderFastq:
     shell:
         """
 if [ {params.run_pointfinder} == True ]; then
-    python3 bin/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired --point -ifq {input.r1} {input.r2} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
+    python3 bin/resfinder/src/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired --point -ifq {input.r1} {input.r2} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
 else
-    python3 bin/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired -ifq {input.r1} {input.r2} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
+    python3 bin/resfinder/src/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired -ifq {input.r1} {input.r2} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
 fi
         """
