@@ -63,10 +63,9 @@ class JunoSummary:
             "--summary_pointfinder",
             type=str,
             metavar="file",
-            dest="pointfinder_summary_file_names",
-            #  2 different filenames are requested. The first one is for pointfinder result summary and second poinfinder prediction summary
-            nargs=2,
-            help="The name for each of the pointfinder summary files(max 2 files), in this order: Pointfinder_result_summary, pointfinder_prediction_summary."
+            dest="pointfinder_summary_file_name",
+            nargs=1,
+            help="The name for each of the pointfinder summary file"
         )
 
         self.parser.add_argument(
@@ -138,7 +137,7 @@ class JunoSummary:
 
         #Collect summary file names from the parser
         self.resfinder_summary_file_names = self.dict_arguments.get("resfinder_summary_file_names")
-        self.pointfinder_summary_file_names = self.dict_arguments.get("pointfinder_summary_file_names")
+        self.pointfinder_summary_file_name = self.dict_arguments.get("pointfinder_summary_file_name")
         self.iles_summary_file_names = self.dict_arguments.get("iles_summary_file_names")
         self.virulencefinder_summary_file_names = self.dict_arguments.get("virulencefinder_summary_file_names")
         self.amrfinderplus_summary_file_names = self.dict_arguments.get("amrfinderplus_summary_file_names")
@@ -243,8 +242,7 @@ class JunoSummary:
         final_df.to_csv(f'{self.pheno_summary_location}', mode='a', index=False)
 
     def pointfinder_result_summary(self):
-        pointfinder_results_output = self.pointfinder_summary_file_names[0]
-        
+
         #Get path & open 1 file for the colnames
         pathname = f"{self.input_paths[0]}/PointFinder_results.txt" 
         opened_file = open(pathname, "r")
@@ -259,12 +257,10 @@ class JunoSummary:
         #Collect data for each sample and add this to a list with the samplename
         sample_counter = 0
         for path in self.input_paths:
-
             pathname = f"{path}/PointFinder_results.txt" 
             opened_file = open(pathname, "r")
             lines = opened_file.readlines()
             subselection = lines[1:]
-            
 
             # If pointfinder has no results, write an empty list to the summary
             for line in subselection:
@@ -274,43 +270,43 @@ class JunoSummary:
                     # append hier lege values voor alle columns 
                     sample.extend((self.samplenames[sample_counter], None, None, None, None, None))
                 # if there is result, place it in a list and convert this to a pd dataframe
-                
                 else:
                     sample.append(self.samplenames[sample_counter])
                     elements = line.split("\t")
                     for element in elements:
                         sample.append(element)
                 
-                data_per_sample.append(sample)    
+                data_per_sample.append(sample)   
             sample_counter = sample_counter + 1
+            
 
         data_frame = pd.DataFrame(data_per_sample, columns = column_names)
-        data_frame.to_csv(f'{pointfinder_results_output}', mode='a', index=False)
+        data_frame.to_csv(self.pointfinder_summary_file_name[0], mode='a', index=False)
     
-    def pointfinder_prediction_summary(self):
-        #Get path & open 1 file for the colnames
-        pointfinder_prediction_output = self.pointfinder_summary_file_names[1]
+    # def pointfinder_prediction_summary(self):
+    #     #Get path & open 1 file for the colnames
+    #     pointfinder_prediction_output = self.pointfinder_summary_file_names[1]
         
-        dataframe_per_sample = []
-        sample_counter = 0
-        for path in self.input_paths: 
-            pathname = f"{path}/PointFinder_prediction.txt" 
-            opened_file = open(pathname, "r")
-            lines = opened_file.readlines()
-            #get the colnames
-            column_names = lines[0].strip("\n").split("\t")
-            # get the values
-            elements = lines[1].strip("\n").split("\t")
-            #add the samplename
-            elements.insert(0, self.samplenames[sample_counter])
-            #create df for each sample
-            temp_df = pd.DataFrame([elements], columns=column_names)
-            dataframe_per_sample.append(temp_df)
-            sample_counter = sample_counter + 1
+    #     dataframe_per_sample = []
+    #     sample_counter = 0
+    #     for path in self.input_paths: 
+    #         pathname = f"{path}/PointFinder_prediction.txt" 
+    #         opened_file = open(pathname, "r")
+    #         lines = opened_file.readlines()
+    #         #get the colnames
+    #         column_names = lines[0].strip("\n").split("\t")
+    #         # get the values
+    #         elements = lines[1].strip("\n").split("\t")
+    #         #add the samplename
+    #         elements.insert(0, self.samplenames[sample_counter])
+    #         #create df for each sample
+    #         temp_df = pd.DataFrame([elements], columns=column_names)
+    #         dataframe_per_sample.append(temp_df)
+    #         sample_counter = sample_counter + 1
            
-        #concat all dfs and write to file
-        final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
-        final_df.to_csv(f'{pointfinder_prediction_output}', mode='a', index=False)
+    #     #concat all dfs and write to file
+    #     final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
+    #     final_df.to_csv(f'{pointfinder_prediction_output}', mode='a', index=False)
     
     def iles_summary(self):
         """Summary file specific for iles/lims"""
@@ -379,8 +375,6 @@ class JunoSummary:
 
             #create df
             df = pd.DataFrame(mut_res_combos, columns=["0","1"])
-            print("df")
-            print(df.to_string())
             df = df.set_index('1')
             transposed = df.transpose()
             transposed.columns= transposed.columns.str.lower()
@@ -479,7 +473,7 @@ def main():
 
     elif summary_type == "pointfinder":
         m.pointfinder_result_summary()
-        m.pointfinder_prediction_summary()
+        # m.pointfinder_prediction_summary()
     
     elif summary_type == "amrfinderplus":
         m.amrfinderplus_summary()

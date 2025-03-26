@@ -4,7 +4,7 @@ rule makePointfinderSummary:
 
     output:
         pointfinder_results = OUT + "/summary/summary_amr_pointfinder_results.csv",
-        pointfinder_prediction = OUT + "/summary/summary_amr_pointfinder_prediction.csv"
+        # pointfinder_prediction = OUT + "/summary/summary_amr_pointfinder_prediction.csv"
 
     message:
         "Creating PointFinder summary file"
@@ -19,4 +19,4 @@ rule makePointfinderSummary:
         species = config["species"]
 
     shell:
-        "python3 bin/make_summary.py -sp {output.pointfinder_results} {output.pointfinder_prediction} -i {input.resfinder_output_dir} -st pointfinder"
+        "python3 bin/make_summary.py -sp {output.pointfinder_results} -i {input.resfinder_output_dir} -st pointfinder"
