@@ -24,7 +24,7 @@ class JunoSummary:
         self.user_parameters_path = "config/user_parameters.yaml"
         self.summary_folder_path = "summary"
         self.results_folder = "results_per_sample"
-        self.antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
+        self.antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole", "azithromycin"]
         self.antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
 
     def get_user_arguments(self):
