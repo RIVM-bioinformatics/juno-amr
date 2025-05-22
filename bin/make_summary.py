@@ -25,6 +25,7 @@ class JunoSummary:
         self.summary_folder_path = "summary"
         self.results_folder = "results_per_sample"
         self.antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
+        self.antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
 
     def get_user_arguments(self):
         """Function to parse the command line arguments from the user"""
@@ -337,8 +338,7 @@ class JunoSummary:
             if self.species == "escherichia_coli" or self.species == "salmonella":
                 filtered_df = df.loc[df['Antimicrobial'].isin(self.antibiotics_ecoli_salm)]
             elif self.species == "campylobacter":
-                antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
-                filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_camp)]
+                filtered_df = df.loc[df['Antimicrobial'].isin(self.antibiotics_camp)]
 
             else:
                 print("No iles summary for this species")
@@ -391,8 +391,7 @@ class JunoSummary:
             if self.species == "escherichia_coli" or self.species == "salmonella":   
                 filtered_transposed = transposed.filter(regex='|'.join(self.antibiotics_ecoli_salm))
             elif self.species == "campylobacter":
-                antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
-                filtered_transposed = transposed.filter(regex='|'.join(antibiotics_camp))
+                filtered_transposed = transposed.filter(regex='|'.join(self.antibiotics_camp))
             else:
                 print("No iles summary for this species")
                 return
@@ -417,8 +416,7 @@ class JunoSummary:
         if self.species == "escherichia_coli" or self.species == "salmonella":    
             final_combined.filter(regex='|'.join(self.antibiotics_ecoli_salm))
         elif self.species == "campylobacter":
-            antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
-            final_combined.filter(regex='|'.join(antibiotics_camp))
+            final_combined.filter(regex='|'.join(self.antibiotics_camp))
         else:
             print("No iles summary for this species")
             return
