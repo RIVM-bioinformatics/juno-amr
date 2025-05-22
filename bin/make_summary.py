@@ -24,6 +24,7 @@ class JunoSummary:
         self.user_parameters_path = "config/user_parameters.yaml"
         self.summary_folder_path = "summary"
         self.results_folder = "results_per_sample"
+        self.antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
 
     def get_user_arguments(self):
         """Function to parse the command line arguments from the user"""
@@ -334,8 +335,7 @@ class JunoSummary:
             #select antimicrobial rows per species
             #TODO dit kan samen met wat helemaal onderaan staat
             if self.species == "escherichia_coli" or self.species == "salmonella":
-                antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
-                filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_ecoli_salm)]
+                filtered_df = df.loc[df['Antimicrobial'].isin(self.antibiotics_ecoli_salm)]
             elif self.species == "campylobacter":
                 antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
                 filtered_df = df.loc[df['Antimicrobial'].isin(antibiotics_camp)]
@@ -389,8 +389,7 @@ class JunoSummary:
 
             #select only the used antimicrobials
             if self.species == "escherichia_coli" or self.species == "salmonella":   
-                antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
-                filtered_transposed = transposed.filter(regex='|'.join(antibiotics_ecoli_salm))
+                filtered_transposed = transposed.filter(regex='|'.join(self.antibiotics_ecoli_salm))
             elif self.species == "campylobacter":
                 antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
                 filtered_transposed = transposed.filter(regex='|'.join(antibiotics_camp))
@@ -416,8 +415,7 @@ class JunoSummary:
         final_combined = inner_merged_total.groupby(level=0, axis=1).first()
 
         if self.species == "escherichia_coli" or self.species == "salmonella":    
-            antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole"]
-            final_combined.filter(regex='|'.join(antibiotics_ecoli_salm))
+            final_combined.filter(regex='|'.join(self.antibiotics_ecoli_salm))
         elif self.species == "campylobacter":
             antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
             final_combined.filter(regex='|'.join(antibiotics_camp))
