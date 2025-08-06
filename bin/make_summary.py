@@ -25,6 +25,8 @@ class JunoSummary:
         self.user_parameters_path = "config/user_parameters.yaml"
         self.summary_folder_path = "summary"
         self.results_folder = "results_per_sample"
+        self.antibiotics_ecoli_salm = ["ampicillin", "cefotaxime", "ciprofloxacin", "gentamicin", "meropenem", "sulfamethoxazole", "trimethoprim", "cotrimoxazole", "azithromycin"]
+        self.antibiotics_camp = ["ciprofloxacin", "gentamicin", "erythromycin", "tetracycline"]
 
     def get_user_arguments(self):
         """Function to parse the command line arguments from the user"""
@@ -328,6 +330,7 @@ class JunoSummary:
             # select antimicrobial rows per species
             # TODO dit kan samen met wat helemaal onderaan staat
             if self.species == "escherichia_coli" or self.species == "salmonella":
+<<<<<<< HEAD
                 antibiotics_ecoli_salm = [
                     "ampicillin",
                     "cefotaxime",
@@ -347,6 +350,11 @@ class JunoSummary:
                     "tetracycline",
                 ]
                 filtered_df = df.loc[df["Antimicrobial"].isin(antibiotics_camp)]
+=======
+                filtered_df = df.loc[df['Antimicrobial'].isin(self.antibiotics_ecoli_salm)]
+            elif self.species == "campylobacter":
+                filtered_df = df.loc[df['Antimicrobial'].isin(self.antibiotics_camp)]
+>>>>>>> master
 
             else:
                 print("No iles summary for this species")
@@ -400,6 +408,7 @@ class JunoSummary:
 
             # TODO get nalicilix acid out of the cols
 
+<<<<<<< HEAD
             # select only the used antimicrobials
             if self.species == "escherichia_coli" or self.species == "salmonella":
                 antibiotics_ecoli_salm = [
@@ -425,6 +434,13 @@ class JunoSummary:
                 filtered_transposed = transposed.filter(
                     regex="|".join(antibiotics_camp)
                 )
+=======
+            #select only the used antimicrobials
+            if self.species == "escherichia_coli" or self.species == "salmonella":   
+                filtered_transposed = transposed.filter(regex='|'.join(self.antibiotics_ecoli_salm))
+            elif self.species == "campylobacter":
+                filtered_transposed = transposed.filter(regex='|'.join(self.antibiotics_camp))
+>>>>>>> master
             else:
                 print("No iles summary for this species")
                 return
@@ -454,6 +470,7 @@ class JunoSummary:
         inner_merged_total.columns = inner_merged_total.columns.str.rstrip("_y")
         final_combined = inner_merged_total.groupby(level=0, axis=1).first()
 
+<<<<<<< HEAD
         if self.species == "escherichia_coli" or self.species == "salmonella":
             antibiotics_ecoli_salm = [
                 "ampicillin",
@@ -474,6 +491,12 @@ class JunoSummary:
                 "tetracycline",
             ]
             final_combined.filter(regex="|".join(antibiotics_camp))
+=======
+        if self.species == "escherichia_coli" or self.species == "salmonella":    
+            final_combined.filter(regex='|'.join(self.antibiotics_ecoli_salm))
+        elif self.species == "campylobacter":
+            final_combined.filter(regex='|'.join(self.antibiotics_camp))
+>>>>>>> master
         else:
             print("No iles summary for this species")
             return
