@@ -283,31 +283,6 @@ class JunoSummary:
         data_frame = pd.DataFrame(data_per_sample, columns = column_names)
         data_frame.to_csv(self.pointfinder_summary_file_name[0], mode='a', index=False)
     
-    # def pointfinder_prediction_summary(self):
-    #     #Get path & open 1 file for the colnames
-    #     pointfinder_prediction_output = self.pointfinder_summary_file_names[1]
-        
-    #     dataframe_per_sample = []
-    #     sample_counter = 0
-    #     for path in self.input_paths: 
-    #         pathname = f"{path}/PointFinder_prediction.txt" 
-    #         opened_file = open(pathname, "r")
-    #         lines = opened_file.readlines()
-    #         #get the colnames
-    #         column_names = lines[0].strip("\n").split("\t")
-    #         # get the values
-    #         elements = lines[1].strip("\n").split("\t")
-    #         #add the samplename
-    #         elements.insert(0, self.samplenames[sample_counter])
-    #         #create df for each sample
-    #         temp_df = pd.DataFrame([elements], columns=column_names)
-    #         dataframe_per_sample.append(temp_df)
-    #         sample_counter = sample_counter + 1
-           
-    #     #concat all dfs and write to file
-    #     final_df = pd.concat(dataframe_per_sample, axis=0, ignore_index=True)
-    #     final_df.to_csv(f'{pointfinder_prediction_output}', mode='a', index=False)
-    
     def iles_summary(self):
         """Summary file specific for iles/lims"""
 
@@ -473,7 +448,6 @@ def main():
 
     elif summary_type == "pointfinder":
         m.pointfinder_result_summary()
-        # m.pointfinder_prediction_summary()
     
     elif summary_type == "amrfinderplus":
         m.amrfinderplus_summary()

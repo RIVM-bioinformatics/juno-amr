@@ -155,8 +155,8 @@ class JunoAmr(Pipeline):
             # "update": self.update,
             "run_in_container": self.snakemake_args["use_singularity"],
             "db_dir": str(self.db_dir),
-            "resfinder_db": str(self.db_dir.joinpath("resfinder_new/resfinder_db")),
-            "pointfinder_db": str(self.db_dir.joinpath("pointfinder_new/pointfinder_db")),
+            "resfinder_db": str(self.db_dir.joinpath("resfinder_2_4_0/resfinder_db")),
+            "pointfinder_db": str(self.db_dir.joinpath("pointfinder_2_4_0/pointfinder_db")),
             "virulencefinder_db": str(self.db_dir.joinpath("virulencefinderdb")),
         }
         with open(

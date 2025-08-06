@@ -3,9 +3,7 @@ rule makePointfinderSummary:
         resfinder_output_dir = expand(OUT + "/results/resfinder/{sample}", sample=SAMPLES)
 
     output:
-        pointfinder_results = OUT + "/summary/summary_amr_pointfinder_results.csv",
-        # pointfinder_prediction = OUT + "/summary/summary_amr_pointfinder_prediction.csv"
-
+        pointfinder_results = OUT + "/summary/summary_amr_pointfinder_results.csv"
     message:
         "Creating PointFinder summary file"
     

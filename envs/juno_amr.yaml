@@ -1,4 +1,4 @@
-name: juno_amr_newdb
+name: juno_amr
 channels:
   - bioconda
   - conda-forge
@@ -16,7 +16,8 @@ dependencies:
   - cgecore==1.5.5
   - pulp==2.7.0
   - pyopenssl>=24.0.0
-  - pyyaml=6.0
+  - pyyaml=6.0  
+  - setuptools=79.0.1
   - pip:
     - tabulate==0.8.0
     - "--editable=git+https://github.com/RIVM-bioinformatics/base_juno_pipeline.git@v2.1.1#egg=juno_library"
