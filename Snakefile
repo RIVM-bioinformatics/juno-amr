@@ -12,16 +12,17 @@ Date: 30 - 03 - 2021
 import os
 import yaml
 
-#collect samples
+# collect samples
 sample_sheet = config["sample_sheet"]
 SAMPLES = {}
 with open(sample_sheet) as sample_sheet_file:
-    SAMPLES = yaml.safe_load(sample_sheet_file) 
+    SAMPLES = yaml.safe_load(sample_sheet_file)
 
-#output dir
+# output dir
 OUT = config["output_dir"]
 
-#includes
+
+# includes
 include: "bin/rules/runResfinderFastq.smk"
 include: "bin/rules/runAmrfinderplus.smk"
 include: "bin/rules/runVirulencefinder.smk"
@@ -30,56 +31,68 @@ include: "bin/rules/makePointfinderSummary.smk"
 include: "bin/rules/makeIlesSummary.smk"
 include: "bin/rules/makeVirulencefinderSummary.smk"
 include: "bin/rules/makeAmrfinderplusSummary.smk"
-#TODO this rule is out of use because we only run resfinder on fastq files
-#include: "bin/rules/runResfinderFasta.smk"
+
+
+# TODO this rule is out of use because we only run resfinder on fastq files
+# include: "bin/rules/runResfinderFasta.smk"
 
 #################################################################################
 #####   Specify final output                                                #####
 #################################################################################
 
+
 localrules:
-    all
-#If the species is other, pointfinder cannot be run, so there will be no output expected of this part
+    all,
+
+
+# If the species is other, pointfinder cannot be run, so there will be no output expected of this part
 # iles summary can only be created for ecoli, shigella, campylobacter and salmonella species
 
 if config["species"] == "other":
+
     rule all:
         """ Main rule that starts the complete workflow """
-        input: 
+        input:
             expand(OUT + "/summary/summary_amr_genes.csv"),
             expand(OUT + "/summary/summary_amr_phenotype.csv"),
             expand(OUT + "/results/resfinder/{sample}", sample=SAMPLES),
             expand(OUT + "/summary/summary_virulencefinder.csv"),
             expand(OUT + "/summary/summary_amrfinderplus.csv"),
             expand(OUT + "/results/virulencefinder/{sample}/", sample=SAMPLES),
-            expand(OUT + "/results/amrfinderplus/{sample}/", sample=SAMPLES)
- 
+            expand(OUT + "/results/amrfinderplus/{sample}/", sample=SAMPLES),
+
 else:
     species = config["species"]
-    if species == "escherichia_coli" or species == "shigella" or species == "campylobacter" or species == "salmonella":
+    if (
+        species == "escherichia_coli"
+        or species == "shigella"
+        or species == "campylobacter"
+        or species == "salmonella"
+    ):
+
         rule all:
             """ Main rule that starts the complete workflow """
             input:
                 expand(OUT + "/summary/summary_amr_genes.csv"),
                 expand(OUT + "/summary/summary_amr_phenotype.csv"),
                 expand(OUT + "/summary/summary_amr_pointfinder_results.csv"),
-                expand(OUT + "/summary/summary_amr_pointfinder_prediction.csv"),
                 expand(OUT + "/results/resfinder/{sample}", sample=SAMPLES),
                 expand(OUT + "/summary/summary_virulencefinder.csv"),
                 expand(OUT + "/summary/summary_amrfinderplus.csv"),
                 expand(OUT + "/results/virulencefinder/{sample}/", sample=SAMPLES),
                 expand(OUT + "/results/amrfinderplus/{sample}/", sample=SAMPLES),
-                expand(OUT + "/summary/summary_iles.csv")
+                expand(OUT + "/summary/summary_iles.csv"),
+
     else:
+
         rule all:
             """ Main rule that starts the complete workflow """
             input:
                 expand(OUT + "/summary/summary_amr_genes.csv"),
                 expand(OUT + "/summary/summary_amr_phenotype.csv"),
                 expand(OUT + "/summary/summary_amr_pointfinder_results.csv"),
-                expand(OUT + "/summary/summary_amr_pointfinder_prediction.csv"),
                 expand(OUT + "/results/resfinder/{sample}", sample=SAMPLES),
                 expand(OUT + "/summary/summary_virulencefinder.csv"),
                 expand(OUT + "/summary/summary_amrfinderplus.csv"),
                 expand(OUT + "/results/virulencefinder/{sample}/", sample=SAMPLES),
-                expand(OUT + "/results/amrfinderplus/{sample}/", sample=SAMPLES)
+                expand(OUT + "/results/amrfinderplus/{sample}/", sample=SAMPLES),
