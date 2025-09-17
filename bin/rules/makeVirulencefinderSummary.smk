@@ -11,5 +11,6 @@ rule makeVirulencefinderSummary:
     threads: int(config["threads"]["virulencefinder"])
     params:
         species=config["species"],
+    log: OUT + "/log/virulencefinder/make_summary_virulencefinder.log"
     shell:
-        "python3 bin/make_summary.py -sv {output.vir_summary} -i {input.vir_output} -st virulencefinder"
+        "python3 bin/make_summary.py -sv {output.vir_summary} -i {input.vir_output} -st virulencefinder >> {log} 2>&1"

@@ -11,5 +11,6 @@ rule makeResfinderSummary:
     threads: int(config["threads"]["resfinder"])
     params:
         species=config["species"],
+    log: OUT + "/log/resfinder/make_summary_resfinder.log"
     shell:
         "python3 bin/make_summary.py -sr {output.genes_summary} {output.pheno_summary} -i {input.resfinder_output_dir} -st resfinder"

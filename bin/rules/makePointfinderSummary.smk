@@ -10,5 +10,6 @@ rule makePointfinderSummary:
     threads: int(config["threads"]["resfinder"])
     params:
         species=config["species"],
+    log: OUT + "/log/resfinder/make_summary_amr_pointfinder_results.log", # poitnfinder is run as part of resfinder
     shell:
-        "python3 bin/make_summary.py -sp {output.pointfinder_results} -i {input.resfinder_output_dir} -st pointfinder"
+        "python3 bin/make_summary.py -sp {output.pointfinder_results} -i {input.resfinder_output_dir} -st pointfinder >> {log} 2>&1"

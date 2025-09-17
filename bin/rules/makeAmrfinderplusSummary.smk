@@ -10,5 +10,6 @@ rule makeAmrfinderplusSummary:
     threads: int(config["threads"]["amrfinderplus"])
     params:
         species=config["species"],
+    log: OUT + "/log/amrfinderplus/make_summary_amrfinderplus.log",
     shell:
-        "python3 bin/make_summary.py -sa {output.vir_summary} -i {input.vir_output} -st amrfinderplus"
+        "python3 bin/make_summary.py -sa {output.vir_summary} -i {input.vir_output} -st amrfinderplus >> {log} 2>&1"

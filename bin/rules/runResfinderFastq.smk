@@ -19,11 +19,16 @@ rule runResfinderFastq:
     resources:
         mem_gb=int(config["mem_gb"]["resfinder"]),
     threads: int(config["threads"]["resfinder"])
+    log: OUT + "/log/resfinder/{sample}_resfinder.log",
     shell:
         """
 if [ {params.run_pointfinder} == True ]; then
-    python3 bin/resfinder/src/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired --point -ifq {input.r1} {input.r2} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
+    python3 bin/resfinder/src/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\"  \
+    -l {params.l} -t {params.t} --acquired --point -ifq {input.r1} {input.r2} -db_res {params.resfinder_db} \
+    -db_point {params.pointfinder_db} > {log} 2>&1
 else
-    python3 bin/resfinder/src/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired -ifq {input.r1} {input.r2} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
+    python3 bin/resfinder/src/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" \
+    -l {params.l} -t {params.t} --acquired -ifq {input.r1} {input.r2} -db_res {params.resfinder_db} \
+    -db_point {params.pointfinder_db} > {log} 2>&1
 fi
         """

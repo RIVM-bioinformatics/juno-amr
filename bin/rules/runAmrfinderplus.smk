@@ -11,6 +11,7 @@ rule runamrfinderplus:
     resources:
         mem_gb=int(config["mem_gb"]["amrfinderplus"]),
     threads: int(config["threads"]["amrfinderplus"])
+    log: OUT + "/log/amrfinderplus/{sample}_amrfinder.log",
     shell:
         #TODO amrfinder needs to be run with -u in order to update
         #This needs to be done the first time an environment is created or anytime you want to update
@@ -19,5 +20,6 @@ rule runamrfinderplus:
         #mkdir -p {output.output_dir} && amrfinder -n {input.fasta_sample} --plus -o {output.output_dir}/amrfinder_result.txt
         #amrfinder cannot be run with -p or -n, just run it as a separate command
         """
-        mkdir -p {output.output_dir} && amrfinder -n {input.fasta_sample} --plus -o {output.output_dir}/amrfinder_result.txt -d /mnt/db/juno-amr/amrfinderplusdb/2022-12-19.1
+        mkdir -p {output.output_dir} && amrfinder -n {input.fasta_sample} --plus \
+        -o {output.output_dir}/amrfinder_result.txt -d /mnt/db/juno-amr/amrfinderplusdb/2022-12-19.1 > {log} 2>&1
         """

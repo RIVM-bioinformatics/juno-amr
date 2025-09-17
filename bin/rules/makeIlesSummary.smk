@@ -10,5 +10,6 @@ rule makeIlesSummary:
     threads: int(config["threads"]["resfinder"])
     params:
         species=config["species"],
+    log: OUT + "/log/make_summary_iles.log",
     shell:
-        "python3 bin/make_summary.py -si {output.iles_summary} -i {input.resfinder_output_dir} -st iles"
+        "python3 bin/make_summary.py -si {output.iles_summary} -i {input.resfinder_output_dir} -st iles >> {log} 2>&1"

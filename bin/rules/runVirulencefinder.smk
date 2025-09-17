@@ -11,10 +11,12 @@ rule runVirulencefinder:
     resources:
         mem_gb=int(config["mem_gb"]["virulencefinder"]),
     threads: int(config["threads"]["virulencefinder"])
+    log: OUT + "/log/virulencefinder/{sample}_virulencefinder.log",
     shell:
         #the sample name directory is not being made by virulence finder
         # t =
         # l = 
         """
-        mkdir -p {output.output_dir} && python3 bin/virulencefinder/virulencefinder.py -i {input.fasta_sample} -o {output.output_dir} -p /mnt/db/juno-amr/virulencefinderdb/ -x 
+        mkdir -p {output.output_dir} && python3 bin/virulencefinder/virulencefinder.py \
+        -i {input.fasta_sample} -o {output.output_dir} -p /mnt/db/juno-amr/virulencefinderdb/ -x > {log} 2>&1
         """
