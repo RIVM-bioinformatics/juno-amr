@@ -184,7 +184,7 @@ class JunoAmr(Pipeline):
                     self.juno_metadata[sample]["full_species_name"].strip().lower()
                 )
             except (KeyError, TypeError, AttributeError):
-                properties["species"] = self.genus  # type: ignore
+                properties["species"] = self.species  # type: ignore
         print(self.sample_dict)
 
     def run(self) -> None:
