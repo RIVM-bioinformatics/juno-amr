@@ -31,7 +31,7 @@ include: "bin/rules/makePointfinderSummary.smk"
 include: "bin/rules/makeIlesSummary.smk"
 include: "bin/rules/makeVirulencefinderSummary.smk"
 include: "bin/rules/makeAmrfinderplusSummary.smk"
-
+# no seperate rule for running pointfinder since its run as part of resfinder
 
 # TODO this rule is out of use because we only run resfinder on fastq files
 # include: "bin/rules/runResfinderFasta.smk"
