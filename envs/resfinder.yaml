@@ -4,7 +4,6 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - kma=1.3.14
-  - resfinder=4.6.0
-  - cgelib=0.7.5
+  - resfinder=4.7.2
+
 

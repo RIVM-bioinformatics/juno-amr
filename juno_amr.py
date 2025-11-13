@@ -194,7 +194,7 @@ class JunoAmr(Pipeline):
             downloads_juno_amr = bin.downloads.DownloadsJunoAmr(
                 self.db_dir,
                 # update_dbs=self.update_dbs,
-                software_resfinder_asked_version="4.6.0",
+                software_resfinder_asked_version="4.7.2",
                 software_virulence_finder_asked_version="2.0.4",
             )
             self.downloads_versions = downloads_juno_amr.downloaded_versions

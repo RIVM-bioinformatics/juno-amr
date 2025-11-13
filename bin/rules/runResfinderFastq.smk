@@ -60,12 +60,8 @@ rule run_Resfinder_Fastq_Nanopore:
     shell:
         """
 if [ {params.run_pointfinder} == True ]; then
-    python3 bin/resfinder/src/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\"  \
-    -l {params.l} -t {params.t} --acquired --point -ifq {input.nanopore_input} -db_res {params.resfinder_db} \
-    -db_point {params.pointfinder_db} --nanopore > {log} 2>&1
+    python3 bin/resfinder/src/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired --point -ifq {input.nanopore_input} -db_res {params.resfinder_db} -db_point {params.pointfinder_db} --nanopore > {log} 2>&1
 else
-    python3 bin/resfinder/src/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" \
-    -l {params.l} -t {params.t} --acquired -ifq {input._nanopore_input} -db_res {params.resfinder_db} \
-    -db_point {params.pointfinder_db} --nanopore > {log} 2>&1
+    python3 bin/resfinder/src/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired -ifq {input.nanopore_input} -db_res {params.resfinder_db} -db_point {params.pointfinder_db} --nanopore > {log} 2>&1
 fi
         """
