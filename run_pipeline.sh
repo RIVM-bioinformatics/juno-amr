@@ -94,7 +94,7 @@ fi
 
 set -euo pipefail
 
-python juno_amr.py --queue "${QUEUE}" -i "${input_dir}" -o "${output_dir}" -s "${GENUS_ALL}" --sequencing_tech "nanopore"
+python juno_amr.py --queue "${QUEUE}" -i "${input_dir}" -o "${output_dir}" -s "${GENUS_ALL}" --sequencing-tech "nanopore"
 
 result=$?
 
