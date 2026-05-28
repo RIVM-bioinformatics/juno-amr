@@ -20,4 +20,4 @@ dependencies:
   - setuptools=79.0.1
   - pip:
     - tabulate==0.8.0
-    - "--editable=git+https://github.com/RIVM-bioinformatics/base_juno_pipeline.git@nanopore_integration#egg=juno_library"
+    - "--editable=git+https://github.com/RIVM-bioinformatics/base_juno_pipeline.git@v2.3.0#egg=juno_library"
