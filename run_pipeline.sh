@@ -32,7 +32,7 @@ case $PROJECT_NAME in
   dsshig|svshig)
     GENUS_ALL="escherichia_coli"
     ;;
-  salm|svsalent|svsaltyp|vdl_salm)
+  salm|svsalent|svsaltyp|vdl_salm|salm_ont)
     GENUS_ALL="salmonella"
     ;;
   svlismon|vdl_list)
