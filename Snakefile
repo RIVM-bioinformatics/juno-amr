@@ -23,7 +23,8 @@ OUT = config["output_dir"]
 
 
 # includes
-include: "bin/rules/runResfinderFastq.smk"
+# include: "bin/rules/runResfinderFastq.smk"
+include: "bin/rules/runResfinderFasta.smk"
 include: "bin/rules/runAmrfinderplus.smk"
 include: "bin/rules/runVirulencefinder.smk"
 include: "bin/rules/makeResfinderSummary.smk"

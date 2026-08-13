@@ -5,6 +5,8 @@ rule runResfinderFasta:
         fasta_sample=lambda wildcards: SAMPLES[wildcards.sample]["assembly"],
     output:
         output_dir=directory(OUT + "/results/resfinder/{sample}"),
+    conda:
+        "../../envs/resfinder.yaml"
     message:
         "Processing received fasta sample in ResFinder and PointFinder"
     params:
@@ -16,12 +18,13 @@ rule runResfinderFasta:
         run_pointfinder=config["run_pointfinder"],
     resources:
         mem_gb=int(config["mem_gb"]["resfinder"]),
-    threads: int(config["threads"]["resfinder"])
+    threads: int(config["threads"]["resfinder"]),
+    log: OUT + "/log/resfinder/{sample}_resfinder.log",
     shell:
         """
-if [ {params.run_pointfinder} == "1" ]; then
-    python3 bin/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired --point -ifa {input.fasta_sample} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
+if [ {params.run_pointfinder} == True ]; then
+    python3 bin/resfinder/src/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired --point -ifa {input.fasta_sample} -db_res {params.resfinder_db} -db_point {params.pointfinder_db} --nanopore > {log} 2>&1
 else
-    python3 bin/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired -ifa {input.fasta_sample} -db_res {params.resfinder_db} -db_point {params.pointfinder_db}
+    python3 bin/resfinder/src/resfinder/run_resfinder.py -o {output.output_dir} -s \"{params.species}\" -l {params.l} -t {params.t} --acquired -ifa {input.fasta_sample} -db_res {params.resfinder_db} -db_point {params.pointfinder_db} --nanopore > {log} 2>&1
 fi
         """
