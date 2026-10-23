@@ -5,7 +5,6 @@ channels:
   - nodefaults
 dependencies:
   - git=2.34.1
-  - mamba=1.3.*
   - pip=23.*
   - pandas==1.5.3
   - python=3.9.*
@@ -19,5 +18,5 @@ dependencies:
   - pyyaml=6.0
   - setuptools=79.0.1
   - pip:
-    - tabulate==0.8.0
-    - "--editable=git+https://github.com/RIVM-bioinformatics/base_juno_pipeline.git@v2.2.2#egg=juno_library"
+      - tabulate==0.8.0
+      - "--editable=git+https://github.com/RIVM-bioinformatics/base_juno_pipeline.git@v2.2.2#egg=juno_library"
